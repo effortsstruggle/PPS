@@ -1,0 +1,105 @@
+name: PSS_ASIO_CMake
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{github.workspace}}/Build/Linux
+      
+    - name: update gcov software
+      run: pip install gcovr==5.0
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/Build/Linux
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -Dgcov_check=1
+
+    - name: dowwload sonar cloud client
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: |
+        wget -nv https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.0.2311-linux.zip
+        unzip -q sonar-scanner-cli-4.6.0.2311-linux.zip
+        echo "${PWD}/sonar-scanner-4.6.0.2311-linux/bin/" >> $GITHUB_PATH
+        wget -nv https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+        unzip -q build-wrapper-linux-x86.zip
+        echo "${PWD}/build-wrapper-linux-x86" >> $GITHUB_PATH
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y scons libfftw3-dev libopenmpi-dev openmpi-bin libhdf5-dev python3-numpy python3-dev libtiff5-dev unzip   
+
+    - name: Build SonarCloud Scan
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: |
+        build-wrapper-linux-x86-64 --out-dir bw-output cmake --build Build/Linux/
+        cd ${{github.workspace}}/Build/Linux/
+        ./pss_asio server_config_test_gcov.json
+        sleep 5
+        ./pss_asio_test_client
+        sleep 5
+        killall pss_asio
+        sleep 5
+        echo "close pss_asio"
+        echo "gcov********************" 
+        cd ${{github.workspace}}/PSS_ASIO
+        pwd
+        gcovr --sonarqube > coverage.xml
+        cat coverage.xml
+        echo "link***********************"
+        cd ${{github.workspace}}
+        pwd
+        cd ./Build/Linux/PSS_ASIO/CMakeFiles/pss_asio.dir
+        cat link.txt
+        echo "end***********************"
+
+    - name: SonarCloud Scan make report
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: |      
+        cd ${{github.workspace}}/PSS_ASIO
+        sonar-scanner -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
+
+    - name: install google test
+      working-directory: ${{github.workspace}}/tests
+      shell: bash 
+      run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make
+
+    - name: run google test
+      working-directory: ${{github.workspace}}/tests
+      shell: bash 
+      run: |
+        apt list --installed | grep gtest
+        cmake .
+        cmake --build . --config debug
+        ./test_pss_asio
+    
+    - name: make report && show
+      working-directory: ${{github.workspace}}/tests
+      shell: bash 
+      run: |
+        cat Test_Pss_Asio.xml
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}

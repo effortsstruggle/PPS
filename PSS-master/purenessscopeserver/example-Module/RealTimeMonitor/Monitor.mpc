@@ -1,0 +1,21 @@
+project(RealTimeMonitor):acelib{
+  sharedname=RealTimeMonitor
+  dynamicflags += TEST_TCP_BUILD_DLL
+  
+  Source_Files{
+  	./*.cpp 
+  }
+  specific (gnuace){
+		macros += __LINUX__   
+		compile_flags += -Wno-deprecated
+	}
+  
+  libout = ./
+  specific (prop:microsoft){
+	dllout = ../../../Build/Windows
+  } else {
+	dllout = ../../../Build/Linux
+  }
+  includes += .
+  includes += ../../Common ./IniRead
+}

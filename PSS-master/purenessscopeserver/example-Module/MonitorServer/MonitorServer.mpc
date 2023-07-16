@@ -1,0 +1,23 @@
+project(Monitor):acelib{
+  sharedname=MonitorServer
+  dynamicflags += TEST_TCP_BUILD_DLL
+  
+  Source_Files{
+	./TinyXML/*.cpp
+	./EncodeConvert/*.cpp
+  	./*.cpp 
+  }
+  specific (gnuace){
+		macros += __LINUX__   
+		compile_flags += -Wno-deprecated
+	}
+  
+  libout = ./
+  specific (prop:microsoft){
+	dllout = ../../../Build/Windows
+  } else {
+	dllout = ../../../Build/Linux
+  }
+  includes += .
+  includes += ../../Common ./TinyXML ./EncodeConvert
+}

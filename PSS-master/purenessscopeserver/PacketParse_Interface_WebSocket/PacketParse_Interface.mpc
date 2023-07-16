@@ -1,0 +1,19 @@
+project(PacketParse_Interface_WebSocket):acelib{
+  sharedname=PacketParse_Interface_WebSocket
+  dynamicflags += TEST_TCP_BUILD_DLL
+  
+  Source_Files{
+  	./*.cpp 
+  }
+  macros += __LINUX__  
+  
+  libout = ./
+  specific (prop:microsoft){
+	dllout = ../FrameCore/Windows_Bin
+  } else {
+	dllout = ../FrameCore/Linux_Bin
+    compile_flags += -Wno-deprecated 
+	compile_flags += -std=c++11	
+  }
+  includes += ../Common
+}

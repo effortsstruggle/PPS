@@ -1,0 +1,97 @@
+{
+  "plugin project name": "example_logic",
+  "plugin project path": "../../Module_Logic/",
+  "plugin class": [
+    {
+      "message type": "Message Input",
+      "class name": "Crecv_sample",
+      "class type": [
+        {
+          "name": "message_version_",
+          "type": "uint16"
+        },
+        {
+          "name": "message_command_id_",
+          "type": "uint16"
+        },
+        {
+          "name": "message_length_",
+          "type": "uint32"
+        },
+        {
+          "name": "message_session_",
+          "type": "string",
+          "buffer_length": 32
+        },
+        {
+          "name": "message_data_",
+          "type": "string",
+          "buffer_length": 200
+        }
+      ]
+    },
+    {
+      "message type": "Message Output",
+      "class name": "Csend_sample",
+      "class type": [
+        {
+          "name": "message_version_",
+          "type": "uint16"
+        },
+        {
+          "name": "message_command_id_",
+          "type": "uint16"
+        },
+        {
+          "name": "message_length_",
+          "type": "uint32"
+        },
+        {
+          "name": "message_session_",
+          "type": "string"
+        },
+        {
+          "name": "message_data_",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+
+  "message map": [
+    {
+      "command macro": "LOGIC_COMMAND_CONNECT",
+      "command id": "",
+      "command function": "logic_connect",
+      "message in": "",
+      "message out": ""
+    },
+    {
+      "command macro": "LOGIC_COMMAND_DISCONNECT",
+      "command id": "",
+      "command function": "logic_disconnect",
+      "message in": "",
+      "message out": ""
+    },
+    {
+      "command macro": "COMMAND_TEST_SYNC",
+      "command id": "0x2101",
+      "command function": "logic_test_sync",
+      "message in": "Crecv_sample",
+      "message out": "Csend_sample"
+    },
+    {
+      "command macro": "COMMAND_TEST_ASYN",
+      "command id": "0x2102",
+      "command function": "logic_test_asyn",
+      "message in": "Crecv_sample",
+      "message out": ""
+    }
+  ],
+
+  "asynchronous send interface": [
+    {
+      "message out": "Csend_sample"
+    }
+  ]
+}

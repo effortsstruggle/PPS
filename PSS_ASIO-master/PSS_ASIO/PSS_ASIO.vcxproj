@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{037299ee-a923-43cf-bcf6-465bc10e3ced}</ProjectGuid>
+    <RootNamespace>PSSASIO</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\Build\Windows\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\Build\Windows\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;ASIO_HAS_SERIAL_PORT;ASIO_HAS_IOCP;SSL_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../third_Include;../Common;./Message;./TcpSession;./Common;./UdpSession;./TTySession;./QueueSession</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>.\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_WIN32_WINDOWS;_WINSOCK_DEPRECATED_NO_WARNINGS;ASIO_HAS_SERIAL_PORT;ASIO_HAS_IOCP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../third_Include;../Common;./Message;./TcpSession;./Common;./UdpSession;./TTySession;./QueueSession</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\third_include\kcp\ikcp.c" />
+    <ClCompile Include="Common\CommunicationService.cpp" />
+    <ClCompile Include="Common\ConnectCounter.cpp" />
+    <ClCompile Include="Common\serverconfig.cpp" />
+    <ClCompile Include="Common\ServerService.cpp" />
+    <ClCompile Include="Message\Iobridge.cpp" />
+    <ClCompile Include="Message\IotoIo.cpp" />
+    <ClCompile Include="Message\LoadModule.cpp" />
+    <ClCompile Include="Message\LoadPacketParse.cpp" />
+    <ClCompile Include="Message\ModuleInterfalce.cpp" />
+    <ClCompile Include="Message\ModuleLogic.cpp" />
+    <ClCompile Include="Message\SessionInterface.cpp" />
+    <ClCompile Include="Message\SessionService.cpp" />
+    <ClCompile Include="PSS_ASIO.cpp" />
+    <ClCompile Include="QueueSession\Queueservice.cpp" />
+    <ClCompile Include="TcpSession\TcpClientSession.cpp" />
+    <ClCompile Include="TcpSession\TcpServer.cpp" />
+    <ClCompile Include="TcpSession\TcpSession.cpp" />
+    <ClCompile Include="TcpSession\TcpSSLClientSession.cpp" />
+    <ClCompile Include="TcpSession\TcpSSLServer.cpp" />
+    <ClCompile Include="TcpSession\TcpSSLSession.cpp" />
+    <ClCompile Include="TTySession\TtyServer.cpp" />
+    <ClCompile Include="UdpSession\KcpServer.cpp" />
+    <ClCompile Include="UdpSession\UdpClientSession.cpp" />
+    <ClCompile Include="UdpSession\UdpServer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Common\define.h" />
+    <ClInclude Include="..\Common\IFrameObject.h" />
+    <ClInclude Include="..\Common\IIoBridge.hpp" />
+    <ClInclude Include="..\Common\ISessionService.h" />
+    <ClInclude Include="..\Common\LoadLibrary.hpp" />
+    <ClInclude Include="..\Common\PerformanceCheck.hpp" />
+    <ClInclude Include="..\Common\ReadBuffer.hpp" />
+    <ClInclude Include="..\Common\ring_buffer.hpp" />
+    <ClInclude Include="..\Common\SessionBuffer.hpp" />
+    <ClInclude Include="..\Common\singleton.h" />
+    <ClInclude Include="..\Common\ThreadQueue.h" />
+    <ClInclude Include="..\Common\TimerManager.hpp" />
+    <ClInclude Include="..\Common\TimeStamp.hpp" />
+    <ClInclude Include="..\Common\tms.hpp" />
+    <ClInclude Include="..\Common\WriteBuffer.hpp" />
+    <ClInclude Include="..\third_include\kcp\ikcp.h" />
+    <ClInclude Include="Common\CommunicationService.h" />
+    <ClInclude Include="Common\ConnectCounter.h" />
+    <ClInclude Include="Common\CoreTimer.hpp" />
+    <ClInclude Include="Common\FrameObject.hpp" />
+    <ClInclude Include="Common\ICommunicationService.h" />
+    <ClInclude Include="Common\ISession.h" />
+    <ClInclude Include="Common\SendBuffer.h" />
+    <ClInclude Include="Common\serverconfig.h" />
+    <ClInclude Include="Common\serverconfigtype.h" />
+    <ClInclude Include="Common\ServerService.h" />
+    <ClInclude Include="Message\Iobridge.h" />
+    <ClInclude Include="Message\IotoIo.h" />
+    <ClInclude Include="Message\LoadModule.h" />
+    <ClInclude Include="Message\LoadPacketParse.h" />
+    <ClInclude Include="Message\ModuleInterfalce.h" />
+    <ClInclude Include="Message\ModuleLogic.h" />
+    <ClInclude Include="Message\SessionInterface.h" />
+    <ClInclude Include="Message\SessionService.h" />
+    <ClInclude Include="QueueSession\QueueService.h" />
+    <ClInclude Include="TcpSession\TcpClientSession.h" />
+    <ClInclude Include="TcpSession\TcpServer.h" />
+    <ClInclude Include="TcpSession\TcpSession.h" />
+    <ClInclude Include="TcpSession\TcpSSLClientSession.h" />
+    <ClInclude Include="TcpSession\TcpSSLServer.h" />
+    <ClInclude Include="TcpSession\TcpSSLSession.h" />
+    <ClInclude Include="TTySession\TtyServer.h" />
+    <ClInclude Include="UdpSession\KcpServer.h" />
+    <ClInclude Include="UdpSession\UdpClientSession.h" />
+    <ClInclude Include="UdpSession\UdpServer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Build\Windows\server_config.json" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

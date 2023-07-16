@@ -1,0 +1,18 @@
+project(PacketParse_Interface_Http):acelib{
+  sharedname=PacketParse_Interface_Http
+  dynamicflags += PACKETPARSE_INTERFACE_HTTP_EXPORTS
+
+  Source_Files{ 
+  ./*.cpp
+  }
+  
+  specific (prop:microsoft){
+  dllout = ../../Build/Windows
+  } else {
+  macros += __LINUX__
+  dllout = ../../Build/Linux
+  compile_flags += -Wno-deprecated 
+  compile_flags += -std=c++11
+  } 
+  includes += ../Common
+}
