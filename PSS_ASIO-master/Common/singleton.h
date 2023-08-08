@@ -56,7 +56,7 @@ public:
 
             if (nullptr == _Myt::__single__.get())
             {
-                _Myt::__single__.reset(new(std::nothrow) _Ty());
+                _Myt::__single__.reset( new(std::nothrow) _Ty() );
                 if (_Myt::__single__ != nullptr)
                     _Myt::delay_init(args...);
             }

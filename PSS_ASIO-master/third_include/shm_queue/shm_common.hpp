@@ -13,27 +13,29 @@
 #define PLATFORM_UNIX    1
 #define PLATFORM_APPLE   2
 
+//根据系统宏，判断当前服务器位于的平台
 #if defined(__WIN32__) || defined(WIN32) || defined(_WIN32) || defined(__WIN64__) || defined(WIN64) || defined(_WIN64)
-#  define PSS_PLATFORM PLATFORM_WIN
+    #define PSS_PLATFORM PLATFORM_WIN
 #elif defined(__APPLE_CC__)
-#  define PSS_PLATFORM PLATFORM_APPLE
+    #define PSS_PLATFORM PLATFORM_APPLE
 #else
-#  define PSS_PLATFORM PLATFORM_UNIX
+    #define PSS_PLATFORM PLATFORM_UNIX
 #endif
 
 const size_t shm_queue_list_size = 100;
 const int shm_queue_list_count = 100;
 
 namespace shm_queue {
+
 #if PSS_PLATFORM == PLATFORM_WIN
     using shm_key = unsigned int;
 #else
     using shm_key = key_t;
 #endif
 
-    using queue_recv_message_func = std::function<void(const char*, size_t)>;
-    using queue_error_func = std::function<void(std::string)>;
-    using queue_close_func = std::function<void(shm_key key)>;
+    using queue_recv_message_func = std::function< void(const char*, size_t) >;
+    using queue_error_func = std::function< void(std::string) >;
+    using queue_close_func = std::function< void(shm_key key) >;
 
     class CShm_queue_interface
     {
@@ -47,4 +49,5 @@ namespace shm_queue {
         virtual void set_error_function(queue_error_func error_func) = 0;
         virtual void set_close_function(queue_close_func close_func) = 0;
     };
+
 };

@@ -40,7 +40,7 @@ public:
     std::string m_strLevel       = "info";
 };
 
-//输出函数类
+//输出函数类 (日志输出)
 class CConsoleOutput
 {
 public:
@@ -50,10 +50,11 @@ public:
     {
         spdlog::drop_all();
 
-        m_Console_Output_Info = obj_Console_Output_Info;
+        this->m_Console_Output_Info = obj_Console_Output_Info;
 
         std::shared_ptr<spdlog::logger> console = nullptr;
-        if (!m_Console_Output_Info.m_blTunOn)
+
+        if (!this->m_Console_Output_Info.m_blTunOn )
         {
             //屏幕输出
             console = spdlog::stdout_color_mt("console");
@@ -62,9 +63,9 @@ public:
         {
             //文件输出
             console = spdlog::rotating_logger_mt("console",
-                m_Console_Output_Info.m_strConsoleName.c_str(), 
-                m_Console_Output_Info.m_nLogFileMaxSize,
-                m_Console_Output_Info.m_nFileCount);
+                this->m_Console_Output_Info.m_strConsoleName.c_str(),
+                this->m_Console_Output_Info.m_nLogFileMaxSize,
+                this->m_Console_Output_Info.m_nFileCount);
         }
 
         //设置输出抬头
@@ -72,32 +73,35 @@ public:
         
         spd::level::level_enum console_level = spdlog::level::info;
         //设置输出等级
-        if (m_Console_Output_Info.m_strLevel == "info")
+        if ( this->m_Console_Output_Info.m_strLevel == "info" )
         {
             console_level = spdlog::level::info;
         }
-        else if (m_Console_Output_Info.m_strLevel == "debug")
+        else if (this->m_Console_Output_Info.m_strLevel == "debug")
         {
             console_level = spdlog::level::debug;
         }
-        else if (m_Console_Output_Info.m_strLevel == "warn")
+        else if (this->m_Console_Output_Info.m_strLevel == "warn")
         {
             console_level = spdlog::level::warn;
         }
-        else if (m_Console_Output_Info.m_strLevel == "error")
+        else if (this->m_Console_Output_Info.m_strLevel == "error")
         {
             console_level = spdlog::level::err;
         }
 
         console->set_level(console_level);
+
         console->flush_on(console_level);
+        
         spdlog::set_default_logger(console);
     };
 
 private:
     Console_Output_Info m_Console_Output_Info;
 };
-using app_ConsoleOutput = PSS_singleton<CConsoleOutput>;
+
+using App_ConsoleOutput = PSS_singleton<CConsoleOutput>;
 
 
 #endif

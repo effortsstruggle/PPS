@@ -13,6 +13,14 @@ void CLoadPacketParse::dispaly_error_message(const std::string& func_name, const
     }
 }
 
+/**
+* @breif:  LoadPacketInfo 加载包解析插件信息 (从配置文件获取)
+* @author: wq
+* @date: 2023/08/08
+* @param1: u4PacketParseID   唯一标识
+* @param2: packet_parse_path 路径
+* @param3: packet_parse_file 解析文件名称（动态库）
+*/
 bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string& packet_parse_path, const std::string& packet_parse_file)
 {
     //隐式加载PacketParse接口
@@ -27,11 +35,13 @@ bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string&
 #ifdef GCOV_TEST
     dispaly_error_message("test", "test logic", pPacketParseInfo);
 #endif
-
+    //唯一ID
     pPacketParseInfo->m_u4PacketParseID   = u4PacketParseID;
-    string strFilePath;
-
+    
+    std::string strFilePath;
     strFilePath = fmt::format("{0}{1}", packet_parse_path, packet_parse_file);
+
+    //加载动态库模块
     pPacketParseInfo->m_hModule = CLoadLibrary::PSS_dlopen(strFilePath.c_str(), RTLD_NOW);
 
     if(nullptr == pPacketParseInfo->m_hModule)
@@ -40,7 +50,9 @@ bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string&
         return false;
     }
 
+    //获取解析函数的接口地址（函数指针）
     pPacketParseInfo->packet_from_recv_buffer_ptr_ = (packet_from_recv_buffer)CLoadLibrary::PSS_dlsym(pPacketParseInfo->m_hModule, "parse_packet_from_recv_buffer");
+    
     if(nullptr == pPacketParseInfo->m_hModule || !pPacketParseInfo->packet_from_recv_buffer_ptr_)
     {
         dispaly_error_message("parse_packet_from_recv_buffer", packet_parse_file, pPacketParseInfo);
@@ -105,10 +117,10 @@ bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string&
     m_objPacketParseList[pPacketParseInfo->m_u4PacketParseID] = pPacketParseInfo;
 
     //调用输出设置
-    pPacketParseInfo->packet_set_output_ptr_(spdlog::default_logger());
+    pPacketParseInfo->packet_set_output_ptr_( spdlog::default_logger() );
 
     //调用初始化
-    pPacketParseInfo->packet_load_ptr_(App_IoBridge::instance());
+    pPacketParseInfo->packet_load_ptr_( App_IoBridge::instance() );
 
     PSS_LOGGER_DEBUG("[CLoadPacketParse::LoadPacketInfo] load {0} OK!", packet_parse_file);
     return true;

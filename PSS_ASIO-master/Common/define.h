@@ -186,16 +186,23 @@ public:
 };
 
 //定义输出屏幕函数接口
-inline void log_screen() {}
+inline void log_screen() 
+{
+
+}
+
 
 template<typename First, typename ...Rest>
 void log_screen(First&& first, Rest && ...rest)
 {
-    std::cout << std::forward<First>(first);
+    std::cout << std::forward<First>(first) ;
+    //这里常用的方式std::forward<Rest>(rest)...的意思是对每一个都进行同样的处理。
+    //实际表述是(std::forward<1>(1)...std::forward<n>(n)))
+    //递归处理，每次提取一个。
     log_screen(std::forward<Rest>(rest)...);
 }
 
-//定义操作宏
+//定义操作宏 （日志库spdlog）
 #define PSS_LOGGER_DEBUG(...) SPDLOG_LOGGER_DEBUG(spdlog::default_logger(), __VA_ARGS__)
 #define PSS_LOGGER_INFO(...) SPDLOG_LOGGER_INFO(spdlog::default_logger(), __VA_ARGS__)
 #define PSS_LOGGER_WARN(...) SPDLOG_LOGGER_WARN(spdlog::default_logger(), __VA_ARGS__)
@@ -217,8 +224,11 @@ using task_function = std::function<void()>;
 //暂不使用的参数
 template <typename T>
 void PSS_UNUSED_ARG(T&&)
-{ }
+{ 
 
+}
+
+//初始化控制台输出
 inline void Init_Console_Output(bool blTurnOn, int nFileCount, int nLogFileMaxSize, string strConsoleName, string strLevel)
 {
     Console_Output_Info obj_Console_Output_Info;
@@ -229,7 +239,7 @@ inline void Init_Console_Output(bool blTurnOn, int nFileCount, int nLogFileMaxSi
     obj_Console_Output_Info.m_strConsoleName = strConsoleName;
     obj_Console_Output_Info.m_strLevel = strLevel;
 
-    app_ConsoleOutput::instance()->Init(obj_Console_Output_Info);
+    App_ConsoleOutput::instance()->Init(obj_Console_Output_Info);
 }
 
 inline std::chrono::seconds get_time_delay(std::string date)
@@ -251,7 +261,7 @@ inline std::chrono::seconds get_time_delay(std::string date)
     tm_.tm_sec = second;
     tm_.tm_isdst = 0;                          // 非夏令时。
 
-    auto tp_tag = std::chrono::system_clock::from_time_t(mktime(&tm_));
+    auto tp_tag = std::chrono::system_clock::from_time_t( mktime(&tm_) );
     auto tp_now = std::chrono::system_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(tp_tag - tp_now);
@@ -262,4 +272,4 @@ inline std::chrono::seconds get_time_delay(std::string date)
 }
 
 //接口函数模板
-using Logic_message_dispose_fn = std::function<int(const CMessage_Source&, std::shared_ptr<CMessage_Packet>, std::shared_ptr<CMessage_Packet>)>;
+using Logic_message_dispose_fn = std::function<int ( const CMessage_Source& , std::shared_ptr<CMessage_Packet> , std::shared_ptr<CMessage_Packet> )>;

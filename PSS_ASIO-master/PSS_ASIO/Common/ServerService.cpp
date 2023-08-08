@@ -1,6 +1,7 @@
 ﻿#include "ServerService.h"
 
 #if PSS_PLATFORM == PLATFORM_WIN
+
 BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
 {
     if (dwCtrlType == CTRL_CLOSE_EVENT || dwCtrlType == CTRL_C_EVENT)
@@ -13,6 +14,7 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
 
     return FALSE;
 }
+
 #endif
 
 #if PSS_PLATFORM == PLATFORM_UNIX
@@ -49,12 +51,22 @@ inline void daemonize()
 }
 #endif
 
+/**
+* @breif: init_servce 初始化服务器根据配置文件
+* @author: wq
+* @data: 2023/08/08
+* @param1: pss_config_file_name  配置文件名称（默认为 server_config.json）
+* @return: bool 初始化是否成功 
+*/
 bool CServerService::init_servce(const std::string& pss_config_file_name)
 {
     //指定当前目录，防止访问文件失败
 #if PSS_PLATFORM == PLATFORM_WIN
+
     TCHAR szFileName[MAX_PATH] = { 0 };
-    ::GetModuleFileName(0, szFileName, MAX_PATH);
+    //获取模块文件名
+    ::GetModuleFileName(0, szFileName, MAX_PATH) ;
+
     LPTSTR pszEnd = _tcsrchr(szFileName, TEXT('\\'));
 
     if (pszEnd != 0)
@@ -62,15 +74,17 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         pszEnd++;
         *pszEnd = 0;
     }
+
 #endif
 
     //读取配置文件
     if (false == App_ServerConfig::instance()->read_server_config_file(pss_config_file_name))
     {
+        PSS_LOGGER_DEBUG("[CServerService::init_servce] configure file {0} read fail. ", pss_config_file_name);
         return false;
     }
 
-    PSS_LOGGER_DEBUG("[CServerService::init_servce]configure file {0} read ok.", pss_config_file_name);
+    PSS_LOGGER_DEBUG("[CServerService::init_servce] configure file {0} read ok. ", pss_config_file_name );
 
 #if PSS_PLATFORM == PLATFORM_UNIX
     if (App_ServerConfig::instance()->get_config_workthread().linux_daemonize_ != 0)
@@ -81,7 +95,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
 #endif
 
     const auto& config_output = App_ServerConfig::instance()->get_config_console();
-
+    
     //初始化输出
     Init_Console_Output(config_output.file_output_,
         config_output.file_count_,
@@ -94,7 +108,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     {
         if (false == App_PacketParseLoader::instance()->LoadPacketInfo(packet_parse.packet_parse_id_, 
             packet_parse.packet_parse_path_,
-            packet_parse.packet_parse_file_name_))
+            packet_parse.packet_parse_file_name_) )
         {
             PSS_LOGGER_DEBUG("[CServerService::init_servce] load error.");
         }
@@ -129,12 +143,12 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     App_WorkThreadLogic::instance()->init_communication_service(App_CommunicationService::instance());
 
     //初始化执行库
-    App_WorkThreadLogic::instance()->init_work_thread_logic(App_ServerConfig::instance()->get_config_workthread().work_thread_count_,
+    App_WorkThreadLogic::instance()->init_work_thread_logic( App_ServerConfig::instance()->get_config_workthread().work_thread_count_,
         (uint16)App_ServerConfig::instance()->get_config_workthread().work_timeout_seconds_,
         (uint32)App_ServerConfig::instance()->get_config_workthread().client_connect_timeout_,
         (uint16)App_ServerConfig::instance()->get_config_workthread().io_send_time_check_,
         App_ServerConfig::instance()->get_config_logic_list(),
-        App_SessionService::instance());
+        App_SessionService::instance() );
 
     //加载Tcp监听
     for(auto tcp_server : App_ServerConfig::instance()->get_config_tcp_list())
@@ -165,6 +179,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
                 tcp_server.port_,
                 tcp_server.packet_parse_id_,
                 tcp_server.recv_buff_size_);
+
             tcp_service_list_.emplace_back(tcp_service);
         }
     }
@@ -211,10 +226,12 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         tty_service_list_.emplace_back(tty_service);
     }
 
-    //打开服务器间链接
+    //打开服务器间的链接
     App_CommunicationService::instance()->run_server_to_server();
 
+    //开始运行
     io_context_.run();
+
 
     PSS_LOGGER_DEBUG("[CServerService::init_servce] server is over.");
     close_service();

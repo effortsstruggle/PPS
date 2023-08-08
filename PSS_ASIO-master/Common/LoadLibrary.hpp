@@ -3,16 +3,18 @@
 #include "define.h"
 
 #if PSS_PLATFORM == PLATFORM_WIN
-#include <windows.h>
+    #include <windows.h>
 #else
-#include <dlfcn.h>
+    #include <dlfcn.h>
 #endif
 
 #ifndef RTLD_NOW
-#define RTLD_NOW 2
+    #define RTLD_NOW 2
 #endif
 
-//实现不同OS的动态库加载
+/**
+*实现不同OS的动态库加载
+*/
 //add by freeeyes
 
 #if PSS_PLATFORM == PLATFORM_WIN
@@ -24,16 +26,16 @@ using Pss_Library_Handler = void*;
 class CLoadLibrary
 {
 public:
+    //打开DLL
     static Pss_Library_Handler PSS_dlopen(const char* pFilePath, const int nMode)
     {
 #if PSS_PLATFORM == PLATFORM_WIN
         PSS_UNUSED_ARG(nMode);
-
         //Unicode字符集转换
         WCHAR wszFilePath[512] = {'\0'};
         memset(wszFilePath, 0, sizeof(wszFilePath));
-        MultiByteToWideChar(CP_ACP, 0, pFilePath, (int)strlen(pFilePath) + 1, wszFilePath,
-            (int)(sizeof(wszFilePath) / sizeof(wszFilePath[0])));
+        MultiByteToWideChar( CP_ACP, 0 , pFilePath, (int)strlen(pFilePath) + 1, wszFilePath,
+            (int)(sizeof(wszFilePath) / sizeof(wszFilePath[0]) ) );
 
         return ::LoadLibraryW(wszFilePath);
 #else
