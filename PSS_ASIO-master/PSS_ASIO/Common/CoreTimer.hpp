@@ -4,32 +4,39 @@
 #include "TimerManager.hpp"
 #include "singleton.h"
 
+/**
+* PSS_Timer_Manager 框架定时器
+*/
 class PSS_Timer_Manager
 {
 public:
     void Start()
     {
-        m_timerMgr = std::make_shared<brynet::TimerMgr>();
+        this->m_timerMgr = std::make_shared<brynet::TimerMgr>();
 
-        m_ttTimerThread = std::thread([this]()
+        this->m_ttTimerThread = std::thread( 
+            [this]()
             {
-                m_timerMgr->schedule();
+                //线程执行函数
+                this->m_timerMgr->schedule(); 
+
                 PSS_LOGGER_DEBUG("[PSS_Timer_Manager::start]End.");
-            });
+            } 
+        );
     }
 
     void Close()
     {
-        if (nullptr != m_timerMgr)
+        if (nullptr != this->m_timerMgr)
         {
-            m_timerMgr->Close();
-            m_ttTimerThread.join();
+            this->m_timerMgr->Close();
+            this->m_ttTimerThread.join();
         }
     }
 
     brynet::TimerMgr::Ptr GetTimerPtr() const
     {
-        return m_timerMgr;
+        return this->m_timerMgr;
     }
 
 private:

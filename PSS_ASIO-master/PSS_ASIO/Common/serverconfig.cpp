@@ -134,7 +134,7 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
             config_tty_list_.emplace_back(config_tty);
         }
 
-        //控制台输出
+        //输出配置
         auto config_output = json_config["console output"];
         config_output_.file_output_ = config_output["file write"];
         config_output_.file_count_ = config_output["log file count"];

@@ -96,7 +96,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
 
     const auto& config_output = App_ServerConfig::instance()->get_config_console();
     
-    //初始化输出
+    //初始化输出配置
     Init_Console_Output(config_output.file_output_,
         config_output.file_count_,
         config_output.max_file_size_,
@@ -119,18 +119,21 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
 #endif
 
     //注册监控中断事件(LINUX)
-    asio::signal_set signals(io_context_, SIGINT, SIGTERM);
-    signals.async_wait(
-        [this](std::error_code ec, int)
+    asio::signal_set  signals(io_context_, SIGINT, SIGTERM);
+
+    signals.async_wait
+    ( 
+        [this] (std::error_code ec, int)
         {
             PSS_LOGGER_DEBUG("[CServerService::init_servce] server is error({0}).", ec.message());
             io_context_.stop();
-        });
+        }
+    );
 
     //测试记录二进制
 #ifdef GCOV_TEST
     char test_buffer[20] = { "freeeyes" };
-    pss_output_binary(test_buffer, 0, 3);
+    pss_output_binary( test_buffer ,  0  , 3 );
 #endif
     
     //初始化框架定时器

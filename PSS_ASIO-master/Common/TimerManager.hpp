@@ -23,12 +23,14 @@ namespace brynet {
         TIMER_STATE_EXECUTE_TIMER,
     };
 
+    //循环状态
     enum class ENUM_WHILE_STATE
     {
         WHILE_STATE_CONTINUE = 0,
         WHILE_STATE_BREAK,
     };
 
+    //定时器类型
     enum class ENUM_TIMER_TYPE
     {
         TIMER_TYPE_ONCE = 0,
@@ -37,6 +39,9 @@ namespace brynet {
 
     class TimerMgr;
 
+    /**
+    *   定时器类
+    */
     class Timer final
     {
     public:
@@ -44,18 +49,19 @@ namespace brynet {
         using WeakPtr = std::weak_ptr<Timer>;
         using Callback = std::function<void(void)>;
 
-        Timer(std::chrono::steady_clock::time_point startTime,
-            std::chrono::nanoseconds lastTime,
-            std::chrono::seconds delayTime,
-            ENUM_TIMER_TYPE timertype,
-            Callback&& callback)
-            :
-            mCallback(std::move(callback)),
-            mStartTime(startTime),
-            mLastTime(lastTime),
-            mDelayTime(delayTime),
-            mTimerType(timertype)
+        Timer( std::chrono::steady_clock::time_point  startTime,
+                    std::chrono::nanoseconds lastTime,
+                    std::chrono::seconds delayTime,
+                    ENUM_TIMER_TYPE timertype,
+                    Callback&& callback  )
+                    :   mCallback(std::move(callback)),
+                        mStartTime(startTime),
+                        mLastTime(lastTime),
+                        mDelayTime(delayTime),
+                        mTimerType(timertype)
         {
+
+
         }
 
         const std::chrono::steady_clock::time_point& getStartTime() const
@@ -71,8 +77,11 @@ namespace brynet {
         std::chrono::nanoseconds getLeftTime()
         {
             const auto now = std::chrono::steady_clock::now();
-            auto delayTime = mDelayTime;
-            mDelayTime = std::chrono::seconds(0);
+
+            auto delayTime = this->mDelayTime;
+            
+            this->mDelayTime = std::chrono::seconds(0);
+            
             return getLastTime() - (now - getStartTime()) + delayTime;
         }
 
@@ -89,16 +98,19 @@ namespace brynet {
         }
 
     private:
+
+
         void operator() ()
         {
             if (mTimerType == ENUM_TIMER_TYPE::TIMER_TYPE_ONCE)
             {
                 Callback callback;
-                std::call_once(mExecuteOnceFlag, [&callback, this]() {
+                std::call_once( mExecuteOnceFlag ,  [&callback, this]() {
                     //一次运行
                     callback = std::move(mCallback);
                     mCallback = nullptr;
-                    });
+                    }
+                );
 
                 if (callback != nullptr)
                 {
@@ -115,63 +127,71 @@ namespace brynet {
             }
         }
 
-        std::once_flag                                  mExecuteOnceFlag;
-        Callback                                        mCallback;
-        std::chrono::steady_clock::time_point           mStartTime;
-        std::chrono::nanoseconds                        mLastTime;
-        std::chrono::seconds                            mDelayTime;
-        ENUM_TIMER_TYPE                                 mTimerType = ENUM_TIMER_TYPE::TIMER_TYPE_ONCE;
+        friend class TimerMgr; //友元类 
 
-        friend class TimerMgr;
+        std::once_flag                                               mExecuteOnceFlag;
+        Callback                                                        mCallback;
+        std::chrono::steady_clock::time_point           mStartTime;
+        std::chrono::nanoseconds                            mLastTime;
+        std::chrono::seconds                                    mDelayTime;
+        ENUM_TIMER_TYPE                                     mTimerType = ENUM_TIMER_TYPE::TIMER_TYPE_ONCE;
+
     };
 
+    /**
+   *定时器管理者
+   */
     class TimerMgr final
     {
     public:
         using Ptr = std::shared_ptr<TimerMgr>;
 
         template<typename F, typename ...TArgs>
-        Timer::WeakPtr  addTimer_loop(
-            std::chrono::seconds delayseconds,
-            std::chrono::nanoseconds timeout,
-            F&& callback,
-            TArgs&& ...args)
+        Timer::WeakPtr  addTimer_loop( std::chrono::seconds  delayseconds , std::chrono::nanoseconds timeout , F&& callback , TArgs&& ...args)
         {
             auto timer = std::make_shared<Timer>(
-                std::chrono::steady_clock::now(),
-                std::chrono::nanoseconds(timeout),
-                delayseconds,
-                ENUM_TIMER_TYPE::TIMER_TYPE_LOOP,
-                std::bind(std::forward<F>(callback), std::forward<TArgs>(args)...));
-            mtx_queue.lock();
+                                                                            std::chrono::steady_clock::now(),
+                                                                            std::chrono::nanoseconds(timeout),
+                                                                            delayseconds,
+                                                                            ENUM_TIMER_TYPE::TIMER_TYPE_LOOP,
+                                                                            std::bind(std::forward<F>(callback), std::forward<TArgs>(args)...) 
+                                                                            );
+
+            this->mtx_queue.lock();
+
             mTimers.push(timer);
-            mtx_queue.unlock();
+            
+            this->mtx_queue.unlock();
 
             //唤醒线程
             timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
+            
             cv.notify_one();
+
             return timer;
         }
 
         template<typename F, typename ...TArgs>
-        Timer::WeakPtr  addTimer(
-            std::chrono::nanoseconds timeout,
-            F&& callback,
-            TArgs&& ...args)
+        Timer::WeakPtr  addTimer(  std::chrono::nanoseconds timeout  ,  F&& callback , TArgs&& ...args )
         {
             auto timer = std::make_shared<Timer>(
                 std::chrono::steady_clock::now(),
                 std::chrono::nanoseconds(timeout),
                 std::chrono::seconds(0),
                 ENUM_TIMER_TYPE::TIMER_TYPE_ONCE,
-                std::bind(std::forward<F>(callback), std::forward<TArgs>(args)...));
-            mtx_queue.lock();
-            mTimers.push(timer);
-            mtx_queue.unlock();
+                std::bind(std::forward<F>(callback), std::forward<TArgs>(args)...) );
+
+            this->mtx_queue.lock();
+            
+            this->mTimers.push(timer);
+            
+            this->mtx_queue.unlock();
 
             //唤醒线程
             timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
+            
             cv.notify_one();
+
             return timer;
         }
 
@@ -182,92 +202,100 @@ namespace brynet {
 
             //唤醒线程
             timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
+
             cv.notify_one();
         }
 
         void Close()
         {
             std::unique_lock <std::mutex> lck(mtx);
-            timer_run_ = false;
+            
+            this->timer_run_ = false;
+            
             //唤醒线程
-            timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
-            cv.notify_one();
+            this->timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
+
+            this->cv.notify_one();
         }
 
         ENUM_WHILE_STATE timer_run()
         {
-            std::unique_lock <std::mutex> lck(mtx);
+                std::unique_lock <std::mutex> lck(mtx);
 
-            if (mTimers.empty())
-            {
-                //当前没有定时器，等待唤醒
-                cv.wait_for(lck, std::chrono::seconds(timer_default_wait));
-                // std::cout << "wake up" << std::endl;
-            }
+                if (mTimers.empty())
+                {
+                    //当前没有定时器，等待唤醒
+                    this->cv.wait_for( lck, std::chrono::seconds( timer_default_wait )  );
+                    // std::cout << "wake up" << std::endl;
+                }
 
-            if (!timer_run_)
-            {
-                //std::cout << "end up" << std::endl;
-                return ENUM_WHILE_STATE::WHILE_STATE_BREAK;
-            }
+                if (  ! this->timer_run_  )
+                {
+                    //std::cout << "end up" << std::endl;
+                    return ENUM_WHILE_STATE::WHILE_STATE_BREAK;
+                }
 
-            if (mTimers.empty())
-            {
-                return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
-            }
-
-            mtx_queue.lock();
-            auto tmp = mTimers.top();
-            mtx_queue.unlock();
-
-            auto timer_wait = tmp->getLeftTime();
-            if (timer_wait > std::chrono::nanoseconds::zero())
-            {
-                //还需要等待下一个到期时间
-                cv.wait_for(lck, timer_wait);
-                //std::cout << "[cv]cv.wait_for=" << timer_wait.count() << std::endl;
-
-                if (timer_wakeup_state == EM_TIMER_STATE::TIMER_STATE_ADD_TIMER)
+                if (  this->mTimers.empty()  )
                 {
                     return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
                 }
-            }
 
-            if (!timer_run_)
-            {
-                return ENUM_WHILE_STATE::WHILE_STATE_BREAK;
-            }
+                this->mtx_queue.lock();
 
-            mtx_queue.lock();
-            mTimers.pop();
+                auto tmp = this->mTimers.top();
+            
+                this->mtx_queue.unlock();
 
-            (*tmp)();
+                auto timer_wait = tmp->getLeftTime();
 
-            //如果是循环消息，则自动添加。
-            if (ENUM_TIMER_TYPE::TIMER_TYPE_LOOP == tmp->get_timer_type() && tmp->mCallback != nullptr)
-            {
-                //重新插入
-                mTimers.push(tmp);
-            }
+                if ( timer_wait > std::chrono::nanoseconds::zero() )
+                {
+                    //还需要等待下一个到期时间
+                    cv.wait_for(lck, timer_wait);
+                    //std::cout << "[cv]cv.wait_for=" << timer_wait.count() << std::endl;
 
-            mtx_queue.unlock();
+                    if (timer_wakeup_state == EM_TIMER_STATE::TIMER_STATE_ADD_TIMER)
+                    {
+                        return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
+                    }
+                }
+
+                if (!timer_run_)
+                {
+                    return ENUM_WHILE_STATE::WHILE_STATE_BREAK;
+                }
+
+                this->mtx_queue.lock();
+                
+                this->mTimers.pop();
+
+                (*tmp)( ) ; //？？？？？
+
+                //如果是循环消息，则自动添加。
+                if (ENUM_TIMER_TYPE::TIMER_TYPE_LOOP == tmp->get_timer_type() && tmp->mCallback != nullptr)
+                {
+                    //重新插入
+                    this->mTimers.push(tmp);
+                }
+
+                this->mtx_queue.unlock();
 
 
+                timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER;
 
-            timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER;
-
-            return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
+                return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
         }
 
+        //线程执行函数
         void schedule()
         {
-            timer_run_ = true;
+            this->timer_run_ = true;
 
-            while (timer_run_)
+            while ( this->timer_run_  )
             {
-                auto while_result = timer_run();
+                auto while_result = this->timer_run();
 
-                if (while_result == ENUM_WHILE_STATE::WHILE_STATE_BREAK)
+                if ( while_result == ENUM_WHILE_STATE::WHILE_STATE_BREAK )
                 {
                     break;
                 }
@@ -283,19 +311,19 @@ namespace brynet {
         bool isEmpty()
         {
             std::unique_lock <std::mutex> lck(mtx);
-            return mTimers.empty();
+            return  this->mTimers.empty();
         }
 
         // if timer empty, return zero
         std::chrono::nanoseconds nearLeftTime()
         {
             std::unique_lock <std::mutex> lck(mtx);
-            if (mTimers.empty())
+            if (this->mTimers.empty())
             {
                 return std::chrono::nanoseconds::zero();
             }
 
-            auto result = mTimers.top()->getLeftTime();
+            auto result = this->mTimers.top()->getLeftTime();
 
             if (result < std::chrono::nanoseconds::zero())
             {
@@ -308,18 +336,18 @@ namespace brynet {
         void clear()
         {
             std::unique_lock <std::mutex> lck(mtx);
-            while (!mTimers.empty())
+            while ( ! this->mTimers.empty( ) )
             {
-                mTimers.pop();
+                mTimers.pop( );
             }
         }
 
     private:
+        //内部类
         class CompareTimer
         {
         public:
-            bool operator() (const Timer::Ptr& left,
-                const Timer::Ptr& right) const
+            bool operator() (  const Timer::Ptr&  left  ,  const Timer::Ptr&  right  ) const
             {
                 const auto startDiff = left->getStartTime() - right->getStartTime();
                 const auto lastDiff = left->getLastTime() - right->getLastTime();
@@ -328,12 +356,17 @@ namespace brynet {
             }
         };
 
-        std::priority_queue<Timer::Ptr, std::vector<Timer::Ptr>, CompareTimer>  mTimers;
+        std::priority_queue< Timer::Ptr ,  std::vector<Timer::Ptr> , CompareTimer >  mTimers;
+
         std::mutex mtx;
+
         std::recursive_mutex mtx_queue;
+
         std::condition_variable cv;
+
         bool timer_run_ = false;
-        EM_TIMER_STATE timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER;
+
+        EM_TIMER_STATE timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER ;
     };
 
 }
