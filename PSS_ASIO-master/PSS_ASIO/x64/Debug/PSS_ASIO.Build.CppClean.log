@@ -1,61 +1,33 @@
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\vc142.pdb
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\vc142.idb
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\ikcp.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpsslsession.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpsslserver.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpsslclientsession.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpsession.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpserver.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\tcpclientsession.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\queueservice.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\pss_asio.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\sessionservice.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\sessioninterface.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\modulelogic.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\moduleinterfalce.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\loadpacketparse.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\loadmodule.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\iotoio.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\iobridge.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\serverservice.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\serverconfig.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\connectcounter.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\communicationservice.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\udpserver.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\udpclientsession.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\kcpserver.obj
-d:\project\pps\pss_asio-master\pss_asio\x64\debug\ttyserver.obj
-d:\project\pps\pss_asio-master\build\windows\pss_asio.ilk
-d:\project\pps\pss_asio-master\build\windows\pss_asio.exe
-d:\project\pps\pss_asio-master\build\windows\pss_asio.pdb
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\communicationservice.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\connectcounter.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\ikcp.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\iobridge.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\iotoio.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\kcpserver.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\loadmodule.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\loadpacketparse.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\moduleinterfalce.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\modulelogic.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\queueservice.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\serverconfig.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\serverservice.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\sessioninterface.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\sessionservice.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpclientsession.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpserver.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsession.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslclientsession.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslserver.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslsession.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\ttyserver.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\udpclientsession.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\udpserver.obj
-f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\vc142.idb
 f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\vc142.pdb
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\vc142.idb
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\ikcp.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslsession.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslserver.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsslclientsession.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpsession.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpserver.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\tcpclientsession.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\queueservice.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\sessionservice.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\sessioninterface.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\modulelogic.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\moduleinterfalce.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\loadpacketparse.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\loadmodule.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\iotoio.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\iobridge.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\serverservice.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\serverconfig.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\connectcounter.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\communicationservice.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\udpserver.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\udpclientsession.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\kcpserver.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\ttyserver.obj
+f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.ilk
 f:\git\5_visual studio code\pss\pss_asio-master\build\windows\pss_asio.exe
+f:\git\5_visual studio code\pss\pss_asio-master\build\windows\pss_asio.pdb
 f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.tlog\cl.command.1.tlog
 f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.tlog\cl.read.1.tlog
 f:\git\5_visual studio code\pss\pss_asio-master\pss_asio\x64\debug\pss_asio.tlog\cl.write.1.tlog

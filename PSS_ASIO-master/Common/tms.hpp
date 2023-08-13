@@ -1,7 +1,10 @@
 ﻿#pragma once
 
-//线程处理队列，处理消息队列和定时消息
+/**
+* 线程处理队列，处理消息队列和定时消息
+*/ 
 //add by freeeyes
+
 #include "define.h"
 #include "ThreadQueue.h"
 #include "TimerManager.hpp"
@@ -17,6 +20,9 @@ enum class EM_LOGIC_TYPE
     LOGIC_TYPE_CLOSE
 };
 
+/**
+ * @brief CLogicMessage 逻辑消息
+*/
 class CLogicMessage
 {
 public:
@@ -24,23 +30,33 @@ public:
     EM_LOGIC_TYPE m_emType = EM_LOGIC_TYPE::LOGIC_TYPE_RUN;
 };
 
+/**
+ * @brief  CLogicTasK  逻辑任务
+*/
 class CLogicTasK
 {
 public:
     CLogicTasK() = default;
 
+    /**
+     * @brief 消息入队
+     * @param msg 
+    */
     void Put(std::shared_ptr<CLogicMessage> msg)
     {
-        m_thread_queue.Push(msg);
+        this->m_thread_queue.Push(msg);
     }
 
     void start(uint32 u4ThreadID)
     {
         m_run = true;
-        m_ttlogic = std::thread([this]()
-            {
-                svc();
-            });
+
+        m_ttlogic = std::thread(  
+                                                [this]()
+                                                {
+                                                    this->svc();
+                                                }
+                                            );
         m_u4ThreadID = u4ThreadID;
     }
 
@@ -59,12 +75,15 @@ public:
     void svc()
     {
         m_tvBegin = CTimeStamp::Get_Time_Stamp();
-        while (m_run)
+
+        while ( this->m_run )
         {
             shared_ptr<CLogicMessage> msg;
-            m_thread_queue.Pop(msg);
 
-            if (EM_LOGIC_TYPE::LOGIC_TYPE_RUN == msg->m_emType)
+            //获取消息
+            this->m_thread_queue.Pop( msg );
+
+            if ( EM_LOGIC_TYPE::LOGIC_TYPE_RUN == msg->m_emType )
             {
                 //获得了数据，进行处理
                 msg->m_func();
@@ -84,10 +103,15 @@ public:
     }
 
 private:
-    CMessageQueue<shared_ptr<CLogicMessage>> m_thread_queue;
+    //消息队列
+    CMessageQueue< shared_ptr<CLogicMessage> > m_thread_queue;
+
     bool m_run = false;
+
     std::thread m_ttlogic;
+    
     PSS_Time_Point m_tvBegin;
+    
     uint32 m_u4ThreadID = 0;
 };
 
@@ -103,10 +127,11 @@ public:
         m_ttTimer = std::thread([this]()
             {
                 m_timerManager.schedule();
-            });
+            }
+        );
     }
 
-    bool CreateLogic(uint32 u4LogicID) //创建一个逻辑线程
+    bool CreateLogic(uint32 u4LogicID)  //创建一个逻辑线程
     {
         auto f = m_mapLogicList.find(u4LogicID);
         if (f != m_mapLogicList.end())
@@ -117,6 +142,7 @@ public:
         {
             //创建线程
             auto pLogicTask = std::make_shared<CLogicTasK>();
+
             pLogicTask->start(u4LogicID);
 
             m_mapLogicList[u4LogicID] = pLogicTask;
@@ -153,7 +179,8 @@ public:
         }
     }
 
-    bool CloseLogic(uint32 u4LogicID)  //关闭一个逻辑线程
+    //关闭一个逻辑线程
+    bool CloseLogic(uint32 u4LogicID)  
     {
         auto f = m_mapLogicList.find(u4LogicID);
         if (f != m_mapLogicList.end())
@@ -177,15 +204,24 @@ public:
         }
     }
 
-    //添加消息(即时)
+    /**
+     * @brief AddMessage 添加消息(即时)
+     * @param u4LogicID  消息ID
+     * @param func 所对应的任务执行函数
+     * @return 
+    */
     bool AddMessage(uint32 u4LogicID, task_function func)
     {
-        auto f = m_mapLogicList.find(u4LogicID);
-        if (f != m_mapLogicList.end())
+        auto f = this->m_mapLogicList.find( u4LogicID );
+
+        if ( f != this->m_mapLogicList.end( ) )
         {
-            auto pLogicMessage = std::make_shared<CLogicMessage>();
+            auto pLogicMessage = std::make_shared< CLogicMessage >();
+
             pLogicMessage->m_func = func;
-            m_mapLogicList[u4LogicID]->Put(pLogicMessage);
+            
+            this->m_mapLogicList[ u4LogicID ]->Put( pLogicMessage );
+            
             return true;
         }
         else
@@ -239,22 +275,30 @@ public:
     //关闭系统
     void Close()
     {
-        for_each(m_mapLogicList.begin(), m_mapLogicList.end(), [](const std::pair<uint32, shared_ptr<CLogicTasK>>& iter) {
-            iter.second->Close();
-            });
+        for_each( this->m_mapLogicList.begin() ,  this->m_mapLogicList.end() , 
+            [ ] (const std::pair<uint32, shared_ptr<CLogicTasK>>& iter) 
+            {
+                iter.second->Close();
+            }
+        );
 
         //关闭定时器
         m_timerManager.Close();
+
         m_ttTimer.join();
     }
 
 private:
-    using mapthreads = map<uint32, std::shared_ptr<CLogicTasK>>;
+    using mapthreads = map<uint32, std::shared_ptr<CLogicTasK> >;
     using mapthreadidtologicid = map<std::string, uint32>;
-    brynet::TimerMgr m_timerManager;
+    
     mapthreads m_mapLogicList;
-    std::thread m_ttTimer;
+  
     mapthreadidtologicid m_TidtologicidList;
+    
+    std::thread m_ttTimer;
+
+    brynet::TimerMgr m_timerManager;
 };
 
 using App_tms = PSS_singleton<TMS>;

@@ -93,25 +93,46 @@ void CModuleLogic::each_session_id(const session_func& session_fn) const
     sessions_interface_.each_session_id(session_fn);
 }
 
-void CWorkThreadLogic::init_work_thread_logic(int thread_count, uint16 timeout_seconds, uint32 connect_timeout, uint16 io_send_time_check, const config_logic_list& logic_list, ISessionService* session_service)
+/**
+ * @brief init_work_thread_logic 初始化工作线程逻辑
+ * @param thread_count 工作线程数
+ * @param timeout_seconds  超时秒数
+ * @param connect_timeout  连接超时
+ * @param io_send_time_check  IO发生时间检查
+ * @param logic_list 逻辑列表
+ * @param session_service 
+*/
+void CWorkThreadLogic::init_work_thread_logic( int thread_count ,  
+                                                                              uint16 timeout_seconds , 
+                                                                              uint32 connect_timeout , 
+                                                                              uint16 io_send_time_check , 
+                                                                              const config_logic_list& logic_list , 
+                                                                              ISessionService* session_service ) 
 {
     //初始化线程数
-    thread_count_ = (uint16)thread_count;
-    connect_timeout_ = connect_timeout;
-    io_send_time_check_ = io_send_time_check;
+    this->thread_count_ = (uint16)thread_count;
+
+    this->connect_timeout_ = connect_timeout;             
+    
+    this->io_send_time_check_ = io_send_time_check;
 
     App_tms::instance()->Init();
 
     //如果存在发送周期，则启动一个定时器，定时检测发送缓冲
     if (io_send_time_check_ > 0)
     {
-        auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(chrono::seconds(1), chrono::milliseconds(io_send_time_check_), [this]()
-            {
-                //发送检查和发送数据消息
-                App_tms::instance()->AddMessage(0, [this]() {
-                    send_io_buffer();
-                    });
-            });
+        auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(1) , chrono::milliseconds(io_send_time_check_) , 
+                                                                                                                                                                    [this]()
+                                                                                                                                                                    {
+                                                                                                                                                                        //发送检查和发送数据消息
+                                                                                                                                                                        App_tms::instance()->AddMessage(0, 
+                                                                                                                                                                            [this]() 
+                                                                                                                                                                            {
+                                                                                                                                                                                send_io_buffer();
+                                                                                                                                                                            }
+                                                                                                                                                                        );
+                                                                                                                                                                    }
+        );
     }
 
     load_module_.set_session_service(session_service);
@@ -161,20 +182,22 @@ void CWorkThreadLogic::init_work_thread_logic(int thread_count, uint16 timeout_s
 
     //显示所有的注册消息以及对应的模块
     PSS_LOGGER_DEBUG("[load_module_]>>>>>>>>>>>>>>>>>");
-    for (const auto& command_info : load_module_.get_module_function_list())
+
+    for (const auto& command_info : load_module_.get_module_function_list() )
     {
         PSS_LOGGER_DEBUG("[load_module_]register command id={0}", command_info.first);
     }
+
     PSS_LOGGER_DEBUG("[load_module_]>>>>>>>>>>>>>>>>>");
 
     //执行线程对应创建
     for (int i = 0; i < thread_count; i++)
     {
-        auto thread_logic = make_shared<CModuleLogic>();
+        auto thread_logic = make_shared< CModuleLogic >();
 
-        thread_logic->init_logic(load_module_.get_module_function_list(), (uint16)i);
+        thread_logic->init_logic( load_module_.get_module_function_list() , (uint16)i );
 
-        thread_module_list_.emplace_back(thread_logic);
+        thread_module_list_.emplace_back( thread_logic );
 
         //初始化线程
         App_tms::instance()->CreateLogic(i);
@@ -211,9 +234,9 @@ void CWorkThreadLogic::init_work_thread_logic(int thread_count, uint16 timeout_s
     for (const auto& plugin_events : plugin_work_thread_buffer_message_list_)
     {
         do_frame_message(plugin_events.tag_thread_id_,
-            plugin_events.message_tag_,
-            plugin_events.send_packet_,
-            plugin_events.delay_timer_);
+                                        plugin_events.message_tag_,
+                                        plugin_events.send_packet_,
+                                        plugin_events.delay_timer_ );
 
     }
     plugin_work_thread_buffer_message_list_.clear();
@@ -228,19 +251,26 @@ void CWorkThreadLogic::init_work_thread_logic(int thread_count, uint16 timeout_s
     plugin_work_thread_buffer_Func_list_.clear();
 
     //定时检查任务，定时检查服务器状态
-    App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(chrono::seconds(0), chrono::seconds(timeout_seconds), [this, timeout_seconds]()
-        {
-            //添加到数据队列处理
-            App_tms::instance()->AddMessage(0, [this, timeout_seconds]() {
-                run_check_task(timeout_seconds);
-                });
-        });
+    App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(chrono::seconds(0), chrono::seconds(timeout_seconds), 
+                                                                                                            [this, timeout_seconds]()
+                                                                                                            {
+                                                                                                                //添加到数据队列处理
+                                                                                                                App_tms::instance()->AddMessage(0, [this, timeout_seconds] ()
+                                                                                                                                                                            {
+                                                                                                                                                                                run_check_task(timeout_seconds);
+                                                                                                                                                                            });
+                                                                                                            }
+    );
     
 }
 
+/**
+ * @brief  init_communication_service  初始化通信服务
+ * @param communicate_service 
+*/
 void CWorkThreadLogic::init_communication_service(ICommunicationInterface* communicate_service)
 {
-    communicate_service_ = communicate_service;
+       this->communicate_service_ = communicate_service;
 }
 
 void CWorkThreadLogic::close()

@@ -18,14 +18,21 @@ using packet_load = void(*)(IIoBridge* io_bridge);
 using packet_close = void(*)(IIoBridge* io_bridge);
 using packet_set_output = void(*)(shared_ptr<spdlog::logger>);
 
+
+/**
+ * @brief 包解析信息类 
+*/
 class _Packet_Parse_Info
 {
 public:
     _Packet_Parse_Info() = default;
 
     uint32              m_u4PacketParseID     = 0;       //当前 packetParse ID
+
     PSS_Time_Point      m_tvCreateTime        = CTimeStamp::Get_Time_Stamp();          //模块创建时间
+    
     Pss_Library_Handler m_hModule             = nullptr; //模块句柄
+
     packet_from_recv_buffer packet_from_recv_buffer_ptr_   = nullptr; //模块向外提供的接口
     parse_format_send_buffer parse_format_send_buffer_ptr_ = nullptr; //模块向外提供的接口
     packet_connect packet_connect_ptr_                     = nullptr; //模块向外提供的接口
@@ -36,6 +43,10 @@ public:
     is_need_send_format is_need_send_format_ptr_           = nullptr; //模块向外提供的接口
 };
 
+
+/**
+ * @brief CLoadPacketParse  加载包解析动态库
+*/
 class CLoadPacketParse
 {
 public:
@@ -50,7 +61,7 @@ public:
     shared_ptr<_Packet_Parse_Info> GetPacketParseInfo(uint32 u4PacketParseID);
 
 private:
-    using hashmapPacketParseModuleList = unordered_map<uint32, shared_ptr<_Packet_Parse_Info> >;
+    using hashmapPacketParseModuleList = unordered_map< uint32 ,  shared_ptr<_Packet_Parse_Info> >;
     hashmapPacketParseModuleList        m_objPacketParseList;                  //Hash内存池（建立映射）
 };
 

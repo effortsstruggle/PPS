@@ -53,5 +53,5 @@ private:
     
     CConfigWorkThread config_work_thread_;
 };
-
+//单例模式
 using App_ServerConfig = PSS_singleton<CServerConfig>;

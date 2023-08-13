@@ -1,12 +1,11 @@
 ﻿#pragma once
-
-//读取参数表定义
-//add freeeyes
-
 #include <string>
 #include <vector>
 #include "define.h"
 
+/**
+*   配置文件参数信息数据结构定义
+*/
 //定义参数类型表 
 
 //工作线程
@@ -45,7 +44,9 @@ using config_tcp_list = std::vector<CConfigNetIO>;
 using config_udp_list = std::vector<CConfigNetIO>;
 using config_kcp_list = std::vector<CConfigNetIO>;
 
-//TTy电传打印机
+/**
+ * @brief CTTyIO 维护“配置文件”中对应的“TTy电传打印机”数据结构
+*/
 class CTTyIO
 {
 public:
@@ -58,6 +59,9 @@ public:
 };
 using config_tty_list = std::vector<CTTyIO>;
 
+/**
+ * @brief  CConfigConsole 维护“配置文件”中对应的控制台数据结构
+*/
 class CConfigConsole
 {
 public:

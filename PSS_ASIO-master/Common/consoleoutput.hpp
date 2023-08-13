@@ -40,13 +40,15 @@ public:
     std::string m_strLevel       = "info";
 };
 
-//输出函数类 (日志输出)
+/**
+ * @brief CConsoleOutput 输出函数类 (研究 日志输出 spdlog类)
+*/
 class CConsoleOutput
 {
 public:
     CConsoleOutput() = default;
 
-    void Init(Console_Output_Info obj_Console_Output_Info)
+    void Init( Console_Output_Info obj_Console_Output_Info )
     {
         spdlog::drop_all();
 
@@ -54,7 +56,7 @@ public:
 
         std::shared_ptr<spdlog::logger> console = nullptr;
 
-        if (!this->m_Console_Output_Info.m_blTunOn )
+        if (! this->m_Console_Output_Info.m_blTunOn  )
         {
             //屏幕输出
             console = spdlog::stdout_color_mt("console");

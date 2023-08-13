@@ -9,7 +9,9 @@
 #include "CoreTimer.hpp"
 #include "SessionBuffer.hpp"
 
-//根据线程的逻辑插件处理模块
+/**
+* 根据线程的逻辑插件处理模块
+*/
 //add by freeeyes
 
 //工作线程的执行状态
@@ -84,6 +86,9 @@ private:
     std::chrono::steady_clock::time_point work_thread_run_time_ = std::chrono::steady_clock::now();
 };
 
+/**
+ * @brief CWorkThreadLogic 工作线程逻辑
+*/
 class CWorkThreadLogic 
 {
 public:
@@ -160,19 +165,32 @@ public:
 private:
     using hashmappluginworkthread = unordered_map<uint32, shared_ptr<CModuleLogic>>;
     using hashmaplogictimer = unordered_map<uint64, brynet::Timer::WeakPtr>;
-    vector<shared_ptr<CModuleLogic>> thread_module_list_;
-    CLoadModule load_module_;
-    uint16      thread_count_ = 0;
-    ICommunicationInterface* communicate_service_ = nullptr;
-    bool        module_init_finish_ = false;
-    vector<uint32> plugin_work_thread_buffer_list_;
-    vector<CDelayPluginMessage> plugin_work_thread_buffer_message_list_;
-    vector<std::shared_ptr<CDelayPluginFunc>> plugin_work_thread_buffer_Func_list_;
+    
     hashmappluginworkthread plugin_work_thread_list_;
     hashmaplogictimer plgin_timer_list_;
+    
+    vector< shared_ptr<CModuleLogic> > thread_module_list_ ; 
+
+    CLoadModule load_module_;
+
+    uint16      thread_count_ = 0; //线程数
+
+    uint32 connect_timeout_ = 0;  //客服端连接超时
+
+    uint16 io_send_time_check_ = 0; //IO发送周期检查
+
+    ICommunicationInterface* communicate_service_ = nullptr; //通信服务
+
+    bool        module_init_finish_ = false;
+
+    vector<uint32> plugin_work_thread_buffer_list_;
+
+    vector<CDelayPluginMessage> plugin_work_thread_buffer_message_list_;
+
+    vector<std::shared_ptr<CDelayPluginFunc>> plugin_work_thread_buffer_Func_list_;
+
     std::recursive_mutex plugin_timer_mutex_;
-    uint32 connect_timeout_ = 0;
-    uint16 io_send_time_check_ = 0;
+   
 };
 
 using App_WorkThreadLogic = PSS_singleton<CWorkThreadLogic>;

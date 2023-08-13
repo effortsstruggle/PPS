@@ -14,7 +14,7 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
         //读取文件 （当前工作目录/文件） -- 需要修改当前工作目录
         std::ifstream config_input( file_name );
 
-        if (! config_input.good())
+        if ( ! config_input.good() )
         {
             log_screen("[CServerConfig::read_server_config_file] ", file_name, " file no exist");
             return false;
@@ -104,7 +104,6 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
             {
                 config_netio.em_net_type_ = EM_NET_TYPE::NET_TYPE_BROADCAST;
             }
-
             config_udp_list_.emplace_back(config_netio);
         }
 
@@ -144,6 +143,7 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
 
         //关闭输入流
         config_input.close();
+
         return true;
     }
     catch ( const json::parse_error& e )
@@ -157,6 +157,7 @@ config_packet_list& CServerConfig::get_config_packet_list()
 {
     return config_packet_list_ ;
 }
+
 
 config_logic_list& CServerConfig::get_config_logic_list()
 {
@@ -182,6 +183,7 @@ config_tty_list& CServerConfig::get_config_tty_list()
 {
     return config_tty_list_ ;
 }
+
 
 CConfigConsole& CServerConfig::get_config_console()
 {

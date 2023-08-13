@@ -1,15 +1,24 @@
 ﻿#include "LoadPacketParse.h"
 
 
-void CLoadPacketParse::dispaly_error_message(const std::string& func_name, const std::string& packet_parse_file, std::shared_ptr<_Packet_Parse_Info> pPacketParseInfo) const
+/**
+ * @brief dispaly_error_message 显示错误信息
+ * @param func_name 
+ * @param packet_parse_file 
+ * @param pPacketParseInfo 
+*/
+void CLoadPacketParse::dispaly_error_message(const std::string& func_name, 
+                                                                            const std::string& packet_parse_file, 
+                                                                            std::shared_ptr<_Packet_Parse_Info> pPacketParseInfo)  const
 {
-    PSS_LOGGER_DEBUG("[CLoadPacketParse::dispaly_error_message] PacketID={0} strModuleName = {1}, Function {2} is error!", 
-        pPacketParseInfo->m_u4PacketParseID,
-        func_name,
-        packet_parse_file);
+    PSS_LOGGER_DEBUG("[ CLoadPacketParse::dispaly_error_message ] PacketID={0} strModuleName = {1}, Function {2} is error!", 
+                                        pPacketParseInfo->m_u4PacketParseID,
+                                        func_name,
+                                        packet_parse_file);
     if (nullptr != pPacketParseInfo->m_hModule)
     {
-        CLoadLibrary::PSS_dlClose(pPacketParseInfo->m_hModule);
+        //关闭dll
+        CLoadLibrary::PSS_dlClose( pPacketParseInfo->m_hModule );
     }
 }
 
@@ -21,7 +30,7 @@ void CLoadPacketParse::dispaly_error_message(const std::string& func_name, const
 * @param2: packet_parse_path 路径
 * @param3: packet_parse_file 解析文件名称（动态库）
 */
-bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string& packet_parse_path, const std::string& packet_parse_file)
+bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string& packet_parse_path, const std::string& packet_parse_file)
 {
     //隐式加载PacketParse接口
     auto pPacketParseInfo = std::make_shared<_Packet_Parse_Info>();
@@ -113,12 +122,15 @@ bool CLoadPacketParse::LoadPacketInfo(uint32 u4PacketParseID, const std::string&
         return false;
     }
 
-    //添加到HashPool里面
-    m_objPacketParseList[pPacketParseInfo->m_u4PacketParseID] = pPacketParseInfo;
+    //建立Hash映射
+    this->m_objPacketParseList[ pPacketParseInfo->m_u4PacketParseID ] =  pPacketParseInfo;
 
+
+    /**
+    *  以下两个调用，需要查看其他封装的动态库
+    */
     //调用输出设置
     pPacketParseInfo->packet_set_output_ptr_( spdlog::default_logger() );
-
     //调用初始化
     pPacketParseInfo->packet_load_ptr_( App_IoBridge::instance() );
 

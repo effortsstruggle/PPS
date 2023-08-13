@@ -203,10 +203,10 @@ void log_screen(First&& first, Rest && ...rest)
 }
 
 //定义操作宏 （日志库spdlog）
-#define PSS_LOGGER_DEBUG(...) SPDLOG_LOGGER_DEBUG(spdlog::default_logger(), __VA_ARGS__)
-#define PSS_LOGGER_INFO(...) SPDLOG_LOGGER_INFO(spdlog::default_logger(), __VA_ARGS__)
-#define PSS_LOGGER_WARN(...) SPDLOG_LOGGER_WARN(spdlog::default_logger(), __VA_ARGS__)
-#define PSS_LOGGER_ERROR(...) SPDLOG_LOGGER_ERROR(spdlog::default_logger(), __VA_ARGS__)
+#define PSS_LOGGER_DEBUG(...)   SPDLOG_LOGGER_DEBUG( spdlog::default_logger() , __VA_ARGS__ )
+#define PSS_LOGGER_INFO(...)      SPDLOG_LOGGER_INFO(spdlog::default_logger(), __VA_ARGS__)
+#define PSS_LOGGER_WARN(...)    SPDLOG_LOGGER_WARN(spdlog::default_logger(), __VA_ARGS__)
+#define PSS_LOGGER_ERROR(...)   SPDLOG_LOGGER_ERROR(spdlog::default_logger(), __VA_ARGS__)
 
 //链接消息命令
 const uint16 LOGIC_COMMAND_CONNECT = 0x0001;     //链接建立事件
@@ -228,7 +228,14 @@ void PSS_UNUSED_ARG(T&&)
 
 }
 
-//初始化控制台输出
+/**
+ * @brief Init_Console_Output 数据结构转换并初始化控制台输出
+ * @param blTurnOn 屏幕输出还是文件输出
+ * @param nFileCount 
+ * @param nLogFileMaxSize 
+ * @param strConsoleName 
+ * @param strLevel 
+*/
 inline void Init_Console_Output(bool blTurnOn, int nFileCount, int nLogFileMaxSize, string strConsoleName, string strLevel)
 {
     Console_Output_Info obj_Console_Output_Info;
@@ -239,7 +246,7 @@ inline void Init_Console_Output(bool blTurnOn, int nFileCount, int nLogFileMaxSi
     obj_Console_Output_Info.m_strConsoleName = strConsoleName;
     obj_Console_Output_Info.m_strLevel = strLevel;
 
-    App_ConsoleOutput::instance()->Init(obj_Console_Output_Info);
+    App_ConsoleOutput::instance()->Init( obj_Console_Output_Info );
 }
 
 inline std::chrono::seconds get_time_delay(std::string date)

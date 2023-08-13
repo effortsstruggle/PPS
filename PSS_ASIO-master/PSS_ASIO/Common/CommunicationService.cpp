@@ -1,18 +1,27 @@
 ﻿#include "CommunicationService.h"
 
+/**
+ * @brief init_communication_service 初始化通信服务
+ * @param io_service_context 
+ * @param timeout_seconds 
+*/
 void CCommunicationService::init_communication_service(asio::io_context* io_service_context, uint16 timeout_seconds)
 {
     //读取配置文件，链接服务器
     io_service_context_ = io_service_context;
 
-    //定时检查任务，检查服务器间链接的状态。
-    App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(chrono::seconds(0), chrono::seconds(timeout_seconds), [this]()
-        {
-            //添加到数据队列处理
-            App_tms::instance()->AddMessage(0, [this]() {
-                run_check_task();
-                });
-        });
+    //定时检查任务，检查服务器间链接的状态。（此任务为循环任务）
+    App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(0) , chrono::seconds(timeout_seconds) , 
+                                                                                                                [this]()
+                                                                                                                {
+                                                                                                                    //添加到数据队列处理
+                                                                                                                    App_tms::instance()->AddMessage( 0 , [this]() 
+                                                                                                                                                                                    {
+                                                                                                                                                                                        this->run_check_task();
+                                                                                                                                                                                    }
+                                                                                                                                                                            );
+                                                                                                                }
+                                                                                                            );
 }
 
 bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
@@ -145,16 +154,20 @@ void CCommunicationService::each(Communication_funtion communication_funtion)
 
 void CCommunicationService::run_check_task()
 {
+    //lock_guard自身作用域中，具有构造时加锁，析构时释放锁
     std::lock_guard <std::recursive_mutex> lock(mutex_);
+
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
 
-    each([this](CCommunicationIOInfo& io_info) {
-        if (io_info.session_ == nullptr || false == io_info.session_->is_connect())
-        {
-            //重新建立链接
-            io_connect(io_info);
-        }
-        });
+    each(  
+                [this](CCommunicationIOInfo& io_info) {
+                    if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
+                    {
+                        //重新建立链接
+                        io_connect(io_info);
+                    }
+                 }
+             );
 
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
 }

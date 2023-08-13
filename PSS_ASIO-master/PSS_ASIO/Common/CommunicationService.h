@@ -8,7 +8,10 @@
 #include "tms.hpp"
 #include "CoreTimer.hpp"
 
-//管理服务器间链接，自动重连的类
+
+/**
+ * @brief 管理服务器间链接，自动重连的类 （心跳机制，使用定时器实现）
+*/
 //add by freeeyes
 
 class CCommunicationIOInfo
@@ -52,12 +55,15 @@ public:
     void each(Communication_funtion communication_funtion);
 
 private:
-    using communication_list = unordered_map<uint32, CCommunicationIOInfo>;
-    using server_connect_id_list = unordered_map<uint32, uint32>;
-    communication_list communication_list_;
+    using communication_list = unordered_map<uint32, CCommunicationIOInfo>; //Hash映射
+    using server_connect_id_list = unordered_map<uint32, uint32>; //Hash映射
+    communication_list communication_list_; 
     server_connect_id_list server_connect_id_list_;
-    std::recursive_mutex mutex_;
+
+    std::recursive_mutex mutex_; //嵌套锁/递归锁（可多次上锁，来获得对互斥量对象的多层使用权；释放量时，需要调用与该lock层次相同的unlock）
+    
     asio::io_context* io_service_context_ = nullptr;
+
     bool communication_is_run_ = false;
 };
 
