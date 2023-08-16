@@ -18,5 +18,5 @@ public:
     void close();
 
 private:
-    command_to_module_function command_to_module_function_;
+    command_to_module_function command_to_module_function_; //[模块指令 , 模块处理接口]映射
 };

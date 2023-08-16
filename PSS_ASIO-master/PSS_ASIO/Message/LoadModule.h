@@ -31,15 +31,15 @@ public:
     string           module_file_path_;     //模块路径
     string           module_param_;         //模块启动参数
     PSS_Time_Point   load_module_time_ = CTimeStamp::Get_Time_Stamp(); //模块创建时间
-    Pss_Library_Handler hModule_                     = nullptr;
-    load_module_function_ptr load_module_            = nullptr;
+    Pss_Library_Handler hModule_                     = nullptr; //模块句柄（在内存中的位置）
+    load_module_function_ptr load_module_            = nullptr; //
     unload_module_function_ptr unload_module_        = nullptr;
-    do_message_function_ptr do_message_              = nullptr;
+    do_message_function_ptr do_message_              = nullptr; //指令的处理接口
     get_module_state_function_ptr get_module_state_  = nullptr;
     set_output_function_ptr set_output_              = nullptr;
-    module_run_finction_ptr module_run_finction_ptr_ = nullptr;
+    module_run_finction_ptr module_run_finction_ptr_ = nullptr; //模块运行的接口
 
-    vector<uint16> command_id_list_;
+    vector<uint16> command_id_list_; //模块指令列表（通过第三方模块来获取）
 
     _ModuleInfo() = default;
 };
@@ -67,6 +67,7 @@ public:
 
     //插件命令处理同步相关功能
     command_to_module_function& get_module_function_list();
+
     int plugin_in_name_to_module_run(const std::string& module_name, std::shared_ptr<CMessage_Packet> send_packet, std::shared_ptr<CMessage_Packet> return_packet);
 
 private:
@@ -74,11 +75,15 @@ private:
 
     void delete_module_name_list(const string& module_name);
 
+private:
     using hashmapModuleList = unordered_map<string, shared_ptr<_ModuleInfo>>;
-    hashmapModuleList                  module_list_;
-    vector<string>                     module_name_list_;               //当前插件名称列表
+    hashmapModuleList                  module_list_; //模块注册列表 [模块名称,模块信息]
 
-    command_to_module_function command_to_module_function_;
-    plugin_name_to_module_run plugin_name_to_module_run_;
-    ISessionService* session_service_;
+    std::vector<std::string>                     module_name_list_;  //当前插件名称列表
+
+    command_to_module_function command_to_module_function_; //[模块指令 , 指令的处理函数] 映射
+
+    plugin_name_to_module_run plugin_name_to_module_run_; //[模块名称 , 模块运行接口] 映射
+    
+    ISessionService* session_service_; //会话服务
 };

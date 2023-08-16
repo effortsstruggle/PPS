@@ -30,6 +30,9 @@ public:
 };
 using config_packet_list = std::vector<CConfigPacketParseInfo>;
 
+/**
+ * @brief CConfigLogicInfo 第三方模块插件列表
+*/
 class CConfigLogicInfo
 {
 public:

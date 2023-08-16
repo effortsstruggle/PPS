@@ -49,15 +49,15 @@ public:
 
     void start(uint32 u4ThreadID)
     {
-        m_run = true;
+        this->m_run = true;
 
-        m_ttlogic = std::thread(  
-                                                [this]()
-                                                {
-                                                    this->svc();
-                                                }
-                                            );
-        m_u4ThreadID = u4ThreadID;
+        this->m_ttlogic = std::thread(  
+                                    [this]()
+                                    {
+                                        this->svc();
+                                    }
+                                );
+        this->m_u4ThreadID = u4ThreadID;
     }
 
     void Close()
@@ -99,7 +99,7 @@ public:
 
     std::thread::id get_thread_id()
     {
-        return m_ttlogic.get_id();
+        return this->m_ttlogic.get_id();
     }
 
 private:
@@ -108,11 +108,11 @@ private:
 
     bool m_run = false;
 
-    std::thread m_ttlogic;
+    std::thread m_ttlogic; //逻辑任务线程
     
     PSS_Time_Point m_tvBegin;
     
-    uint32 m_u4ThreadID = 0;
+    uint32 m_u4ThreadID = 0; //逻辑ID
 };
 
 class TMS
@@ -124,36 +124,40 @@ public:
     void Init()
     {
         //创建定时器线程
-        m_ttTimer = std::thread([this]()
-            {
-                m_timerManager.schedule();
-            }
-        );
+        this->m_ttTimer = std::thread(  [this]()
+                                        {
+                                            this->m_timerManager.schedule();
+                                        }
+                                    );
     }
 
-    bool CreateLogic(uint32 u4LogicID)  //创建一个逻辑线程
+    /**
+     * @brief CreateLogic 创建一个逻辑线程
+     * @param u4LogicID 逻辑ID
+     * @return 
+    */
+    bool CreateLogic(uint32 u4LogicID)  
     {
-        auto f = m_mapLogicList.find(u4LogicID);
-        if (f != m_mapLogicList.end())
+        auto f = this->m_mapLogicList.find(u4LogicID);
+        if (f != this->m_mapLogicList.end()) //找到该逻辑线程ID
         {
             return false;
         }
-        else
+        else //未找到
         {
-            //创建线程
+            //创建线程，并开启
             auto pLogicTask = std::make_shared<CLogicTasK>();
-
             pLogicTask->start(u4LogicID);
 
-            m_mapLogicList[u4LogicID] = pLogicTask;
+            this->m_mapLogicList[u4LogicID] = pLogicTask;
 
-            //记录映射关系
+            //记录[线程ID,逻辑ID]映射关系
             std::thread::id tid = pLogicTask->get_thread_id();
             std::ostringstream thread_id_stream;
             thread_id_stream << tid;
             std::string thread_id_str = thread_id_stream.str();
 
-            m_TidtologicidList[thread_id_str] = u4LogicID;
+            this->m_TidtologicidList[thread_id_str] = u4LogicID;
             //cout << "CreateLogic(" << u4LogicID << ")." << endl;
         }
 
@@ -214,7 +218,7 @@ public:
     {
         auto f = this->m_mapLogicList.find( u4LogicID );
 
-        if ( f != this->m_mapLogicList.end( ) )
+        if ( f != this->m_mapLogicList.end( ) ) //消息已存在
         {
             auto pLogicMessage = std::make_shared< CLogicMessage >();
 
@@ -224,7 +228,7 @@ public:
             
             return true;
         }
-        else
+        else //消息未存在
         {
             return false;
         }
@@ -235,7 +239,8 @@ public:
     {
         brynet::Timer::WeakPtr timer;
         auto f = m_mapLogicList.find(u4LogicID);
-        if (f != m_mapLogicList.end())
+        
+        if (f != m_mapLogicList.end() ) //消息已存在
         {
             auto pLogicMessage = std::make_shared<CLogicMessage>();
             pLogicMessage->m_func = func;
@@ -292,13 +297,13 @@ private:
     using mapthreads = map<uint32, std::shared_ptr<CLogicTasK> >;
     using mapthreadidtologicid = map<std::string, uint32>;
     
-    mapthreads m_mapLogicList;
+    mapthreads m_mapLogicList; //[逻辑ID，逻辑任务] ； 每一个逻辑任务对应一个线程
   
-    mapthreadidtologicid m_TidtologicidList;
+    mapthreadidtologicid m_TidtologicidList; //[ 线程ID , 逻辑ID ]
     
-    std::thread m_ttTimer;
-
-    brynet::TimerMgr m_timerManager;
+    std::thread m_ttTimer; //定时器线程
+     
+    brynet::TimerMgr m_timerManager; //定时器管理者
 };
 
 using App_tms = PSS_singleton<TMS>;

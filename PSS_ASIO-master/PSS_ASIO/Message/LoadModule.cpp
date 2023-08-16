@@ -24,7 +24,7 @@ void CLoadModule::Close()
 
 void CLoadModule::set_session_service(ISessionService* session_service)
 {
-    session_service_ = session_service;
+    this->session_service_ = session_service;
 }
 
 bool CLoadModule::load_plugin_module(const string& module_file_path, const string& module_file_name, const string& module_param)
@@ -36,55 +36,55 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
     module_info->module_file_path_ = module_file_path;
     module_info->module_param_ = module_param;
 
-    //开始注册模块函数
-    if (false == load_module_info(module_info))
+    //1、开始注册模块函数
+    if (false == this->load_module_info(module_info))
     {
         return false;
     }
 
-    //查找此模块是否已经被注册，有则把信息老信息清理
-    auto f = module_list_.find(module_info->module_file_name_);
-
-    if (module_list_.end() != f)
+    //2.查找此模块是否已经被注册，有则把信息老信息清理
+    auto f = this->module_list_.find( module_info->module_file_name_ );
+    if ( this->module_list_.end() != f) //已注册
     {
         //卸载旧的插件
         PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] module_name = {0}, Execute Function LoadModuleData is error!", module_file_name);
         return false;
     }
 
-    //开始调用模块初始化动作
+    //3.开始调用模块初始化
     CFrame_Object module_frame_object;
-    module_frame_object.session_service_ = session_service_;
-    int nRet = module_info->load_module_((IFrame_Object* )&module_frame_object, module_info->module_param_);
-
+    module_frame_object.session_service_ = this->session_service_;
+    //加载模块(注册模块的一些指令)
+    int nRet = module_info->load_module_( (IFrame_Object* )&module_frame_object , module_info->module_param_ );
     if (nRet != 0)
     {
         PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] module_name = {0}, Execute Function LoadModuleData is error!", module_file_name);
         return false;
     }
 
-    //获得所有的注册指令(注册)
+    //4.获得模块中所有的注册指令(注册)
     for (const auto& command_info : module_frame_object.module_command_list_)
     {
-        if (command_info.type_ == ENUM_LOGIC_COMMAND_TYPE::COMMAND_TYPE_NO_FN)
+        if (command_info.type_ == ENUM_LOGIC_COMMAND_TYPE::COMMAND_TYPE_NO_FN) 
         {
-            command_to_module_function_[command_info.command_id_] = module_info->do_message_;
+            this->command_to_module_function_[command_info.command_id_] = module_info->do_message_;
         }
         else
         {
-            command_to_module_function_[command_info.command_id_] = command_info.logic_fn_;
+            this->command_to_module_function_[command_info.command_id_] = command_info.logic_fn_;
         }
 
         //记录当前插件加载的命令信息
         module_info->command_id_list_.emplace_back(command_info.command_id_);
     }
 
-    //添加模块间调用的映射关系
-    plugin_name_to_module_run_[module_file_name] = module_info->module_run_finction_ptr_;
+    //5.添加模块间调用的映射(与模块的"module_run接口"作映射)
+    this->plugin_name_to_module_run_[module_file_name] = module_info->module_run_finction_ptr_;
 
-    //将注册成功的模块，加入到Hash数组中
-    module_list_[module_file_name] = module_info;
-    module_name_list_.emplace_back(module_file_name);
+    //6.将注册成功的模块，加入到Hash数组中
+    this->module_list_[module_file_name] = module_info;
+
+    this->module_name_list_.emplace_back(module_file_name);
 
     PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] Begin Load ModuleName[{0}] OK!", module_file_name);
     return true;
@@ -147,7 +147,12 @@ shared_ptr<_ModuleInfo> CLoadModule::find_module_info(const char* pModuleName)
     }
 }
 
-bool CLoadModule::load_module_info(shared_ptr<_ModuleInfo> module_info) const
+/**
+ * @brief load_module_info 加载模块信息 （包括:模块名称、模块路径、模块启动参数、模块创建时间、模块句柄及模块的接口）
+ * @param module_info 
+ * @return 
+*/
+bool CLoadModule::load_module_info(std::shared_ptr<_ModuleInfo> module_info) const
 {
     string strModuleFile;
 
@@ -208,6 +213,7 @@ bool CLoadModule::load_module_info(shared_ptr<_ModuleInfo> module_info) const
         return false;
     }
 
+    //module_run 接口
     module_info->module_run_finction_ptr_ = (module_run_finction_ptr)CLoadLibrary::PSS_dlsym(module_info->hModule_, "module_run");
     if (nullptr == module_info->set_output_)
     {
@@ -230,7 +236,7 @@ void CLoadModule::delete_module_name_list(const string& module_name)
 
 command_to_module_function& CLoadModule::get_module_function_list()
 {
-    return command_to_module_function_;
+    return this->command_to_module_function_;
 }
 
 int CLoadModule::plugin_in_name_to_module_run(const std::string& module_name, std::shared_ptr<CMessage_Packet> send_packet, std::shared_ptr<CMessage_Packet> return_packet)

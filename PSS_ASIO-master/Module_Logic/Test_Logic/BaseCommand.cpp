@@ -2,29 +2,29 @@
 
 void CBaseCommand::Init(ISessionService* session_service)
 {
-    session_service_ = session_service;
+    this->session_service_ = session_service;
 
     //得到服务器的所有监听消息
     std::vector<CConfigNetIO> io_list;
-    session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_TCP);
+    this->session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_TCP);
     for (const auto& io_type : io_list)
     {
         PSS_LOGGER_DEBUG("[CBaseCommand::Init]tcp listen {0}:{1}", io_type.ip_, io_type.port_);
     }
 
-    session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_UDP);
+    this->session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_UDP);
     for (const auto& io_type : io_list)
     {
         PSS_LOGGER_DEBUG("[CBaseCommand::Init]udp listen {0}:{1}", io_type.ip_, io_type.port_);
     }
 
-    session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_KCP);
+    this->session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_KCP);
     for (const auto& io_type : io_list)
     {
         PSS_LOGGER_DEBUG("[CBaseCommand::Init]kcp listen {0}:{1}", io_type.ip_, io_type.port_);
     }
 
-    session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_TTY);
+    this->session_service_->get_server_listen_info(io_list, EM_CONNECT_IO_TYPE::CONNECT_IO_TTY);
     for (const auto& io_type : io_list)
     {
         PSS_LOGGER_DEBUG("[CBaseCommand::Init]tty listen {0}:{1}", io_type.ip_, io_type.port_);
@@ -50,7 +50,7 @@ void CBaseCommand::Init(ISessionService* session_service)
     logic_connect_tcp();
 #endif
 
-    PSS_LOGGER_DEBUG("[load_module]({0})io thread count.", session_service_->get_io_work_thread_count());
+    PSS_LOGGER_DEBUG("[load_module]({0})io thread count.", this->session_service_->get_io_work_thread_count());
 }
 
 void CBaseCommand::logic_connect_tcp()
@@ -68,7 +68,7 @@ void CBaseCommand::logic_connect_tcp()
     io_info.server_id = 1001;
     io_info.packet_parse_id = 1;
 
-    session_service_->connect_io_server(io_info, io_type);
+    this->session_service_->connect_io_server(io_info, io_type);
 }
 
 void CBaseCommand::logic_connect_udp()
@@ -84,7 +84,7 @@ void CBaseCommand::logic_connect_udp()
     io_info.server_id = 1002;
     io_info.packet_parse_id = 1;
 
-    session_service_->connect_io_server(io_info, io_type);
+    this->session_service_->connect_io_server(io_info, io_type);
 }
 
 void CBaseCommand::logic_connect(const CMessage_Source& source, std::shared_ptr<CMessage_Packet> recv_packet, std::shared_ptr<CMessage_Packet> send_packet)
@@ -161,7 +161,7 @@ int CBaseCommand::logic_test_asyn(const CMessage_Source& source, std::shared_ptr
     auto send_asyn_packet = std::make_shared<CMessage_Packet>();
     send_asyn_packet->buffer_.append(recv_packet->buffer_.c_str(), recv_packet->buffer_.size());
 
-    session_service_->send_io_message(source.connect_id_, send_asyn_packet);
+    this->session_service_->send_io_message(source.connect_id_, send_asyn_packet);
 
     return 0;
 }
@@ -235,7 +235,7 @@ void CBaseCommand::logic_http_websocket_data(const CMessage_Source& source, std:
     auto send_asyn_packet = std::make_shared<CMessage_Packet>();
     send_asyn_packet->buffer_.append(recv_packet->buffer_.c_str(), recv_packet->buffer_.size());
 
-    session_service_->send_io_message(source.connect_id_, send_asyn_packet);
+    this->session_service_->send_io_message(source.connect_id_, send_asyn_packet);
 
 }
 

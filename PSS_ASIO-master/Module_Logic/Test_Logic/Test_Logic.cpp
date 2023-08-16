@@ -29,14 +29,20 @@ DECLDIR int module_state();
 DECLDIR int module_run(std::shared_ptr<CMessage_Packet> send_packet, std::shared_ptr<CMessage_Packet> return_packet);
 DECLDIR void set_output(shared_ptr<spdlog::logger> logger);
 
-ISessionService* session_service = nullptr;
+ISessionService* session_service = nullptr; //会话服务
+
 std::shared_ptr<CBaseCommand> base_command = nullptr;
 
 #define MESSAGE_FUNCTION_BEGIN(x) switch(x) {
 #define MESSAGE_FUNCTION(x,y,z,h,i) case x: { y(z,h,i); break; }
 #define MESSAGE_FUNCTION_END }
 
-//插件加载
+/**
+ * @brief load_module 插件(模块)加载
+ * @param frame_object 
+ * @param module_param 
+ * @return 
+*/
 int load_module(IFrame_Object* frame_object, string module_param)
 {
 #ifdef GCOV_TEST
@@ -45,18 +51,18 @@ int load_module(IFrame_Object* frame_object, string module_param)
 #endif
 
     //初始化消息处理类
-    base_command = std::make_shared<CBaseCommand>();
+    ::base_command = std::make_shared<CBaseCommand>();
 
     //测试添加性能探针
     CRandom_Sample random_sample(100);
     auto time_cost_func = std::bind(&CBaseCommand::performace_check, base_command.get(), std::placeholders::_1, std::placeholders::_2);
     CPerformance_Check performance_check(random_sample, "load_module", time_cost_func);
 
-    //注册插件
-    frame_object->Regedit_command(LOGIC_COMMAND_CONNECT);
-    frame_object->Regedit_command(LOGIC_COMMAND_DISCONNECT);
-    frame_object->Regedit_command(LOGIC_CONNECT_SERVER_ERROR);
-    frame_object->Regedit_command(LOGIC_LISTEN_SERVER_ERROR);
+    //注册插件(模块对应的指令)
+    frame_object->Regedit_command(LOGIC_COMMAND_CONNECT); //链接建立事件
+    frame_object->Regedit_command(LOGIC_COMMAND_DISCONNECT); //链接断开事件
+    frame_object->Regedit_command(LOGIC_CONNECT_SERVER_ERROR); //链接服务器不成功事件
+    frame_object->Regedit_command(LOGIC_LISTEN_SERVER_ERROR); //监听事件
     //frame_object->Regedit_command(COMMAND_TEST_SYNC);
     //frame_object->Regedit_command(COMMAND_TEST_ASYN);
     frame_object->Regedit_command(COMMAND_TEST_FRAME);
@@ -82,15 +88,15 @@ int load_module(IFrame_Object* frame_object, string module_param)
     frame_object->Regedit_command(COMMAND_TEST_SYNC, command_sync_api);
 
 
-    session_service = frame_object->get_session_service();
+    ::session_service = frame_object->get_session_service();
 
-    base_command->Init(session_service);
+    ::base_command->Init(::session_service);
 
     //测试注册api
     auto test_api = std::bind(&CBaseCommand::do_logic_api, base_command.get(), std::placeholders::_1);
-    session_service->add_plugin_api("test_logic", test_api);
+    ::session_service->add_plugin_api("test_logic", test_api);
 
-    session_service->do_plugin_api("test_logic", "hello free eyes");
+    ::session_service->do_plugin_api("test_logic", "hello free eyes");
 
     PSS_LOGGER_DEBUG("[load_module]({0})finish.", module_param);
 
@@ -99,22 +105,22 @@ int load_module(IFrame_Object* frame_object, string module_param)
     bool ret = session_service->create_queue(key, 100, 10);
     if (ret)
     {
-        session_service->set_recv_function(key, [](const char* message, size_t len) {
+        ::session_service->set_recv_function(key, [](const char* message, size_t len) {
             PSS_LOGGER_DEBUG("[shm que message]message={0},len={1}.", message, len);
             });
 
-        session_service->set_close_function(key, [](shm_queue::shm_key key) {
+        ::session_service->set_close_function(key, [](shm_queue::shm_key key) {
             PSS_LOGGER_DEBUG("[shm que message]close {0}.", key);
             });
 
-        session_service->set_error_function(key, [](std::string error) {
+        ::session_service->set_error_function(key, [](std::string error) {
             PSS_LOGGER_DEBUG("[shm que message]error={0}.", error);
             });
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         char buffer[30] = { "hello queue!" };
-        if (!session_service->send_queue_message(key, buffer, strlen(buffer)))
+        if (! ::session_service->send_queue_message(key, buffer, strlen(buffer) ) )
         {
             PSS_LOGGER_DEBUG("[shm que message]put message error.");
         }

@@ -39,7 +39,7 @@ public:
 private:
     config_packet_list config_packet_list_; //包解析配置
     
-    config_logic_list config_logic_list_;
+    config_logic_list config_logic_list_; //模块插件的列表
     
     config_tcp_list config_tcp_list_;
     

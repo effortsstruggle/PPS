@@ -146,13 +146,13 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //初始化执行库
     CConfigWorkThread& config_work_thread_ = App_ServerConfig::instance()->get_config_workthread();
     App_WorkThreadLogic::instance()->init_work_thread_logic(
-                                                                                                        config_work_thread_.work_thread_count_ , 
-                                                                                                        (uint16)config_work_thread_.work_timeout_seconds_  ,
-                                                                                                        (uint32)config_work_thread_.client_connect_timeout_  ,
-                                                                                                        (uint16)config_work_thread_.io_send_time_check_  ,
-                                                                                                        App_ServerConfig::instance()->get_config_logic_list()  ,
-                                                                                                        App_SessionService::instance()
-                                                                                                );
+                                                                config_work_thread_.work_thread_count_ , 
+                                                                (uint16)config_work_thread_.work_timeout_seconds_  ,
+                                                                (uint32)config_work_thread_.client_connect_timeout_  ,
+                                                                (uint16)config_work_thread_.io_send_time_check_  ,
+                                                                App_ServerConfig::instance()->get_config_logic_list()  ,
+                                                                App_SessionService::instance()
+                                                            );
 
     //加载Tcp监听
     for(auto tcp_server : App_ServerConfig::instance()->get_config_tcp_list())

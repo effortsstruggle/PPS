@@ -49,6 +49,9 @@ public:
     task_function func_;
 };
 
+/**
+ * @brief CModuleLogic 模块逻辑
+*/
 class CModuleLogic
 {
 public:
@@ -78,11 +81,15 @@ public:
 
 private:
     CSessionInterface sessions_interface_;
-    CModuleInterface modules_interface_;
-    uint16 work_thread_id_ = 0;
+    
+    CModuleInterface modules_interface_; //模块指令处理类
+    
+    uint16 work_thread_id_ = 0; //工作线程ID
+
     uint16 last_dispose_command_id_ = 0;
 
     ENUM_WORK_THREAD_STATE work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_INIT;
+    
     std::chrono::steady_clock::time_point work_thread_run_time_ = std::chrono::steady_clock::now();
 };
 
@@ -166,12 +173,13 @@ private:
     using hashmappluginworkthread = unordered_map<uint32, shared_ptr<CModuleLogic>>;
     using hashmaplogictimer = unordered_map<uint64, brynet::Timer::WeakPtr>;
     
-    hashmappluginworkthread plugin_work_thread_list_;
-    hashmaplogictimer plgin_timer_list_;
-    
-    vector< shared_ptr<CModuleLogic> > thread_module_list_ ; 
+    hashmappluginworkthread plugin_work_thread_list_;//[]
 
-    CLoadModule load_module_;
+    hashmaplogictimer plgin_timer_list_;
+
+    std::vector< std::shared_ptr<CModuleLogic> > thread_module_list_;  //模块逻辑列表（工作线程ID，[指令,指令处理接口] 等信息）
+
+    CLoadModule load_module_; //模块（插件）加载封装类
 
     uint16      thread_count_ = 0; //线程数
 
@@ -179,13 +187,13 @@ private:
 
     uint16 io_send_time_check_ = 0; //IO发送周期检查
 
-    ICommunicationInterface* communicate_service_ = nullptr; //通信服务
+    ICommunicationInterface* communicate_service_ = nullptr; //通信服务(服务器间链接库)
 
-    bool        module_init_finish_ = false;
+    bool        module_init_finish_ = false; //模块初始化结束标志
 
     vector<uint32> plugin_work_thread_buffer_list_;
 
-    vector<CDelayPluginMessage> plugin_work_thread_buffer_message_list_;
+    vector< CDelayPluginMessage > plugin_work_thread_buffer_message_list_;
 
     vector<std::shared_ptr<CDelayPluginFunc>> plugin_work_thread_buffer_Func_list_;
 

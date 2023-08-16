@@ -32,11 +32,11 @@ public:
     bool delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type) final;
 
     bool create_queue(shm_queue::shm_key key, size_t message_size = shm_queue_list_size, int message_count = shm_queue_list_count) final;
-    bool close(shm_queue::shm_key key) final;
     bool send_queue_message(shm_queue::shm_key key, const char* message_text, size_t len) final;
     bool set_close_function(shm_queue::shm_key key, const shm_queue::queue_close_func& close_func) final;
     bool set_error_function(shm_queue::shm_key key, const shm_queue::queue_error_func& error_func) final;
     bool set_recv_function(shm_queue::shm_key key, const shm_queue::queue_recv_message_func& fn_logic) final;
+    bool close(shm_queue::shm_key key) final;
 
     void close();
 

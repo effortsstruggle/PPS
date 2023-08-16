@@ -2,8 +2,8 @@
 
 void CModuleLogic::init_logic(const command_to_module_function& command_to_module_function, uint16 work_thread_id)
 {
-    modules_interface_.copy_from_module_list(command_to_module_function);
-    work_thread_id_ = work_thread_id;
+    this->modules_interface_.copy_from_module_list( command_to_module_function );
+    this->work_thread_id_ = work_thread_id;
 }
 
 void CModuleLogic::add_session(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
@@ -102,12 +102,12 @@ void CModuleLogic::each_session_id(const session_func& session_fn) const
  * @param logic_list 逻辑列表
  * @param session_service 
 */
-void CWorkThreadLogic::init_work_thread_logic( int thread_count ,  
-                                                                              uint16 timeout_seconds , 
-                                                                              uint32 connect_timeout , 
-                                                                              uint16 io_send_time_check , 
-                                                                              const config_logic_list& logic_list , 
-                                                                              ISessionService* session_service ) 
+void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,  
+                                                uint16 timeout_seconds , 
+                                                uint32 connect_timeout , 
+                                                uint16 io_send_time_check , 
+                                                const config_logic_list& logic_list , 
+                                                ISessionService* session_service ) 
 {
     //初始化线程数
     this->thread_count_ = (uint16)thread_count;
@@ -122,27 +122,30 @@ void CWorkThreadLogic::init_work_thread_logic( int thread_count ,
     if (io_send_time_check_ > 0)
     {
         auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(1) , chrono::milliseconds(io_send_time_check_) , 
-                                                                                                                                                                    [this]()
-                                                                                                                                                                    {
-                                                                                                                                                                        //发送检查和发送数据消息
-                                                                                                                                                                        App_tms::instance()->AddMessage(0, 
-                                                                                                                                                                            [this]() 
-                                                                                                                                                                            {
-                                                                                                                                                                                send_io_buffer();
-                                                                                                                                                                            }
-                                                                                                                                                                        );
-                                                                                                                                                                    }
-        );
+                                                                                                    [this]()
+                                                                                                    {
+                                                                                                        //发送检查和发送数据消息
+                                                                                                        App_tms::instance()->AddMessage(0, 
+                                                                                                            [this]() 
+                                                                                                            {
+                                                                                                                send_io_buffer();
+                                                                                                            }
+                                                                                                        );
+                                                                                                    }
+                                                                                               );
     }
 
-    load_module_.set_session_service(session_service);
+    this->load_module_.set_session_service(session_service);
 
-    //初始化插件加载
+    //加载第三方模块插件列表（将模块接口及模块指令等信息加载到该内存中）
     for (const auto& logic_library : logic_list)
     {
-        load_module_.load_plugin_module(logic_library.logic_path_, 
-            logic_library.logic_file_name_, 
-            logic_library.logic_param_);
+        //初始化 load_module_ 属性
+        this->load_module_.load_plugin_module(
+                                                logic_library.logic_path_, 
+                                                logic_library.logic_file_name_, 
+                                                logic_library.logic_param_
+                                             );
 
 #ifdef GCOV_TEST
         plugin_work_thread_buffer_message_list_.clear();
@@ -180,68 +183,68 @@ void CWorkThreadLogic::init_work_thread_logic( int thread_count ,
     }
 #endif
 
-    //显示所有的注册消息以及对应的模块
-    PSS_LOGGER_DEBUG("[load_module_]>>>>>>>>>>>>>>>>>");
+    //显示所有的 注册消息(指令) 以及 对应的模块（处理指令的函数）
+    PSS_LOGGER_DEBUG("[ load_module_ ]>>>>>>>>>>>>>>>>>");
 
-    for (const auto& command_info : load_module_.get_module_function_list() )
+    for (const auto& command_info : this->load_module_.get_module_function_list() )
     {
         PSS_LOGGER_DEBUG("[load_module_]register command id={0}", command_info.first);
     }
 
-    PSS_LOGGER_DEBUG("[load_module_]>>>>>>>>>>>>>>>>>");
+    PSS_LOGGER_DEBUG("[ load_module_ ]>>>>>>>>>>>>>>>>>");
 
-    //执行线程对应创建
+    //每个逻辑ID ， 创建对应的执行线程
     for (int i = 0; i < thread_count; i++)
     {
         auto thread_logic = make_shared< CModuleLogic >();
+        //绑定 “逻辑ID”与“[模块指令，指令的处理接口]”
+        thread_logic->init_logic( this->load_module_.get_module_function_list() , (uint16)i ); 
+        this->thread_module_list_.emplace_back( thread_logic );
 
-        thread_logic->init_logic( load_module_.get_module_function_list() , (uint16)i );
-
-        thread_module_list_.emplace_back( thread_logic );
-
-        //初始化线程
+        //初始化线程（thread_count线程，创建thread_count逻辑任务）
         App_tms::instance()->CreateLogic(i);
+
     }
+    //模块初始化结束标志
+    this->module_init_finish_ = true;
 
-    module_init_finish_ = true;
 
-    //创建插件使用的线程
-    for (auto thread_id : plugin_work_thread_buffer_list_)
+    //创建插件使用的线程 ( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ?)
+    for ( auto thread_id : this->plugin_work_thread_buffer_list_ )
     {
         //查找线程是否已经存在
-        auto f = plugin_work_thread_list_.find(thread_id);
-        if (f != plugin_work_thread_list_.end())
+        auto f = this->plugin_work_thread_list_.find( thread_id );
+        if ( f != this->plugin_work_thread_list_.end() ) //存在
         {
             continue;
         }
 
         auto thread_logic = make_shared<CModuleLogic>();
+        //绑定 “逻辑ID”与“[模块指令，指令的处理接口]”
+        thread_logic->init_logic(this->load_module_.get_module_function_list(), (uint16)thread_id);
 
-        thread_logic->init_logic(load_module_.get_module_function_list(), (uint16)thread_id);
-
-        plugin_work_thread_list_[thread_id] = thread_logic;
+        this->plugin_work_thread_list_[thread_id] = thread_logic;
 
         //初始化线程
         App_tms::instance()->CreateLogic(thread_id);
     }
-
-    plugin_work_thread_buffer_list_.clear();
+    this->plugin_work_thread_buffer_list_.clear();
 
     //等待10毫秒，让所有线程创建完毕
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    //加载插件投递事件
-    for (const auto& plugin_events : plugin_work_thread_buffer_message_list_)
+    //加载插件投递事件( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ）
+    for (const auto& plugin_events : this->plugin_work_thread_buffer_message_list_)
     {
-        do_frame_message(plugin_events.tag_thread_id_,
+        this->do_frame_message(plugin_events.tag_thread_id_,
                                         plugin_events.message_tag_,
                                         plugin_events.send_packet_,
                                         plugin_events.delay_timer_ );
 
     }
-    plugin_work_thread_buffer_message_list_.clear();
+    this->plugin_work_thread_buffer_message_list_.clear();
 
-    //加载插件逻辑
+    //加载插件逻辑( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? )
     for (const auto& plugin_logic : plugin_work_thread_buffer_Func_list_)
     {
         do_work_thread_logic(plugin_logic->tag_thread_id_,
@@ -619,16 +622,16 @@ bool CWorkThreadLogic::create_frame_work_thread(uint32 thread_id)
 {
     std::lock_guard <std::recursive_mutex> lock(plugin_timer_mutex_);
 
-    if (thread_id < thread_count_)
+    if (thread_id < this->thread_count_ )
     {
         PSS_LOGGER_DEBUG("[CWorkThreadLogic::create_frame_work_thread]thread id must more than config thread count.");
         return false;
     }
 
-    if (false == module_init_finish_)
+    if ( false == module_init_finish_ )
     {
         //如果模块还没全部启动完毕，将这个创建线程的过程，放入vector里面，等模块全部加载完毕，启动。
-        plugin_work_thread_buffer_list_.emplace_back(thread_id);
+        this->plugin_work_thread_buffer_list_.emplace_back(thread_id);
     }
     else
     {
@@ -642,7 +645,6 @@ bool CWorkThreadLogic::create_frame_work_thread(uint32 thread_id)
 
         //创建线程
         auto thread_logic = make_shared<CModuleLogic>();
-
         thread_logic->init_logic(load_module_.get_module_function_list(), (uint16)thread_id);
 
         plugin_work_thread_list_[thread_id] = thread_logic;
@@ -900,7 +902,9 @@ bool CWorkThreadLogic::send_frame_message(uint16 tag_thread_id, const std::strin
         plugin_message.message_tag_ = message_tag;
         plugin_message.send_packet_ = send_packet;
         plugin_message.delay_timer_ = delay_timer;
+
         plugin_work_thread_buffer_message_list_.emplace_back(plugin_message);
+        
         return true;
     }
 
@@ -992,7 +996,7 @@ bool CWorkThreadLogic::run_work_thread_logic(uint16 tag_thread_id, CFrame_Messag
         plugin_func->tag_thread_id_ = tag_thread_id;
         plugin_func->func_          = func;
         plugin_func->delay_timer_   = delay_timer;
-        plugin_work_thread_buffer_Func_list_.emplace_back(plugin_func);
+        this->plugin_work_thread_buffer_Func_list_.emplace_back(plugin_func);
         return true;
     }
 

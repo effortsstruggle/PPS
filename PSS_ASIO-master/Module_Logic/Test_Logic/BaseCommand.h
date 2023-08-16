@@ -42,6 +42,6 @@ public:
 
 	void performace_check(const std::string name, const double time_cost_millsecond);
 
-	ISessionService* session_service_ = nullptr;
+	ISessionService* session_service_ = nullptr; //会话服务
 };
 
