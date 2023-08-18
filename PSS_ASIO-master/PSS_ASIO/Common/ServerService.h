@@ -31,13 +31,13 @@ public:
     void stop_service();
 
 private:
-    vector< shared_ptr<CTcpServer> > tcp_service_list_;
-    vector< shared_ptr<CUdpServer> > udp_service_list_;
-    vector< shared_ptr<CKcpServer> > kcp_service_list_;
-    vector< shared_ptr<CTTyServer> > tty_service_list_;
+    std::vector< std::shared_ptr< CTcpServer > > tcp_service_list_;
+    std::vector< std::shared_ptr< CUdpServer > > udp_service_list_;
+    std::vector< std::shared_ptr< CKcpServer > > kcp_service_list_;
+    std::vector< std::shared_ptr< CTTyServer > > tty_service_list_;
 
 #ifdef SSL_SUPPORT
-    vector< shared_ptr<CTcpSSLServer> > tcp_ssl_service_list_;
+    vector< std::shared_ptr< CTcpSSLServer > > tcp_ssl_service_list_;
 #endif
 
     //io上下文

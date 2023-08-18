@@ -12,16 +12,16 @@ void CCommunicationService::init_communication_service(asio::io_context* io_serv
 
     //定时检查任务，检查服务器间链接的状态。（此任务为循环任务）
     App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(0) , chrono::seconds(timeout_seconds) , 
-                                                                                                                [this]()
-                                                                                                                {
-                                                                                                                    //添加到数据队列处理
-                                                                                                                    App_tms::instance()->AddMessage( 0 , [this]() 
-                                                                                                                                                                                    {
-                                                                                                                                                                                        this->run_check_task();
-                                                                                                                                                                                    }
-                                                                                                                                                                            );
-                                                                                                                }
-                                                                                                            );
+                                                                [this]()
+                                                                {
+                                                                    //添加到数据队列处理
+                                                                    App_tms::instance()->AddMessage( 0 ,[this]() 
+                                                                                                        {
+                                                                                                            this->run_check_task();
+                                                                                                        }
+                                                                                                    );
+                                                                }
+                                                            );
 }
 
 bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
@@ -113,9 +113,9 @@ void CCommunicationService::io_connect(CCommunicationIOInfo& connect_info)
 void CCommunicationService::run_server_to_server()
 {
     //开始运行
-    communication_is_run_ = true;
+    this->communication_is_run_ = true;
 
-    run_check_task();
+    this->run_check_task();
 }
 
 void CCommunicationService::close_connect(uint32 server_id)
@@ -160,14 +160,14 @@ void CCommunicationService::run_check_task()
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
 
     each(  
-                [this](CCommunicationIOInfo& io_info) {
-                    if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
-                    {
-                        //重新建立链接
-                        io_connect(io_info);
-                    }
-                 }
-             );
+            [this](CCommunicationIOInfo& io_info) {
+                if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
+                {
+                    //重新建立链接
+                    this->io_connect(io_info);
+                }
+            }
+        );
 
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
 }

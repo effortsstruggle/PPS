@@ -47,7 +47,7 @@ public:
 
             this->_queue.pop();
             
-            return true
+            return true;
         }
         else
         {

@@ -50,86 +50,86 @@
 namespace asio {
 
 #if defined(ASIO_HAS_STD_TYPE_TRAITS)
-using std::add_const;
-using std::add_lvalue_reference;
-using std::aligned_storage;
-using std::alignment_of;
-using std::conditional;
-using std::decay;
-using std::declval;
-using std::enable_if;
-using std::false_type;
-using std::integral_constant;
-using std::is_base_of;
-using std::is_class;
-using std::is_const;
-using std::is_constructible;
-using std::is_convertible;
-using std::is_copy_constructible;
-using std::is_destructible;
-using std::is_function;
-using std::is_move_constructible;
-using std::is_nothrow_copy_constructible;
-using std::is_nothrow_destructible;
-using std::is_object;
-using std::is_reference;
-using std::is_same;
-using std::is_scalar;
-using std::remove_cv;
-template <typename T>
-struct remove_cvref : remove_cv<typename std::remove_reference<T>::type> {};
-using std::remove_pointer;
-using std::remove_reference;
-#if defined(ASIO_HAS_STD_INVOKE_RESULT)
-template <typename> struct result_of;
-template <typename F, typename... Args>
-struct result_of<F(Args...)> : std::invoke_result<F, Args...> {};
-#else // defined(ASIO_HAS_STD_INVOKE_RESULT)
-using std::result_of;
-#endif // defined(ASIO_HAS_STD_INVOKE_RESULT)
-using std::true_type;
+	using std::add_const;
+	using std::add_lvalue_reference;
+	using std::aligned_storage;
+	using std::alignment_of;
+	using std::conditional;
+	using std::decay;
+	using std::declval;
+	using std::enable_if;
+	using std::false_type;
+	using std::integral_constant;
+	using std::is_base_of;
+	using std::is_class;
+	using std::is_const;
+	using std::is_constructible;
+	using std::is_convertible;
+	using std::is_copy_constructible;
+	using std::is_destructible;
+	using std::is_function;
+	using std::is_move_constructible;
+	using std::is_nothrow_copy_constructible;
+	using std::is_nothrow_destructible;
+	using std::is_object;
+	using std::is_reference;
+	using std::is_same;
+	using std::is_scalar;
+	using std::remove_cv;
+	template <typename T>
+	struct remove_cvref : remove_cv<typename std::remove_reference<T>::type> {};
+	using std::remove_pointer;
+	using std::remove_reference;
+	#if defined(ASIO_HAS_STD_INVOKE_RESULT)
+		template <typename> struct result_of;
+		template <typename F, typename... Args>
+		struct result_of<F(Args...)> : std::invoke_result<F, Args...> {};
+	#else // defined(ASIO_HAS_STD_INVOKE_RESULT)
+		using std::result_of;
+	#endif // defined(ASIO_HAS_STD_INVOKE_RESULT)
+	using std::true_type;
 #else // defined(ASIO_HAS_STD_TYPE_TRAITS)
-using boost::add_const;
-using boost::add_lvalue_reference;
-using boost::aligned_storage;
-using boost::alignment_of;
-template <bool Condition, typename Type = void>
-struct enable_if : boost::enable_if_c<Condition, Type> {};
-using boost::conditional;
-using boost::decay;
-using boost::declval;
-using boost::false_type;
-using boost::integral_constant;
-using boost::is_base_of;
-using boost::is_class;
-using boost::is_const;
-using boost::is_constructible;
-using boost::is_convertible;
-using boost::is_copy_constructible;
-using boost::is_destructible;
-using boost::is_function;
-#if defined(ASIO_HAS_MOVE)
-template <typename T>
-struct is_move_constructible : false_type {};
-#else // defined(ASIO_HAS_MOVE)
-template <typename T>
-struct is_move_constructible : is_copy_constructible<T> {};
-#endif // defined(ASIO_HAS_MOVE)
-template <typename T>
-struct is_nothrow_copy_constructible : boost::has_nothrow_copy<T> {};
-template <typename T>
-struct is_nothrow_destructible : boost::has_nothrow_destructor<T> {};
-using boost::is_object;
-using boost::is_reference;
-using boost::is_same;
-using boost::is_scalar;
-using boost::remove_cv;
-template <typename T>
-struct remove_cvref : remove_cv<typename boost::remove_reference<T>::type> {};
-using boost::remove_pointer;
-using boost::remove_reference;
-using boost::result_of;
-using boost::true_type;
+	using boost::add_const;
+	using boost::add_lvalue_reference;
+	using boost::aligned_storage;
+	using boost::alignment_of;
+	template <bool Condition, typename Type = void>
+	struct enable_if : boost::enable_if_c<Condition, Type> {};
+	using boost::conditional;
+	using boost::decay;
+	using boost::declval;
+	using boost::false_type;
+	using boost::integral_constant;
+	using boost::is_base_of;
+	using boost::is_class;
+	using boost::is_const;
+	using boost::is_constructible;
+	using boost::is_convertible;
+	using boost::is_copy_constructible;
+	using boost::is_destructible;
+	using boost::is_function;
+	#if defined(ASIO_HAS_MOVE)
+		template <typename T>
+		struct is_move_constructible : false_type {};
+	#else // defined(ASIO_HAS_MOVE)
+		template <typename T>
+		struct is_move_constructible : is_copy_constructible<T> {};
+	#endif // defined(ASIO_HAS_MOVE)
+	template <typename T>
+	struct is_nothrow_copy_constructible : boost::has_nothrow_copy<T> {};
+	template <typename T>
+	struct is_nothrow_destructible : boost::has_nothrow_destructor<T> {};
+	using boost::is_object;
+	using boost::is_reference;
+	using boost::is_same;
+	using boost::is_scalar;
+	using boost::remove_cv;
+	template <typename T>
+	struct remove_cvref : remove_cv<typename boost::remove_reference<T>::type> {};
+	using boost::remove_pointer;
+	using boost::remove_reference;
+	using boost::result_of;
+	using boost::true_type;
 #endif // defined(ASIO_HAS_STD_TYPE_TRAITS)
 
 template <typename> struct void_type { typedef void type; };

@@ -59,7 +59,7 @@ namespace detail
     }
 
   private:
-    executor_type executor_;
+    executor_type executor_ ;
   };
 
 #if !defined(ASIO_NO_TS_EXECUTORS)

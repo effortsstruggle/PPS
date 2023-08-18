@@ -122,16 +122,16 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     if (io_send_time_check_ > 0)
     {
         auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(1) , chrono::milliseconds(io_send_time_check_) , 
-                                                                                                    [this]()
-                                                                                                    {
-                                                                                                        //发送检查和发送数据消息
-                                                                                                        App_tms::instance()->AddMessage(0, 
-                                                                                                            [this]() 
-                                                                                                            {
-                                                                                                                send_io_buffer();
-                                                                                                            }
-                                                                                                        );
-                                                                                                    }
+                                                                                                [this]()
+                                                                                                {
+                                                                                                    //发送检查和发送数据消息
+                                                                                                    App_tms::instance()->AddMessage(0, 
+                                                                                                        [this]() 
+                                                                                                        {
+                                                                                                            this->send_io_buffer();
+                                                                                                        }
+                                                                                                    );
+                                                                                                }
                                                                                                );
     }
 
@@ -924,27 +924,29 @@ bool CWorkThreadLogic::do_frame_message(uint16 tag_thread_id, const std::string&
     if (delay_timer.delay_seconds_ == std::chrono::seconds(0))
     {
         //不需要延时，立刻投递
-        do_plugin_thread_module_logic(plugin_thread, message_tag, send_packet);
+        this->do_plugin_thread_module_logic(plugin_thread, message_tag, send_packet);
     }
     else
     {
         //需要延时，延时后投递
-        auto timer_ptr = App_TimerManager::instance()->GetTimerPtr()->addTimer(delay_timer.delay_seconds_, [this, plugin_thread, message_tag, send_packet, delay_timer]()
-            {
-                //对定时器列表操作加锁
-                plugin_timer_mutex_.lock();
-                plgin_timer_list_.erase(delay_timer.timer_id_);
-                plugin_timer_mutex_.unlock();
+        auto timer_ptr = App_TimerManager::instance()->GetTimerPtr()->addTimer(delay_timer.delay_seconds_, 
+                                                                                [this, plugin_thread, message_tag, send_packet, delay_timer]()
+                                                                                {
+                                                                                    //对定时器列表操作加锁
+                                                                                    this->plugin_timer_mutex_.lock();
+                                                                                    this->plgin_timer_list_.erase(delay_timer.timer_id_);
+                                                                                    this->plugin_timer_mutex_.unlock();
 
-                //延时到期，进行投递
-                do_plugin_thread_module_logic(plugin_thread, message_tag, send_packet);
-            });
+                                                                                    //延时到期，进行投递
+                                                                                    this->do_plugin_thread_module_logic(plugin_thread, message_tag, send_packet);
+                                                                                }
+                                                                             );
 
         //添加映射关系(只有在定时器ID > 0的时候才能删除)
-        if (delay_timer.timer_id_ > 0)
+        if ( delay_timer.timer_id_ > 0)
         {
-            std::lock_guard <std::recursive_mutex> lock(plugin_timer_mutex_);
-            plgin_timer_list_[delay_timer.timer_id_] = timer_ptr;
+            std::lock_guard <std::recursive_mutex> lock(this->plugin_timer_mutex_);
+            this->plgin_timer_list_[ delay_timer.timer_id_ ] = timer_ptr;
         }
     }
 

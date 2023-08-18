@@ -88,7 +88,7 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
                 config_netio.ssl_dh_pem_file_ = tcp["ssl dh pem file"];
             }
 
-            config_tcp_list_.emplace_back(config_netio);
+            this->config_tcp_list_.emplace_back(config_netio);
         }
 
         //udp服务接口信息
@@ -104,7 +104,7 @@ bool CServerConfig::read_server_config_file(const std::string& file_name)
             {
                 config_netio.em_net_type_ = EM_NET_TYPE::NET_TYPE_BROADCAST;
             }
-            config_udp_list_.emplace_back(config_netio);
+            this->config_udp_list_.emplace_back(config_netio);
         }
 
         //kcp服务接口信息

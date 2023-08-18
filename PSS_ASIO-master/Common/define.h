@@ -84,19 +84,21 @@ enum class EM_SESSION_STATE
     SESSION_IO_BRIDGE,        //IO消息桥接状态
 };
 
-//监听服务的IO接口信息
+/**
+ * @brief CConfigNetIO 监听服务的IO接口信息
+*/
 class CConfigNetIO
 {
 public:
-    std::string ip_;
-    io_port_type port_ = 0;
-    unsigned int packet_parse_id_ = 0;
-    unsigned int recv_buff_size_ = 1024;
-    unsigned int send_buff_size_ = 1024;
-    std::string ssl_server_password_;
-    std::string ssl_server_pem_file_;
-    std::string ssl_dh_pem_file_;
-    EM_NET_TYPE em_net_type_ = EM_NET_TYPE::NET_TYPE_POINT_TO_POINT;
+    std::string ip_; //ip地址
+    io_port_type port_ = 0; //端口
+    unsigned int packet_parse_id_ = 0; //包解析ID
+    unsigned int recv_buff_size_ = 1024; //Recv缓冲区大小
+    unsigned int send_buff_size_ = 1024; //Send缓冲区大小
+    std::string ssl_server_password_; //ssl服务器密码
+    std::string ssl_server_pem_file_; //ssl pem文件
+    std::string ssl_dh_pem_file_; //ssl dh pem文件
+    EM_NET_TYPE em_net_type_ = EM_NET_TYPE::NET_TYPE_POINT_TO_POINT; //通信方式（点对点 / 广播）
 };
 
 //客户端IP信息

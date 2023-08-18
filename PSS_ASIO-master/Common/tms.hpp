@@ -124,7 +124,7 @@ public:
     void Init()
     {
         //创建定时器线程
-        this->m_ttTimer = std::thread(  [this]()
+        this->m_ttTimer = std::thread( [this]()
                                         {
                                             this->m_timerManager.schedule();
                                         }
@@ -149,7 +149,7 @@ public:
             auto pLogicTask = std::make_shared<CLogicTasK>();
             pLogicTask->start(u4LogicID);
 
-            this->m_mapLogicList[u4LogicID] = pLogicTask;
+            this->m_mapLogicList[ u4LogicID ] = pLogicTask;
 
             //记录[线程ID,逻辑ID]映射关系
             std::thread::id tid = pLogicTask->get_thread_id();
@@ -164,8 +164,13 @@ public:
         return true;
     };
 
+    /**
+     * @brief GetLogicThreadID 通过当前线程ID，获取对应的逻辑ID
+     * @return 
+    */
     uint32 GetLogicThreadID()
     {
+        //获取当前线程ID
         std::thread::id tid = std::this_thread::get_id();
         std::ostringstream thread_id_stream;
         thread_id_stream << tid;
@@ -174,7 +179,7 @@ public:
         auto f = m_TidtologicidList.find(thread_id_str);
         if (f != m_TidtologicidList.end())
         {
-            return f->second;
+            return f->second; 
         }
         else
         {
@@ -234,19 +239,28 @@ public:
         }
     };
 
-    //添加消息(延时)
+
+
+    /**
+     * 目前来看：deprecated
+     * @brief AddMessage 添加消息(延时) 
+     * @param u4LogicID  
+     * @param millisecond 
+     * @param func 
+     * @return 
+    */
     brynet::Timer::WeakPtr AddMessage(uint32 u4LogicID, std::chrono::milliseconds millisecond, task_function func)
     {
         brynet::Timer::WeakPtr timer;
-        auto f = m_mapLogicList.find(u4LogicID);
+        auto f = this->m_mapLogicList.find(u4LogicID);
         
-        if (f != m_mapLogicList.end() ) //消息已存在
+        if (f != this->m_mapLogicList.end() ) //消息已存在
         {
             auto pLogicMessage = std::make_shared<CLogicMessage>();
             pLogicMessage->m_func = func;
 
-            timer = m_timerManager.addTimer(millisecond, [this, u4LogicID, pLogicMessage]() {
-                m_mapLogicList[u4LogicID]->Put(pLogicMessage);
+            timer = this->m_timerManager.addTimer(millisecond, [this, u4LogicID, pLogicMessage]() {
+                this->m_mapLogicList[u4LogicID]->Put(pLogicMessage);
                 //cout << "Timer execute is ok." << endl;
                 });
 
@@ -256,18 +270,26 @@ public:
         return timer;
     }
 
-    //添加消息(定时器)
+    /**
+     * 目前来看：deprecated
+     * @brief AddMessage_loop 添加消息(定时器)
+     * @param u4LogicID 
+     * @param delayseconds 
+     * @param millisecond 
+     * @param func 
+     * @return 
+    */
     brynet::Timer::WeakPtr AddMessage_loop(uint32 u4LogicID, std::chrono::seconds delayseconds, std::chrono::milliseconds millisecond, task_function func)
     {
         brynet::Timer::WeakPtr timer;
-        auto f = m_mapLogicList.find(u4LogicID);
-        if (f != m_mapLogicList.end())
+        auto f = this->m_mapLogicList.find(u4LogicID);
+        if (f != this->m_mapLogicList.end())
         {
             auto pLogicMessage = std::make_shared<CLogicMessage>();
             pLogicMessage->m_func = func;
 
-            timer = m_timerManager.addTimer_loop(delayseconds, millisecond, [this, u4LogicID, pLogicMessage]() {
-                m_mapLogicList[u4LogicID]->Put(pLogicMessage);
+            timer = this->m_timerManager.addTimer_loop(delayseconds, millisecond, [this, u4LogicID, pLogicMessage]() {
+                this->m_mapLogicList[u4LogicID]->Put(pLogicMessage);
                 //cout << "Timer execute is ok." << endl;
                 });
 
@@ -288,9 +310,9 @@ public:
         );
 
         //关闭定时器
-        m_timerManager.Close();
+        this->m_timerManager.Close();
 
-        m_ttTimer.join();
+        this->m_ttTimer.join();
     }
 
 private:

@@ -47,19 +47,19 @@
 namespace asio {
 
 namespace detail {
-#if defined(ASIO_HAS_IOCP)
-  typedef win_iocp_io_context io_context_impl;
-  class win_iocp_overlapped_ptr;
-#else
-  typedef scheduler io_context_impl;
-#endif
+    #if defined(ASIO_HAS_IOCP)
+      typedef win_iocp_io_context io_context_impl;
+      class win_iocp_overlapped_ptr;
+    #else
+      typedef scheduler io_context_impl;
+    #endif
 
-  struct io_context_bits
-  {
+    struct io_context_bits
+    {
     ASIO_STATIC_CONSTEXPR(unsigned int, blocking_never = 1);
     ASIO_STATIC_CONSTEXPR(unsigned int, relationship_continuation = 2);
     ASIO_STATIC_CONSTEXPR(unsigned int, outstanding_work_tracked = 4);
-  };
+    };
 } // namespace detail
 
 /// Provides core I/O functionality.
@@ -212,39 +212,39 @@ class io_context
   : public execution_context
 {
 private:
-  typedef detail::io_context_impl impl_type;
-#if defined(ASIO_HAS_IOCP)
-  friend class detail::win_iocp_overlapped_ptr;
-#endif
+    typedef detail::io_context_impl impl_type;
+    #if defined(ASIO_HAS_IOCP)
+        friend class detail::win_iocp_overlapped_ptr;
+    #endif
 
 public:
-  template <typename Allocator, unsigned int Bits>
-  class basic_executor_type;
+    template <typename Allocator, unsigned int Bits>
+    class basic_executor_type;
 
-  template <typename Allocator, unsigned int Bits>
-  friend class basic_executor_type;
+    template <typename Allocator, unsigned int Bits>
+    friend class basic_executor_type;
 
-  /// Executor used to submit functions to an io_context.
-  typedef basic_executor_type<std::allocator<void>, 0> executor_type;
+    /// Executor used to submit functions to an io_context.
+    typedef basic_executor_type<std::allocator<void>, 0> executor_type;
 
-#if !defined(ASIO_NO_DEPRECATED)
-  class work;
-  friend class work;
-#endif // !defined(ASIO_NO_DEPRECATED)
+    #if !defined(ASIO_NO_DEPRECATED)
+        class work;
+        friend class work;
+    #endif // !defined(ASIO_NO_DEPRECATED)
 
-  class service;
+    class service;
 
-#if !defined(ASIO_NO_EXTENSIONS) \
-  && !defined(ASIO_NO_TS_EXECUTORS)
-  class strand;
-#endif // !defined(ASIO_NO_EXTENSIONS)
-       //   && !defined(ASIO_NO_TS_EXECUTORS)
+    #if !defined(ASIO_NO_EXTENSIONS) \
+        && !defined(ASIO_NO_TS_EXECUTORS)
+        class strand;
+    #endif // !defined(ASIO_NO_EXTENSIONS)
+        //   && !defined(ASIO_NO_TS_EXECUTORS)
 
-  /// The type used to count the number of handlers executed by the context.
-  typedef std::size_t count_type;
+    /// The type used to count the number of handlers executed by the context.
+    typedef std::size_t count_type;
 
-  /// Constructor.
-  ASIO_DECL io_context();
+    /// Constructor.
+    ASIO_DECL io_context();
 
   /// Constructor.
   /**
@@ -627,29 +627,29 @@ public:
    */
   template <typename Handler>
 #if defined(GENERATING_DOCUMENTATION)
-  unspecified
+    unspecified
 #else
-  detail::wrapped_handler<io_context&, Handler>
+    detail::wrapped_handler<io_context&, Handler>
 #endif
-  wrap(Handler handler);
+    wrap(Handler handler);
 #endif // !defined(ASIO_NO_DEPRECATED)
 
 private:
-  io_context(const io_context&) ASIO_DELETED;
-  io_context& operator=(const io_context&) ASIO_DELETED;
+    io_context(const io_context&) ASIO_DELETED;
+    io_context& operator=(const io_context&) ASIO_DELETED;
 
 #if !defined(ASIO_NO_DEPRECATED)
-  struct initiate_dispatch;
-  struct initiate_post;
+    struct initiate_dispatch;
+    struct initiate_post;
 #endif // !defined(ASIO_NO_DEPRECATED)
 
-  // Helper function to add the implementation.
-  ASIO_DECL impl_type& add_impl(impl_type* impl);
+    // Helper function to add the implementation.
+    ASIO_DECL impl_type& add_impl(impl_type* impl);
 
-  // Backwards compatible overload for use with services derived from
-  // io_context::service.
-  template <typename Service>
-  friend Service& use_service(io_context& ioc);
+    // Backwards compatible overload for use with services derived from
+    // io_context::service.
+    template <typename Service>
+    friend Service& use_service(io_context& ioc);
 
 #if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
   detail::winsock_init<> init_;
@@ -1473,8 +1473,8 @@ struct query_member<
 
 template <typename Allocator, unsigned int Bits>
 struct query_member<
-    asio::io_context::basic_executor_type<Allocator, Bits>,
-    asio::execution::context_t
+    asio::io_context::basic_executor_type<Allocator, Bits> ,
+    asio::execution::context_t 
   >
 {
   ASIO_STATIC_CONSTEXPR(bool, is_valid = true);

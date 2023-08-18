@@ -154,16 +154,20 @@ shared_ptr<_Packet_Parse_Info> CLoadPacketParse::GetPacketParseInfo(uint32 u4Pac
     }
 }
 
-void CLoadPacketParse::Close()
+void CLoadPacketParse::close()
 {
     PSS_LOGGER_DEBUG("[CLoadPacketParse::Close]Begin.");
     //清理所有已存在的指针
-    for_each(m_objPacketParseList.begin(), m_objPacketParseList.end(), [](const std::pair<uint32, shared_ptr<_Packet_Parse_Info>>& iter) {
-        //关闭模块接口
-        iter.second->packet_close_ptr_(App_IoBridge::instance());
-        CLoadLibrary::PSS_dlClose(iter.second->m_hModule);
-        });
+    for_each( this->m_objPacketParseList.begin() ,
+              this->m_objPacketParseList.end(), 
+              [](const std::pair<uint32, shared_ptr<_Packet_Parse_Info>>& iter) 
+              {
+                    //关闭模块接口
+                    iter.second->packet_close_ptr_(App_IoBridge::instance());
+                    CLoadLibrary::PSS_dlClose(iter.second->m_hModule);
+              }
+           );
 
-    m_objPacketParseList.clear();
+   this->m_objPacketParseList.clear();
     PSS_LOGGER_DEBUG("[CLoadPacketParse::Close]End.");
 }

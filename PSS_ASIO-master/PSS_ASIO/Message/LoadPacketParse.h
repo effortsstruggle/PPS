@@ -20,7 +20,7 @@ using packet_set_output = void(*)(shared_ptr<spdlog::logger>);
 
 
 /**
- * @brief 包解析信息类 
+ * @brief 协议解析信息类 
 */
 class _Packet_Parse_Info
 {
@@ -45,7 +45,7 @@ public:
 
 
 /**
- * @brief CLoadPacketParse  加载包解析动态库
+ * @brief CLoadPacketParse  加载"协议解析"动态库
 */
 class CLoadPacketParse
 {
@@ -56,13 +56,13 @@ public:
 
     bool LoadPacketInfo(uint32 u4PacketParseID, const std::string& packet_parse_path, const std::string& packet_parse_file);
 
-    void Close();
+    void close();
 
     shared_ptr<_Packet_Parse_Info> GetPacketParseInfo(uint32 u4PacketParseID);
 
 private:
     using hashmapPacketParseModuleList = unordered_map< uint32 ,  shared_ptr<_Packet_Parse_Info> >;
-    hashmapPacketParseModuleList        m_objPacketParseList;                  //Hash内存池（建立映射）
+    hashmapPacketParseModuleList        m_objPacketParseList; //[动态库唯一ID，协议解析信息类]Hash内存池（建立映射）
 };
 
 using App_PacketParseLoader = PSS_singleton<CLoadPacketParse>;

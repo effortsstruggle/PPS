@@ -34,6 +34,9 @@ public:
     EM_UDP_VALID udp_state = EM_UDP_VALID::UDP_INVALUD;
 };
 
+/**
+ * @brief CUdpServer Udp服务器
+*/
 class CUdpServer : public std::enable_shared_from_this<CUdpServer>, public ISession
 {
 public:
@@ -78,6 +81,7 @@ private:
    
     void close_udp_endpoint_by_id(uint32 connect_id);
 
+private:
     udp::socket socket_;
     uint32 connect_client_id_ = 0;
     udp::endpoint recv_endpoint_;
@@ -89,11 +93,13 @@ private:
 
     uint32 max_recv_size_ = 0;
     uint32 max_send_size_ = 0;
+    
     asio::io_context* io_context_ = nullptr;
+    
     std::chrono::steady_clock::time_point recv_data_time_ = std::chrono::steady_clock::now();
 
     CSessionBuffer session_recv_buffer_;
-    shared_ptr<_Packet_Parse_Info> packet_parse_interface_ = nullptr;
+    std::shared_ptr<_Packet_Parse_Info> packet_parse_interface_ = nullptr;
 
     EM_CONNECT_IO_TYPE io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_UDP;
 

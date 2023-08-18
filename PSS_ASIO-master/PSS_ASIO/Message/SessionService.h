@@ -26,8 +26,10 @@ public:
     uint16 get_plugin_work_thread_count() final;
     int module_run(const std::string& module_name, std::shared_ptr<CMessage_Packet> send_packet, std::shared_ptr<CMessage_Packet> return_packet) final;
     uint32 get_curr_thread_logic_id() final; 
+    
     bool add_plugin_api(const std::string& api_name, const plugin_api_logic& func) final;
     std::string do_plugin_api(const std::string& api_name, const std::string& api_func_param) final;
+   
     bool add_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type, const _ClientIPInfo& to_io, EM_CONNECT_IO_TYPE to_io_type, ENUM_IO_BRIDGE_TYPE bridge_type = ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH) final;
     bool delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type) final;
 

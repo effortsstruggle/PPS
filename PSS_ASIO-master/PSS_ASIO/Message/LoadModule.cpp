@@ -79,10 +79,10 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
     }
 
     //5.添加模块间调用的映射(与模块的"module_run接口"作映射)
-    this->plugin_name_to_module_run_[module_file_name] = module_info->module_run_finction_ptr_;
+    this->plugin_name_to_module_run_[ module_file_name ] = module_info->module_run_finction_ptr_;
 
     //6.将注册成功的模块，加入到Hash数组中
-    this->module_list_[module_file_name] = module_info;
+    this->module_list_[ module_file_name ] = module_info;
 
     this->module_name_list_.emplace_back(module_file_name);
 

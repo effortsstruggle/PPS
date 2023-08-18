@@ -4,7 +4,7 @@
 #include "shm_queue/shm_common.hpp"
 
 //同步调用插件接口
-using plugin_api_logic = std::function<std::string(std::string)>;
+using plugin_api_logic = std::function< std::string(std::string) >;
 
 //暴露给插件调用的接口
 //add by freeeyes

@@ -39,11 +39,13 @@ void CKcpServer::do_receive()
     auto self(shared_from_this());
 
     socket_.async_receive_from(
-        asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()), recv_endpoint_,
+        asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()), 
+        recv_endpoint_ ,
         [self](std::error_code ec, std::size_t length)
         { 
             self->do_receive_from(ec, length);
-        });
+        }
+    );
 }
 
 void CKcpServer::do_receive_from(std::error_code ec, std::size_t length)

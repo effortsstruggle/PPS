@@ -4,6 +4,9 @@
 
 #include "TcpSSLSession.h"
 
+/**
+ * @brief CTcpSSLServer Tcp SSL·þÎñÆ÷
+*/
 class CTcpSSLServer
 {
 public:

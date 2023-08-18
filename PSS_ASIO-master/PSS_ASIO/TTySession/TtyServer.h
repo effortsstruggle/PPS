@@ -13,6 +13,9 @@
 #include "ModuleLogic.h"
 #include "Iobridge.h"
 
+/**
+ * @brief CTTyServer tty服务器
+*/
 class CTTyServer : public std::enable_shared_from_this<CTTyServer>, public ISession
 {
 public:
