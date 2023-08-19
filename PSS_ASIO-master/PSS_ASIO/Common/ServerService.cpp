@@ -119,7 +119,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     #endif
 
     //注册监控中断事件(LINUX)
-    asio::signal_set  signals ( this->io_context_, SIGINT, SIGTERM );
+    asio::signal_set  signals( this->io_context_, SIGINT, SIGTERM );
 
     signals.async_wait
     ( 

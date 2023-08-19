@@ -6,14 +6,14 @@ CTcpServer::CTcpServer(asio::io_context& io_context, const std::string& server_i
     try
     {
         io_context_ = &io_context;
-        acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint(asio::ip::address_v4::from_string(server_ip), port));
+        acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint( asio::ip::address_v4::from_string(server_ip) , port ) );
 
         //处理链接建立消息
         PSS_LOGGER_INFO("[CTcpServer::do_accept]({0}:{1}) Begin Accept.",
             acceptor_->local_endpoint().address().to_string(),
             acceptor_->local_endpoint().port());
 
-        do_accept();
+        this->do_accept();
     }
     catch (std::system_error const& ex)
     {
