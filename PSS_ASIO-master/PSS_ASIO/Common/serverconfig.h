@@ -37,13 +37,13 @@ public:
     CConfigWorkThread& get_config_workthread();
 
 private:
-    config_packet_list config_packet_list_; //包解析配置
+    config_packet_list config_packet_list_; //协议解析配置
     
-    config_logic_list config_logic_list_; //模块插件的列表
+    config_logic_list config_logic_list_; //业务逻辑配置
     
-    config_tcp_list config_tcp_list_;
-    
-    config_udp_list config_udp_list_;
+    config_tcp_list config_tcp_list_; //tcp通信配置列表
+     
+    config_udp_list config_udp_list_; //udp通信配置列表
     
     config_kcp_list config_kcp_list_;
     

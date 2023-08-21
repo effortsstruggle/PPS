@@ -11,22 +11,23 @@ CTTyServer::CTTyServer(uint32 packet_parse_id, uint32 max_recv_size, uint32 max_
     packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(packet_parse_id);
 }
 
-void CTTyServer::start(asio::io_context* io_context, const std::string& tty_name, uint16 tty_port, uint8 char_size, uint32 server_id)
+void CTTyServer::start( asio::io_context* io_context , const std::string& tty_name , uint16 tty_port , uint8 char_size , uint32 server_id )
 {
-    io_context_ = io_context;
-    if (false == add_serial_port(io_context, tty_name, tty_port, char_size))
+    this->io_context_ = io_context;
+
+    if ( false == this->add_serial_port(io_context, tty_name, tty_port, char_size))
     {
         return;
     }
 
-    recv_data_time_ = std::chrono::steady_clock::now();
-
-    server_id_ = server_id;
-    tty_name_ = tty_name;
+    this->recv_data_time_ = std::chrono::steady_clock::now();
+    this->server_id_ = server_id;
+    this->tty_name_ = tty_name;
 
     asio::serial_port::baud_rate option;
     std::error_code ec;
-    serial_port_param_->get_option(option, ec);
+    
+    this->serial_port_param_->get_option(option, ec);
     if (ec)
     {
         PSS_LOGGER_DEBUG("[CTTyServer::CTTyServer]connect error={}.", ec.message());
@@ -39,7 +40,7 @@ void CTTyServer::start(asio::io_context* io_context, const std::string& tty_name
 
         App_WorkThreadLogic::instance()->add_thread_session(connect_id_, shared_from_this(), local_ip_, remote_ip_);
 
-        packet_parse_interface_->packet_connect_ptr_(connect_id_, remote_ip_, local_ip_, io_type_, App_IoBridge::instance());
+        this->packet_parse_interface_->packet_connect_ptr_(connect_id_, remote_ip_, local_ip_, io_type_, App_IoBridge::instance());
 
         //添加点对点映射
         if (true == App_IoBridge::instance()->regedit_session_id(remote_ip_, io_type_, connect_id_))
@@ -54,7 +55,7 @@ void CTTyServer::start(asio::io_context* io_context, const std::string& tty_name
             App_WorkThreadLogic::instance()->set_io_bridge_connect_id(connect_id_, io_bradge_connect_id_);
         }
 
-        do_receive();
+        this->do_receive();
     }
 }
 
@@ -63,15 +64,21 @@ _ClientIPInfo CTTyServer::get_remote_ip(uint32 connect_id)
     return remote_ip_;
 }
 
+/**
+ * @brief  do_receive 接收数据
+*/
 void CTTyServer::do_receive()
 {
     auto self(shared_from_this());
-    serial_port_param_->async_read_some(asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()),
-        [self](std::error_code ec, std::size_t length)
-        {
-            //处理接收数据
-            self->do_read_some(ec, length);
-        });
+    //异步读取数据
+	serial_port_param_->async_read_some(
+		asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()),
+		[self](std::error_code ec, std::size_t length)
+		{
+			//处理接收数据
+			self->do_read_some(ec, length);
+		}
+	);
 }
 
 void CTTyServer::set_write_buffer(uint32 connect_id, const char* data, size_t length)
@@ -99,18 +106,20 @@ bool CTTyServer::add_serial_port(asio::io_context* io_context, const std::string
     std::error_code ec;
     serial_port_param_ = std::make_shared<asio::serial_port>(*io_context);
 
-    serial_port_param_->open(tty_name, ec);
+    serial_port_param_->open( tty_name, ec );
 
     if (ec)
     {
         PSS_LOGGER_DEBUG("[CServerService::add_serial_port]connect error={}.", ec.message());
 
         //发送消息给逻辑块
-        App_WorkThreadLogic::instance()->add_frame_events(LOGIC_LISTEN_SERVER_ERROR,
-            server_id_,
-            local_ip_.m_strClientIP,
-            local_ip_.m_u2Port,
-            io_type_);
+		App_WorkThreadLogic::instance()->add_frame_events(
+			LOGIC_LISTEN_SERVER_ERROR,
+			server_id_,
+			local_ip_.m_strClientIP,
+			local_ip_.m_u2Port,
+			io_type_
+		);
 
         return false;
     }
@@ -124,6 +133,10 @@ bool CTTyServer::add_serial_port(asio::io_context* io_context, const std::string
     return true;
 }
 
+/**
+ * @brief do_write 发送数据
+ * @param connect_id 
+*/
 void CTTyServer::do_write(uint32 connect_id)
 {
     PSS_UNUSED_ARG(connect_id);
@@ -264,15 +277,15 @@ void CTTyServer::do_read_some(std::error_code ec, std::size_t length)
         recv_data_size_ += length;
 
         //如果缓冲已满，断开连接，不再接受数据。
-        if (session_recv_buffer_.get_buffer_size() == 0)
+        if ( session_recv_buffer_.get_buffer_size() == 0 )
         {
             //不断开(缓冲撑满了)
-            session_recv_buffer_.move(length);
+            this->session_recv_buffer_.move( length );
             App_WorkThreadLogic::instance()->close_session_event(connect_id);
-            do_receive();
+            this->do_receive();
         }
 
-        session_recv_buffer_.set_write_data(length);
+        this->session_recv_buffer_.set_write_data(length);
         
         //判断是否有桥接
         if (EM_SESSION_STATE::SESSION_IO_BRIDGE == io_state_)
@@ -287,9 +300,11 @@ void CTTyServer::do_read_some(std::error_code ec, std::size_t length)
         }
         else
         {
-            //处理数据拆包
+            //处理数据拆包（存储 解析完成的数据）
             vector<std::shared_ptr<CMessage_Packet>> message_list;
+            //调用”协议解析动态库 "，解析数据
             bool ret = packet_parse_interface_->packet_from_recv_buffer_ptr_(connect_id_, &session_recv_buffer_, message_list, io_type_);
+
             if (!ret)
             {
                 //链接断开(解析包不正确)

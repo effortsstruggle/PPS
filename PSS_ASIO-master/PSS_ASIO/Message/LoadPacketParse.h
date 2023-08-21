@@ -45,12 +45,14 @@ public:
 
 
 /**
- * @brief CLoadPacketParse  加载"协议解析"动态库
+ * @brief CLoadPacketParse  协议解析类（通过配置文件初始化）
 */
 class CLoadPacketParse
 {
 public:
     CLoadPacketParse() = default;
+
+    ~CLoadPacketParse();
 
     void dispaly_error_message(const std::string& func_name, const std::string& packet_parse_file, std::shared_ptr<_Packet_Parse_Info> pPacketParseInfo) const;
 
@@ -58,11 +60,16 @@ public:
 
     void close();
 
+    /**
+     * @brief  GetPacketParseInfo 获取【协议解析库ID , 协议解析信息类】映射
+     * @param u4PacketParseID 
+     * @return 
+    */
     shared_ptr<_Packet_Parse_Info> GetPacketParseInfo(uint32 u4PacketParseID);
 
 private:
     using hashmapPacketParseModuleList = unordered_map< uint32 ,  shared_ptr<_Packet_Parse_Info> >;
-    hashmapPacketParseModuleList        m_objPacketParseList; //[动态库唯一ID，协议解析信息类]Hash内存池（建立映射）
+    hashmapPacketParseModuleList        m_objPacketParseList; //[ 解析动态库唯一ID，协议解析信息类]Hash内存池（建立映射）
 };
 
 using App_PacketParseLoader = PSS_singleton<CLoadPacketParse>;

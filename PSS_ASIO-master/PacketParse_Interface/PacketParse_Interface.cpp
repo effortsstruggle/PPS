@@ -37,7 +37,7 @@ bool is_need_send_format()
 }
 
 //处理TCP流数据
-bool parse_packet_from_recv_buffer_stream(uint32 connect_id, CSessionBuffer* buffer, vector<std::shared_ptr<CMessage_Packet>>& message_list, EM_CONNECT_IO_TYPE emIOType)
+bool parse_packet_from_recv_buffer_stream(uint32 connect_id,  CSessionBuffer* buffer , vector<std::shared_ptr<CMessage_Packet>>& message_list, EM_CONNECT_IO_TYPE emIOType)
 {
     uint32 packet_pos = 0;
     auto buff_length = buffer->get_write_size();
@@ -204,24 +204,31 @@ bool parse_packet_from_recv_buffer_single(uint32 connect_id, CSessionBuffer* buf
     return true;
 }
 
-//处理接收数据解析
+/**
+ * @brief 处理接收数据解析
+ * @param connect_id 连接ID
+ * @param buffer 
+ * @param message_list 
+ * @param emIOType 
+ * @return 
+*/
 bool parse_packet_from_recv_buffer(uint32 connect_id, CSessionBuffer* buffer, vector<std::shared_ptr<CMessage_Packet>>& message_list, EM_CONNECT_IO_TYPE emIOType)
 {
     if (emIOType == EM_CONNECT_IO_TYPE::CONNECT_IO_SERVER_TCP || emIOType == EM_CONNECT_IO_TYPE::CONNECT_IO_TCP)
     {
-        return parse_packet_from_recv_buffer_stream(connect_id, buffer, message_list, emIOType);
+        return ::parse_packet_from_recv_buffer_stream(connect_id, buffer, message_list, emIOType);
     }
     else if(emIOType == EM_CONNECT_IO_TYPE::CONNECT_IO_SERVER_UDP || emIOType == EM_CONNECT_IO_TYPE::CONNECT_IO_UDP)
     {
-        return parse_packet_from_recv_buffer_single(connect_id, buffer, message_list, emIOType);
+        return ::parse_packet_from_recv_buffer_single(connect_id, buffer, message_list, emIOType);
     }
     else if (emIOType == EM_CONNECT_IO_TYPE::CONNECT_IO_KCP)
     {
-        return parse_packet_from_recv_buffer_single(connect_id, buffer, message_list, emIOType);
+        return ::parse_packet_from_recv_buffer_single(connect_id, buffer, message_list, emIOType);
     }
     else
     {
-        return parse_packet_from_recv_buffer_stream(connect_id, buffer, message_list, emIOType);
+        return ::parse_packet_from_recv_buffer_stream(connect_id, buffer, message_list, emIOType);
     }
 }
 
@@ -234,13 +241,14 @@ bool parse_packet_format_send_buffer(uint32 connect_id, std::shared_ptr<CMessage
     PSS_UNUSED_ARG(emIOType);
 
     //如果没有格式化，直接返回false，否则返回true
+
     return false;
 }
 
 bool connect(uint32 u4ConnectID, const _ClientIPInfo& remote_ip, const _ClientIPInfo& local_ip, EM_CONNECT_IO_TYPE emIOType, IIoBridge* io_bridge)
 {
     PSS_UNUSED_ARG(emIOType);
-    PSS_LOGGER_INFO("[Connect]u4ConnectID = {}, {}:{} ==> {}:{}",
+    PSS_LOGGER_INFO("[ Connect ]u4ConnectID = {}, {}:{} ==> {}:{}",
         u4ConnectID,
         remote_ip.m_strClientIP,
         remote_ip.m_u2Port,
@@ -256,11 +264,13 @@ void disconnect(uint32 u4ConnectID, EM_CONNECT_IO_TYPE emIOType, IIoBridge* io_b
         u4ConnectID);
 }
 
-void packet_load(IIoBridge* io_bridge)
+void packet_load( IIoBridge* io_bridge )
 {
     //Packet_Parse初始化调用
+
+
 #ifdef GCOV_TEST
-    //测试数据透传接口
+    //测试数据透传接口 
     _ClientIPInfo from_io;
     from_io.m_strClientIP = "127.0.0.1";
     from_io.m_u2Port = 10010;

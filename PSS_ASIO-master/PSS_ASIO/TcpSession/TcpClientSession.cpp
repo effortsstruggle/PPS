@@ -5,28 +5,41 @@ CTcpClientSession::CTcpClientSession(asio::io_context* io_context)
 {
 }
 
+/**
+ * @brief 开始建立网络链接
+ * @param io_info 
+ * @return 
+*/
 bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
 {
-    server_id_ = io_info.server_id;
-    packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(io_info.packet_parse_id);
+    this->server_id_ = io_info.server_id;
 
-    session_recv_buffer_.Init(io_info.recv_size);
-    session_send_buffer_.Init(io_info.send_size);
+    this->packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(io_info.packet_parse_id);
 
-    //建立连接
-    tcp::endpoint end_point(asio::ip::address::from_string(io_info.server_ip.c_str()), io_info.server_port);
+    this->session_recv_buffer_.Init(io_info.recv_size);
+
+    this->session_send_buffer_.Init(io_info.send_size);
+
+    //赋值对应的IP和端口信息
+    //本地IP及端口
+    this->local_ip_.m_strClientIP = io_info.client_ip;
+    this->local_ip_.m_u2Port = io_info.client_port;
+    //服务器
+    this->remote_ip_.m_strClientIP = io_info.server_ip;
+    this->remote_ip_.m_u2Port = io_info.server_port;
+
     asio::error_code connect_error;
 
     //判断链接是否需要指定客户端IP和端口
-    if (io_info.client_port > 0 && io_info.client_ip.length() > 0)
+    if ( io_info.client_port > 0 && io_info.client_ip.length() > 0)
     {
-        asio::ip::tcp::endpoint localEndpoint(asio::ip::address::from_string(io_info.client_ip), io_info.client_port);
-        socket_.open(asio::ip::tcp::v4(), connect_error);
-        socket_.set_option(asio::ip::tcp::socket::reuse_address(true));
+        asio::ip::tcp::endpoint localEndpoint(asio::ip::address::from_string( io_info.client_ip ), io_info.client_port );
+        this->socket_.open( asio::ip::tcp::v4() , connect_error );
+        this->socket_.set_option( asio::ip::tcp::socket::reuse_address(true) );
 
         try
         {
-            socket_.bind(localEndpoint, connect_error);
+            this->socket_.bind( localEndpoint, connect_error );
         }
         catch (std::system_error const& ex)
         {
@@ -34,16 +47,12 @@ bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
         }
     }
 
-    //赋值对应的IP和端口信息
-    local_ip_.m_strClientIP = io_info.client_ip;
-    local_ip_.m_u2Port = io_info.client_port;
-    remote_ip_.m_strClientIP = io_info.server_ip;
-    remote_ip_.m_u2Port = io_info.server_port;
-
     //异步链接
+    tcp::endpoint end_point(asio::ip::address::from_string(io_info.server_ip.c_str()), io_info.server_port);
     tcp::resolver::results_type::iterator endpoint_iter;
-    socket_.async_connect(end_point, std::bind(&CTcpClientSession::handle_connect,
-        this, std::placeholders::_1, endpoint_iter));
+    this->socket_.async_connect(  end_point, 
+                                            std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
+                                        );
     return true;
 }
 
@@ -91,11 +100,15 @@ void CTcpClientSession::set_write_buffer(uint32 connect_id, const char* data, si
     session_send_buffer_.set_write_data(length);
 }
 
+/**
+ * @brief 读取数据
+*/
 void CTcpClientSession::do_read()
 {
     //接收数据
-    auto self(shared_from_this());
-    auto connect_id = connect_id_;
+    auto self( shared_from_this() );
+
+    auto connect_id = this->connect_id_;
 
     //如果缓冲已满，断开连接，不再接受数据。
     if (session_recv_buffer_.get_buffer_size() == 0)
@@ -106,11 +119,13 @@ void CTcpClientSession::do_read()
             });
     }
 
-    socket_.async_read_some(asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()),
-        [self](std::error_code ec, std::size_t length)
-        {
-            self->do_read_some(ec, length);
-        });
+	socket_.async_read_some(
+		asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()),
+		[self](std::error_code ec, std::size_t length)
+		{
+			self->do_read_some(ec, length);
+		}
+	);
 }
 
 _ClientIPInfo CTcpClientSession::get_remote_ip(uint32 connect_id)
@@ -241,12 +256,20 @@ void CTcpClientSession::clear_write_buffer()
     session_send_buffer_.move(session_send_buffer_.get_write_size());
 }
 
+
+/**
+ * @brief 
+ * @param ec 
+ * @param length 
+*/
 void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
 {
     if (!ec)
     {
+        //更新接收缓冲区
         recv_data_size_ += length;
-        session_recv_buffer_.set_write_data(length);
+        this->session_recv_buffer_.set_write_data(length);
+        
         PSS_LOGGER_DEBUG("[CTcpClientSession::do_write]recv length={}.", length);
 
         //判断是否有桥接
@@ -262,9 +285,10 @@ void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
         }
         else
         {
-            //处理数据拆包
-            vector<std::shared_ptr<CMessage_Packet>> message_list;
-            bool ret = packet_parse_interface_->packet_from_recv_buffer_ptr_(connect_id_, &session_recv_buffer_, message_list, io_type_);
+            //处理数据拆包( 存储解析完成的数据 )
+            vector< std::shared_ptr<CMessage_Packet> > message_list;
+            //调用”协议解析动态库“，解析数据 
+            bool ret = packet_parse_interface_->packet_from_recv_buffer_ptr_( this->connect_id_ , &this->session_recv_buffer_ , message_list , this->io_type_);
             if (!ret)
             {
                 //链接断开(解析包不正确)
@@ -272,15 +296,15 @@ void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
             }
             else
             {
-                recv_data_time_ = std::chrono::steady_clock::now();
+                this->recv_data_time_ = std::chrono::steady_clock::now();
 
-                //添加消息处理
-                App_WorkThreadLogic::instance()->assignation_thread_module_logic(connect_id_, message_list, shared_from_this());
+                //添加消息处理 
+                App_WorkThreadLogic::instance()->assignation_thread_module_logic(this->connect_id_ , message_list , shared_from_this() );
             }
         }
 
         //继续读数据
-        do_read();
+        this->do_read();
     }
     else
     {
@@ -290,37 +314,43 @@ void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
     }
 }
 
+/**
+ * @brief 异步链接，处理函数
+ * @param ec 
+ * @param endpoint_iter 
+*/
 void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver::results_type::iterator endpoint_iter)
 {
-    if (!ec)
+    if (! ec )
     {
-        is_connect_ = true;
-        connect_id_ = App_ConnectCounter::instance()->CreateCounter();
+        this->is_connect_ = true;
 
-        recv_data_time_ = std::chrono::steady_clock::now();
+        this->connect_id_ = App_ConnectCounter::instance()->CreateCounter();
+
+        this->recv_data_time_ = std::chrono::steady_clock::now();
 
         //处理链接建立消息
-        remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
-        remote_ip_.m_u2Port = socket_.remote_endpoint().port();
-        local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
-        local_ip_.m_u2Port = socket_.local_endpoint().port();
+        this->remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
+        this->remote_ip_.m_u2Port = socket_.remote_endpoint().port();
+        this->local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
+        this->local_ip_.m_u2Port = socket_.local_endpoint().port();
 
         PSS_LOGGER_DEBUG("[CTcpClientSession::start]remote({0}:{1})", remote_ip_.m_strClientIP, remote_ip_.m_u2Port);
         PSS_LOGGER_DEBUG("[CTcpClientSession::start]local({0}:{1})", local_ip_.m_strClientIP, local_ip_.m_u2Port);
 
-        packet_parse_interface_->packet_connect_ptr_(connect_id_, remote_ip_, local_ip_, io_type_, App_IoBridge::instance());
+        this->packet_parse_interface_->packet_connect_ptr_( connect_id_ , remote_ip_ , local_ip_ , io_type_ , App_IoBridge::instance());
 
         //添加点对点映射
-        if (true == App_IoBridge::instance()->regedit_session_id(remote_ip_, io_type_, connect_id_))
+        if (true == App_IoBridge::instance()->regedit_session_id(this->remote_ip_ , this->io_type_ , this->connect_id_))
         {
             io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
         }
 
         //查看这个链接是否有桥接信息
-        io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id(connect_id_, remote_ip_);
-        if (io_bradge_connect_id_ > 0)
+        this->io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id(this->connect_id_ , this->remote_ip_);
+        if (this->io_bradge_connect_id_ > 0)
         {
-            App_WorkThreadLogic::instance()->set_io_bridge_connect_id(connect_id_, io_bradge_connect_id_);
+            App_WorkThreadLogic::instance()->set_io_bridge_connect_id(this->connect_id_ , this->io_bradge_connect_id_);
         }
 
 #ifdef GCOV_TEST
@@ -328,16 +358,16 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
         std::string write_fail_text = "test write fail";
         send_write_fail_to_logic(write_fail_text, write_fail_text.length());
 #endif
-
         //添加映射关系
-        App_WorkThreadLogic::instance()->add_thread_session(connect_id_, shared_from_this(), local_ip_, remote_ip_);
+        App_WorkThreadLogic::instance()->add_thread_session(this->connect_id_, shared_from_this(), this->local_ip_, this->remote_ip_);
 
-        do_read();
+        //接收IO数据
+        this->do_read();
 
     }
     else
     {
-        is_connect_ = false;
+        this->is_connect_ = false;
 
         //连接建立失败
         PSS_LOGGER_DEBUG("[CTcpClientSession::handle_connect]({0}:{1}  ==> {2}:{3})error({4})", 
@@ -348,12 +378,14 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
             ec.message());
 
         //发送消息给逻辑块
-        App_WorkThreadLogic::instance()->add_frame_events(LOGIC_CONNECT_SERVER_ERROR,
-            server_id_,
-            remote_ip_.m_strClientIP,
-            remote_ip_.m_u2Port,
-            io_type_);
+        App_WorkThreadLogic::instance()->add_frame_events( LOGIC_CONNECT_SERVER_ERROR,
+                                                                                                server_id_,
+                                                                                                remote_ip_.m_strClientIP,
+                                                                                                remote_ip_.m_u2Port,
+                                                                                                io_type_
+        );
     }
+
 }
 
 void CTcpClientSession::send_write_fail_to_logic(const std::string& write_fail_buffer, std::size_t buffer_length)

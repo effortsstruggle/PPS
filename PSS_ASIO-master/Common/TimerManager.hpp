@@ -74,6 +74,10 @@ namespace brynet {
             return mLastTime;
         }
 
+        /**
+         * @brief  获取定时器执行的时间
+         * @return 
+        */
         std::chrono::nanoseconds getLeftTime()
         {
             //获取时间
@@ -133,9 +137,13 @@ namespace brynet {
         friend class TimerMgr; //友元类 
 
         std::once_flag                                               mExecuteOnceFlag; //执行一次的标志
+
         Callback                                                        mCallback; //定时器执行的任务
+        
         std::chrono::steady_clock::time_point           mStartTime; //开始时间
+        
         std::chrono::nanoseconds                            mLastTime; //结束时间
+        
         std::chrono::seconds                                    mDelayTime; //延迟时间 （到达结束的时间，最多延迟多长时间，以秒为单位）
        
         ENUM_TIMER_TYPE                                     mTimerType = ENUM_TIMER_TYPE::TIMER_TYPE_ONCE;
@@ -173,14 +181,14 @@ namespace brynet {
 
             this->mtx_queue.lock();
 
-            mTimers.push(timer);
+            this->mTimers.push(timer);
             
             this->mtx_queue.unlock();
 
             //唤醒线程
-            timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
+            this->timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_ADD_TIMER;
             
-            cv.notify_one();
+            this->cv.notify_one();
 
             return timer;
         }
@@ -243,7 +251,7 @@ namespace brynet {
         {
                 std::unique_lock <std::mutex> lck(mtx);
 
-                if (mTimers.empty())
+                if ( this->mTimers.empty())
                 {
                     //当前没有定时器，等待唤醒
                     this->cv.wait_for( lck, std::chrono::seconds( timer_default_wait )  );
@@ -270,17 +278,17 @@ namespace brynet {
                 auto timer_wait = tmp->getLeftTime();
                 if ( timer_wait > std::chrono::nanoseconds::zero() ) //判断该定时器是否到期
                 {
-                    //还需要等待下一个到期时间
-                    cv.wait_for(lck, timer_wait);
+                    //此时需要等待上一个定时器到期
+                    this->cv.wait_for( lck , timer_wait );
                     //std::cout << "[cv]cv.wait_for=" << timer_wait.count() << std::endl;
 
-                    if (timer_wakeup_state == EM_TIMER_STATE::TIMER_STATE_ADD_TIMER)
+                    if ( this->timer_wakeup_state == EM_TIMER_STATE::TIMER_STATE_ADD_TIMER  ) //判断是否有新加入的定时器
                     {
                         return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE; //继续运行定时器
                     }
                 }
 
-                if (! timer_run_ )
+                if (! this->timer_run_ )
                 {
                     return ENUM_WHILE_STATE::WHILE_STATE_BREAK;
                 }
@@ -302,7 +310,7 @@ namespace brynet {
                 this->mtx_queue.unlock();
 
                 //更改定时器的状态为“已执行状态”
-                timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER;
+                this->timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER;
 
                 return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
         }
@@ -329,13 +337,18 @@ namespace brynet {
             //std::cout << "[TimerMgr::schedule]Time manager is end.\n" << std::endl;
         }
 
+        /**
+         * @brief  是否为空
+         * @return 
+        */
         bool isEmpty()
         {
             std::unique_lock <std::mutex> lck(mtx);
             return  this->mTimers.empty();
         }
 
-        // if timer empty, return zero
+        // if timer empty, return zero、
+           
         std::chrono::nanoseconds nearLeftTime()
         {
             std::unique_lock <std::mutex> lck(mtx);
@@ -359,7 +372,7 @@ namespace brynet {
             std::unique_lock <std::mutex> lck(mtx);
             while ( ! this->mTimers.empty( ) )
             {
-                mTimers.pop( );
+                this->mTimers.pop( );
             }
         }
 
@@ -389,7 +402,7 @@ namespace brynet {
 
         bool timer_run_ = false; //定时器是否运行标志
 
-        EM_TIMER_STATE timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER ;
+        EM_TIMER_STATE timer_wakeup_state = EM_TIMER_STATE::TIMER_STATE_EXECUTE_TIMER ; //默认为执行状态
     };
 
 }

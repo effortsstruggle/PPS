@@ -39,6 +39,9 @@ public:
     }
 };
 
+/**
+ * @brief CIotoIo 一个IO 到 另一个IO
+*/
 class CIotoIo 
 {
 public:

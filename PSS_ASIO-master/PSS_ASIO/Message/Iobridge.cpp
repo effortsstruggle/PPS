@@ -1,10 +1,19 @@
 #include "Iobridge.h"
 
 
+/**
+ * @brief 两个客户端之间的会话
+ * @param from_io 
+ * @param from_io_type 
+ * @param to_io 
+ * @param to_io_type 
+ * @param bridge_type 
+ * @return 
+*/
 bool CIoBridge::add_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type, const _ClientIPInfo& to_io, EM_CONNECT_IO_TYPE to_io_type, ENUM_IO_BRIDGE_TYPE bridge_type)
 {
     auto ret = false;
-    ret = iotoio_.add_session_io_mapping(from_io, from_io_type, to_io, to_io_type, bridge_type);
+    ret = this->iotoio_.add_session_io_mapping(from_io, from_io_type, to_io, to_io_type, bridge_type);
 
     //判断链接是否已存在，如果存在则通知桥接session对象
     auto connect_info = iotoio_.find_io_to_io_list(from_io, from_io_type);
@@ -34,7 +43,7 @@ bool CIoBridge::delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNE
 
 bool CIoBridge::regedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE io_type, uint32 session_id)
 {
-    return iotoio_.regedit_session_id(from_io, io_type, session_id);
+    return iotoio_.regedit_session_id( from_io, io_type, session_id );
 }
 
 void CIoBridge::unregedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE io_type)

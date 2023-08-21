@@ -70,7 +70,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         //获取模块文件名
         ::GetModuleFileName(0, szFileName, MAX_PATH) ;
 
-        LPTSTR pszEnd = _tcsrchr(szFileName, TEXT('\\'));
+        LPTSTR pszEnd = _tcsrchr( szFileName, TEXT('\\') );
 
         if (pszEnd != 0)
         {
@@ -97,11 +97,12 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     #endif
 
     const auto& config_output = App_ServerConfig::instance()->get_config_console() ;
-    Init_Console_Output(config_output.file_output_,
-        config_output.file_count_,
-        config_output.max_file_size_,
-        config_output.file_name_,
-        config_output.output_level_);
+    Init_Console_Output(    config_output.file_output_,
+                                          config_output.file_count_,
+                                          config_output.max_file_size_,
+                                          config_output.file_name_,
+                                          config_output.output_level_
+                                    );
 
     //初始化PacketParse插件，将“动态库加载到内存中”存起来
     for ( const auto&  packet_parse  :  App_ServerConfig::instance()->get_config_packet_list() )
@@ -139,14 +140,15 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //初始化框架定时器 ,并开启定时器线程
     App_TimerManager::instance()->Start();
 
-    //启动 服务器间 链接库
+    //初始化IO通信服务
     uint16 timeout_ = (uint16)App_ServerConfig::instance()->get_config_workthread().s2s_timeout_seconds_ ;
     App_CommunicationService::instance()->init_communication_service( &this->io_context_ , timeout_);
-    App_WorkThreadLogic::instance()->init_communication_service( App_CommunicationService::instance() );
+    App_WorkThreadLogic::instance()->init_communication_service(  App_CommunicationService::instance() );
 
     //初始化执行库
     CConfigWorkThread& config_work_thread_ = App_ServerConfig::instance()->get_config_workthread();
     App_WorkThreadLogic::instance()->init_work_thread_logic(
+<<<<<<< Updated upstream
                                                                 config_work_thread_.work_thread_count_ , 
                                                                 (uint16)config_work_thread_.work_timeout_seconds_  ,
                                                                 (uint32)config_work_thread_.client_connect_timeout_  ,
@@ -154,6 +156,15 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
                                                                 App_ServerConfig::instance()->get_config_logic_list()  , 
                                                                 App_SessionService::instance()
                                                             );
+=======
+                                                                                                        config_work_thread_.work_thread_count_ , 
+                                                                                                        (uint16)config_work_thread_.work_timeout_seconds_  ,
+                                                                                                        (uint32)config_work_thread_.client_connect_timeout_  ,
+                                                                                                        (uint16)config_work_thread_.io_send_time_check_  ,
+                                                                                                        App_ServerConfig::instance()->get_config_logic_list()  ,
+                                                                                                        App_SessionService::instance()
+                                                                                                 );
+>>>>>>> Stashed changes
 
     //加载Tcp监听
     for( auto tcp_server : App_ServerConfig::instance()->get_config_tcp_list() )
@@ -164,13 +175,14 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         {
         #ifdef SSL_SUPPORT
             auto tcp_ssl_service = std::make_shared<CTcpSSLServer>(  io_context_,
-                                                                tcp_server.ip_,
-                                                                tcp_server.port_,
-                                                                tcp_server.packet_parse_id_,
-                                                                tcp_server.recv_buff_size_,
-                                                                tcp_server.ssl_server_password_,
-                                                                tcp_server.ssl_server_pem_file_,
-                                                                tcp_server.ssl_dh_pem_file_ );
+                                                                                                            tcp_server.ip_,
+                                                                                                            tcp_server.port_,
+                                                                                                            tcp_server.packet_parse_id_,
+                                                                                                            tcp_server.recv_buff_size_,
+                                                                                                            tcp_server.ssl_server_password_,
+                                                                                                            tcp_server.ssl_server_pem_file_,
+                                                                                                            tcp_server.ssl_dh_pem_file_ 
+                                                                                                        );
 
             this->tcp_ssl_service_list_.emplace_back(tcp_ssl_service);
         #else
@@ -235,7 +247,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         this->tty_service_list_.emplace_back(tty_service);
     }
 
-    //打开服务器间的链接
+    //启动服务器间的链接
     App_CommunicationService::instance()->run_server_to_server();
 
     //开始运行

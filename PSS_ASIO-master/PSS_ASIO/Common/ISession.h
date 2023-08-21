@@ -38,4 +38,5 @@ public:
     virtual bool is_need_send_format() = 0;    //是否需要格式化发送
     
     virtual bool is_connect() { return true; };  //当前链接状态是否是链接的
+
 };

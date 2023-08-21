@@ -33,7 +33,7 @@ inline void pss_output_binary(const char* buffer, int begin, int end)
 class Console_Output_Info
 {
 public:
-    bool m_blTunOn               = true;              //true为屏幕输出, false为文件输出
+    bool m_blTunOn               = true;              //true为文件输出, false为屏幕输出
     int  m_nLogFileMaxSize       = 1024000;           
     int  m_nFileCount            = 0;
     std::string m_strConsoleName = "./consoleoutput";
@@ -56,7 +56,7 @@ public:
 
         std::shared_ptr<spdlog::logger> console = nullptr;
 
-        if (! this->m_Console_Output_Info.m_blTunOn  )
+        if ( ! this->m_Console_Output_Info.m_blTunOn  )
         {
             //屏幕输出
             console = spdlog::stdout_color_mt("console");

@@ -1,8 +1,15 @@
 ﻿#include "LoadPacketParse.h"
 
 
+
+CLoadPacketParse::~CLoadPacketParse()
+{
+    //释放所有动态库
+    this->close();
+}
+
 /**
- * @brief dispaly_error_message 显示错误信息
+ * @brief dispaly_error_message 加载失败，显示错误信息
  * @param func_name 
  * @param packet_parse_file 
  * @param pPacketParseInfo 
@@ -44,7 +51,7 @@ bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string
 #ifdef GCOV_TEST
     dispaly_error_message("test", "test logic", pPacketParseInfo);
 #endif
-    //唯一ID
+    //解析动态库唯一ID标识
     pPacketParseInfo->m_u4PacketParseID   = u4PacketParseID;
     
     std::string strFilePath;
@@ -64,7 +71,7 @@ bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string
     
     if(nullptr == pPacketParseInfo->m_hModule || !pPacketParseInfo->packet_from_recv_buffer_ptr_)
     {
-        dispaly_error_message("parse_packet_from_recv_buffer", packet_parse_file, pPacketParseInfo);
+        this->dispaly_error_message("parse_packet_from_recv_buffer", packet_parse_file, pPacketParseInfo);
         return false;
     }
 
@@ -129,10 +136,10 @@ bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string
     /**
     *  以下两个调用，需要查看其他封装的动态库
     */
-    //调用输出设置
+    //设置”第三方动态库“的输出对象
     pPacketParseInfo->packet_set_output_ptr_( spdlog::default_logger() );
     //调用初始化
-    pPacketParseInfo->packet_load_ptr_( App_IoBridge::instance() );
+    pPacketParseInfo->packet_load_ptr_(  App_IoBridge::instance() );
 
     PSS_LOGGER_DEBUG("[CLoadPacketParse::LoadPacketInfo] load {0} OK!", packet_parse_file);
     return true;

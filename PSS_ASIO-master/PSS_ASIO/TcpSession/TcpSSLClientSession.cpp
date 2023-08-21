@@ -13,8 +13,8 @@ bool CTcpSSLClientSession::start(const CConnect_IO_Info& io_info)
     server_id_ = io_info.server_id;
     packet_parse_id_ = io_info.packet_parse_id;
 
-    session_recv_buffer_.Init(io_info.recv_size);
-    session_send_buffer_.Init(io_info.send_size);
+    this->session_recv_buffer_.Init(io_info.recv_size);
+    this->session_send_buffer_.Init(io_info.send_size);
 
     //验证证书的合法性
     asio::error_code pem_ec;
@@ -30,18 +30,16 @@ bool CTcpSSLClientSession::start(const CConnect_IO_Info& io_info)
     }
 
     ssl_socket_.set_verify_mode(asio::ssl::verify_peer);
-    ssl_socket_.set_verify_callback(
-        std::bind(&CTcpSSLClientSession::verify_certificate, this, _1, _2));
+    ssl_socket_.set_verify_callback( std::bind( &CTcpSSLClientSession::verify_certificate , this , _1 , _2 ) );
 
     //建立连接(异步)
     tcp::resolver resolver(*io_context_);
-    auto endpoints = resolver.resolve(io_info.server_ip, std::to_string(io_info.server_port));
+    auto endpoints = resolver.resolve( io_info.server_ip , std::to_string(io_info.server_port) );
     asio::error_code connect_error;
 
     auto self(shared_from_this());
-    asio::async_connect(ssl_socket_.lowest_layer(), endpoints,
-        [self](const std::error_code& error,
-            const tcp::endpoint& /*endpoint*/)
+    asio::async_connect( ssl_socket_.lowest_layer() , endpoints ,
+        [self]( const std::error_code& error ,  const tcp::endpoint& /*endpoint*/)
         {
             if (!error)
             {
@@ -109,7 +107,8 @@ void CTcpSSLClientSession::do_read()
 {
     //接收数据
     auto self(shared_from_this());
-    auto connect_id = connect_id_;
+
+    auto connect_id = this->connect_id_;
 
     //如果缓冲已满，断开连接，不再接受数据。
     if (session_recv_buffer_.get_buffer_size() == 0)
@@ -239,6 +238,11 @@ void CTcpSSLClientSession::clear_write_buffer()
     session_send_buffer_.move(session_send_buffer_.get_write_size());
 }
 
+/**
+ * @brief 
+ * @param ec 
+ * @param length 
+*/
 void CTcpSSLClientSession::do_read_some(std::error_code ec, std::size_t length)
 {
     if (!ec)
@@ -259,8 +263,9 @@ void CTcpSSLClientSession::do_read_some(std::error_code ec, std::size_t length)
         }
         else
         {
-            //处理数据拆包
+            //处理数据拆包 （ 存储解析完成的数据 ）
             vector<std::shared_ptr<CMessage_Packet>> message_list;
+            //调用”协议解析动态库“，解析数据
             bool ret = packet_parse_interface_->packet_from_recv_buffer_ptr_(connect_id_, &session_recv_buffer_, message_list, io_type_);
             if (!ret)
             {
@@ -275,11 +280,11 @@ void CTcpSSLClientSession::do_read_some(std::error_code ec, std::size_t length)
                 App_WorkThreadLogic::instance()->assignation_thread_module_logic(connect_id_, message_list, shared_from_this());
             }
 
-            session_recv_buffer_.move(length);
+            this->session_recv_buffer_.move( length );
         }
 
         //继续读数据
-        do_read();
+        this->do_read();
     }
     else
     {
@@ -316,8 +321,9 @@ bool CTcpSSLClientSession::verify_certificate(bool preverified, asio::ssl::verif
 
 void CTcpSSLClientSession::handshake()
 {
-    auto self(shared_from_this());
-    ssl_socket_.async_handshake(asio::ssl::stream_base::client,
+    auto self( shared_from_this() );
+
+    ssl_socket_.async_handshake( asio::ssl::stream_base::client ,
         [self](const std::error_code& error)
         {
             if (!error)
@@ -326,7 +332,7 @@ void CTcpSSLClientSession::handshake()
                 self->connect_id_ = App_ConnectCounter::instance()->CreateCounter();
 
                 self->recv_data_time_ = std::chrono::steady_clock::now();
-
+                
                 self->packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(self->packet_parse_id_);
 
                 //处理链接建立消息

@@ -1,78 +1,77 @@
 ﻿  ikcp.c
   CommunicationService.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   ConnectCounter.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   ServerConfig.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   ServerService.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   Iobridge.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   IotoIo.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   LoadModule.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   LoadPacketParse.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   ModuleInterfalce.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   ModuleLogic.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   SessionInterface.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   SessionService.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   PSS_ASIO.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   Queueservice.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpClientSession.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpServer.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpSession.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpSSLClientSession.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpSSLServer.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   TcpSSLSession.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   正在生成代码...
   正在编译...
   TtyServer.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   KcpServer.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   UdpClientSession.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   UdpServer.cpp
-D:\Project\PPS\PSS_ASIO-master\Common\define.h(208,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
-D:\Project\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\define.h(210,1): warning C4005: “PSS_LOGGER_DEBUG”: 宏重定义
+F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Common\consoleoutput.hpp(21): message : 参见“PSS_LOGGER_DEBUG”的前一个定义
   正在生成代码...
-  LINK : 没有找到 ..\Build\Windows\PSS_ASIO.exe 或上一个增量链接没有生成它；正在执行完全链接
-  PSS_ASIO.vcxproj -> D:\Project\PPS\PSS_ASIO-master\PSS_ASIO\..\Build\Windows\PSS_ASIO.exe
+  PSS_ASIO.vcxproj -> F:\Git\5_Visual Studio Code\PPS\PSS_ASIO-master\Build\Windows\PSS_ASIO.exe

@@ -8,7 +8,7 @@
 */
 //定义参数类型表 
 
-//工作线程
+//工作线程配置类
 class CConfigWorkThread
 {
 public:
@@ -20,7 +20,7 @@ public:
     int io_send_time_check_ = 0;        
 };
 
-//包解析信息（动态库）
+//协议解析配置类（动态库）
 class CConfigPacketParseInfo
 {
 public:
@@ -31,7 +31,7 @@ public:
 using config_packet_list = std::vector<CConfigPacketParseInfo>;
 
 /**
- * @brief CConfigLogicInfo 第三方模块插件列表
+ * @brief CConfigLogicInfo 业务逻辑配置类
 */
 class CConfigLogicInfo
 {
@@ -42,13 +42,13 @@ public:
 };
 using config_logic_list = std::vector<CConfigLogicInfo>;
 
-// tcp/udp/kcp 接口信息
+// tcp/udp/kcp  IO配置列表
 using config_tcp_list = std::vector<CConfigNetIO>;
 using config_udp_list = std::vector<CConfigNetIO>;
 using config_kcp_list = std::vector<CConfigNetIO>;
 
 /**
- * @brief CTTyIO 维护“配置文件”中对应的“TTy电传打印机”数据结构
+ * @brief CTTyIO  TTy IO配置类（电传打印机）
 */
 class CTTyIO
 {
@@ -63,7 +63,7 @@ public:
 using config_tty_list = std::vector<CTTyIO>;
 
 /**
- * @brief  CConfigConsole 维护“配置文件”中对应的控制台数据结构
+ * @brief  CConfigConsole 输出配置类
 */
 class CConfigConsole
 {

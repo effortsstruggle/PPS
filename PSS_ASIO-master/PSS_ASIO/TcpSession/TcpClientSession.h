@@ -22,33 +22,31 @@ public:
 
     bool start(const CConnect_IO_Info& io_info);
 
-    void do_read();
+    virtual void set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id)  override final;
 
-    _ClientIPInfo get_remote_ip(uint32 connect_id) final;
+    virtual _ClientIPInfo get_remote_ip(uint32 connect_id) override final;
 
-    void close(uint32 connect_id) final;
-
-    void set_write_buffer(uint32 connect_id, const char* data, size_t length) final; //写入些缓冲
+    virtual void set_write_buffer(uint32 connect_id, const char* data, size_t length) override final; //写入些缓冲
     
-    void do_write_immediately(uint32 connect_id, const char* data, size_t length) final;
+    virtual void do_write(uint32 connect_id) override final;
+    
+    virtual void do_write_immediately(uint32 connect_id, const char* data, size_t length) override final;
 
-    void do_write(uint32 connect_id) final;
+    virtual void close(uint32 connect_id)  override final;
 
-    void add_send_finish_size(uint32 connect_id, size_t send_length) final;
+    virtual void add_send_finish_size(uint32 connect_id, size_t send_length) override final;
 
-    EM_CONNECT_IO_TYPE get_io_type() final;
+    virtual EM_CONNECT_IO_TYPE get_io_type() override final;
 
-    uint32 get_mark_id(uint32 connect_id) final;
+    virtual uint32 get_mark_id(uint32 connect_id) override final;
 
-    std::chrono::steady_clock::time_point& get_recv_time(uint32 connect_id = 0) final;
+    virtual std::chrono::steady_clock::time_point& get_recv_time(uint32 connect_id = 0) override final;
 
-    void set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id) final;
+    virtual bool format_send_packet(uint32 connect_id, std::shared_ptr<CMessage_Packet> message, std::shared_ptr<CMessage_Packet> format_message) override final;
 
-    bool format_send_packet(uint32 connect_id, std::shared_ptr<CMessage_Packet> message, std::shared_ptr<CMessage_Packet> format_message) final;
+    virtual bool is_need_send_format() override final;
 
-    bool is_need_send_format() final;
-
-    bool is_connect() final;
+    virtual bool is_connect() override final;
 
     void clear_write_buffer();
 
@@ -61,24 +59,33 @@ public:
     void do_io_bridge_error_to_logic(std::shared_ptr<CMessage_Packet> bridge_packet);
 
 private:
-    tcp::socket socket_;
+    void do_read();
+
+private:
+    tcp::socket socket_; //tpc 套接字
+
     asio::io_context* io_context_ = nullptr;
-    uint32 server_id_  = 0;
-    uint32 connect_id_ = 0;
+    uint32 server_id_  = 0; //服务器ID
+    uint32 connect_id_ = 0; //链接ID
+
     uint32 io_bradge_connect_id_ = 0;
+
     bool is_connect_ = false;
-    CSessionBuffer session_recv_buffer_;
-    CSessionBuffer session_send_buffer_;
+    
 
-    _ClientIPInfo remote_ip_;
-    _ClientIPInfo local_ip_;
+    CSessionBuffer session_recv_buffer_;    //接收缓冲区
+    CSessionBuffer session_send_buffer_;    //发送缓冲区
+    size_t recv_data_size_ = 0; 
+    size_t send_data_size_ = 0;
+    std::chrono::steady_clock::time_point recv_data_time_ = std::chrono::steady_clock::now(); //接收数据耗时
 
-    shared_ptr<_Packet_Parse_Info> packet_parse_interface_ = nullptr;
+    _ClientIPInfo remote_ip_;    //服务器IP
+    _ClientIPInfo local_ip_;   //客户端IP
+    shared_ptr<_Packet_Parse_Info> packet_parse_interface_ = nullptr; //协议解析动态库
 
-    size_t recv_data_size_  = 0;
-    size_t send_data_size_  = 0;
-    std::chrono::steady_clock::time_point recv_data_time_ = std::chrono::steady_clock::now();
 
-    EM_CONNECT_IO_TYPE io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_SERVER_TCP;
-    EM_SESSION_STATE io_state_ = EM_SESSION_STATE::SESSION_IO_LOGIC;
+
+    EM_CONNECT_IO_TYPE io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_SERVER_TCP; //io 类型
+
+    EM_SESSION_STATE io_state_ = EM_SESSION_STATE::SESSION_IO_LOGIC;  //io状态 ？？？？
 };

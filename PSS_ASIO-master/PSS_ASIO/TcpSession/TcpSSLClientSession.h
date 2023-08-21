@@ -29,31 +29,31 @@ public:
 
     bool start(const CConnect_IO_Info& io_info);
 
-    void do_read();
+    virtual void set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id) override final;
 
-    _ClientIPInfo get_remote_ip(uint32 connect_id) final;
-
-    void close(uint32 connect_id) final;
-
-    void set_write_buffer(uint32 connect_id, const char* data, size_t length) final; //写入些缓冲
+    virtual _ClientIPInfo get_remote_ip(uint32 connect_id) override final;
     
-    void do_write_immediately(uint32 connect_id, const char* data, size_t length) final;
+    virtual void set_write_buffer(uint32 connect_id, const char* data, size_t length) override final; //写入些缓冲
 
-    void do_write(uint32 connect_id) final;
+    virtual void do_write(uint32 connect_id) override final;
+    
+    virtual void do_write_immediately(uint32 connect_id, const char* data, size_t length) override final;
 
-    void add_send_finish_size(uint32 connect_id, size_t send_length) final;
+    virtual void close(uint32 connect_id) override final;
 
-    EM_CONNECT_IO_TYPE get_io_type() final;
+    virtual void add_send_finish_size(uint32 connect_id, size_t send_length)  override final;
 
-    uint32 get_mark_id(uint32 connect_id) final;
+    virtual EM_CONNECT_IO_TYPE get_io_type() override final;
 
-    std::chrono::steady_clock::time_point& get_recv_time(uint32 connect_id = 0) final;
+    virtual uint32 get_mark_id(uint32 connect_id) override final;
 
-    void set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id) final;
+    virtual std::chrono::steady_clock::time_point& get_recv_time(uint32 connect_id = 0) override final;
 
-    bool format_send_packet(uint32 connect_id, std::shared_ptr<CMessage_Packet> message, std::shared_ptr<CMessage_Packet> format_message) final;
+    virtual bool format_send_packet(uint32 connect_id, std::shared_ptr<CMessage_Packet> message, std::shared_ptr<CMessage_Packet> format_message) override final;
 
-    bool is_need_send_format() final;
+    virtual bool is_need_send_format() override final;
+
+    void do_read();
 
     void clear_write_buffer();
 
@@ -63,10 +63,12 @@ public:
 
 private:
     bool verify_certificate(bool preverified, asio::ssl::verify_context& ctx);
+
     void handshake();
 
+private:
     asio::io_context* io_context_ = nullptr;
-    asio::ssl::stream<tcp::socket> ssl_socket_;
+    asio::ssl::stream<tcp::socket> ssl_socket_; //tcp 
     asio::ssl::context ssl_ctx_;
     uint32 packet_parse_id_ = 0;
 

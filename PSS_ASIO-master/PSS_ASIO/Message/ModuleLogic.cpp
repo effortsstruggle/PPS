@@ -274,10 +274,10 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
 }
 
 /**
- * @brief  init_communication_service  初始化通信服务
+ * @brief  init_communication_service  初始化IO通信服务
  * @param communicate_service 
 */
-void CWorkThreadLogic::init_communication_service(ICommunicationInterface* communicate_service)
+void CWorkThreadLogic::init_communication_service( ICommunicationInterface* communicate_service )
 {
        this->communicate_service_ = communicate_service;
 }
