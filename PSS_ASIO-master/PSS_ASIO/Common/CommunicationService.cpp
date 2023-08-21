@@ -73,9 +73,7 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 */
 void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
 {
-
     this->communication_list_[ connect_info.io_info_.server_id ] = connect_info;
-
     if (false == communication_is_run_)
     {
         //还在初始化中，不启动链接
@@ -203,6 +201,7 @@ void CCommunicationService::run_check_task()
                 }
             }
         );
+
 
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
 }

@@ -97,12 +97,12 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     #endif
 
     const auto& config_output = App_ServerConfig::instance()->get_config_console() ;
-    Init_Console_Output(    config_output.file_output_,
-                                          config_output.file_count_,
-                                          config_output.max_file_size_,
-                                          config_output.file_name_,
-                                          config_output.output_level_
-                                    );
+    Init_Console_Output(  config_output.file_output_,
+						  config_output.file_count_,
+						  config_output.max_file_size_,
+						  config_output.file_name_,
+						  config_output.output_level_
+						);
 
     //初始化PacketParse插件，将“动态库加载到内存中”存起来
     for ( const auto&  packet_parse  :  App_ServerConfig::instance()->get_config_packet_list() )
@@ -148,7 +148,6 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //初始化执行库
     CConfigWorkThread& config_work_thread_ = App_ServerConfig::instance()->get_config_workthread();
     App_WorkThreadLogic::instance()->init_work_thread_logic(
-
                                                                 config_work_thread_.work_thread_count_ , 
                                                                 (uint16)config_work_thread_.work_timeout_seconds_  ,
                                                                 (uint32)config_work_thread_.client_connect_timeout_  ,
