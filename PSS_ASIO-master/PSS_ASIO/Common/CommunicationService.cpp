@@ -73,13 +73,9 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 */
 void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
 {
-<<<<<<< Updated upstream
-    communication_list_[ connect_info.io_info_.server_id ] = connect_info;
-    
-=======
-    this->communication_list_[  connect_info.io_info_.server_id  ] = connect_info;
-   
->>>>>>> Stashed changes
+
+    this->communication_list_[ connect_info.io_info_.server_id ] = connect_info;
+
     if (false == communication_is_run_)
     {
         //还在初始化中，不启动链接
@@ -198,7 +194,6 @@ void CCommunicationService::run_check_task()
 
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
 
-<<<<<<< Updated upstream
     each(  
             [this]( CCommunicationIOInfo& io_info ) {
                 if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
@@ -208,17 +203,6 @@ void CCommunicationService::run_check_task()
                 }
             }
         );
-=======
-    this->each(  
-                        [this]( CCommunicationIOInfo& io_info) {
-                            if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
-                            {
-                                //重新建立链接
-                                this->io_connect(io_info);
-                            }
-                        }
-            );
->>>>>>> Stashed changes
 
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
 }

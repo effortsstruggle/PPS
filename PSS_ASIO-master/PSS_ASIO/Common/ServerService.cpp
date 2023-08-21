@@ -148,7 +148,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //初始化执行库
     CConfigWorkThread& config_work_thread_ = App_ServerConfig::instance()->get_config_workthread();
     App_WorkThreadLogic::instance()->init_work_thread_logic(
-<<<<<<< Updated upstream
+
                                                                 config_work_thread_.work_thread_count_ , 
                                                                 (uint16)config_work_thread_.work_timeout_seconds_  ,
                                                                 (uint32)config_work_thread_.client_connect_timeout_  ,
@@ -156,15 +156,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
                                                                 App_ServerConfig::instance()->get_config_logic_list()  , 
                                                                 App_SessionService::instance()
                                                             );
-=======
-                                                                                                        config_work_thread_.work_thread_count_ , 
-                                                                                                        (uint16)config_work_thread_.work_timeout_seconds_  ,
-                                                                                                        (uint32)config_work_thread_.client_connect_timeout_  ,
-                                                                                                        (uint16)config_work_thread_.io_send_time_check_  ,
-                                                                                                        App_ServerConfig::instance()->get_config_logic_list()  ,
-                                                                                                        App_SessionService::instance()
-                                                                                                 );
->>>>>>> Stashed changes
+
 
     //加载Tcp监听
     for( auto tcp_server : App_ServerConfig::instance()->get_config_tcp_list() )
@@ -175,14 +167,14 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         {
         #ifdef SSL_SUPPORT
             auto tcp_ssl_service = std::make_shared<CTcpSSLServer>(  io_context_,
-                                                                                                            tcp_server.ip_,
-                                                                                                            tcp_server.port_,
-                                                                                                            tcp_server.packet_parse_id_,
-                                                                                                            tcp_server.recv_buff_size_,
-                                                                                                            tcp_server.ssl_server_password_,
-                                                                                                            tcp_server.ssl_server_pem_file_,
-                                                                                                            tcp_server.ssl_dh_pem_file_ 
-                                                                                                        );
+																	tcp_server.ip_,
+																	tcp_server.port_,
+																	tcp_server.packet_parse_id_,
+																	tcp_server.recv_buff_size_,
+																	tcp_server.ssl_server_password_,
+																	tcp_server.ssl_server_pem_file_,
+																	tcp_server.ssl_dh_pem_file_ 
+																);
 
             this->tcp_ssl_service_list_.emplace_back(tcp_ssl_service);
         #else
