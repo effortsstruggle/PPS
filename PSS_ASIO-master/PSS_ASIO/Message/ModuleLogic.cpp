@@ -3,12 +3,13 @@
 void CModuleLogic::init_logic(const command_to_module_function& command_to_module_function, uint16 work_thread_id)
 {
     this->modules_interface_.copy_from_module_list( command_to_module_function );
+
     this->work_thread_id_ = work_thread_id;
 }
 
 void CModuleLogic::add_session(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
 {
-    sessions_interface_.add_session_interface(connect_id, session, local_info, romote_info);
+    this->sessions_interface_.add_session_interface(connect_id, session, local_info, romote_info);
 }
 
 shared_ptr<ISession> CModuleLogic::get_session_interface(uint32 connect_id)
@@ -45,11 +46,11 @@ void CModuleLogic::close()
 
 int CModuleLogic::do_thread_module_logic(const CMessage_Source& source, std::shared_ptr<CMessage_Packet> recv_packet, std::shared_ptr<CMessage_Packet> send_packet)
 {
-    last_dispose_command_id_ = recv_packet->command_id_;
-    work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_BEGIN;
+    this->last_dispose_command_id_ = recv_packet->command_id_;
+    this->work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_BEGIN;
     auto ret = modules_interface_.do_module_message(source, recv_packet, send_packet);
-    work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_END;
-    work_thread_run_time_ = std::chrono::steady_clock::now();
+    this->work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_END;
+    this->work_thread_run_time_ = std::chrono::steady_clock::now();
     return ret;
 }
 
@@ -60,9 +61,9 @@ uint16 CModuleLogic::get_work_thread_id() const
 
 int CModuleLogic::get_work_thread_timeout() const
 {
-    if(ENUM_WORK_THREAD_STATE::WORK_THREAD_BEGIN == work_thread_state_)
+    if(ENUM_WORK_THREAD_STATE::WORK_THREAD_BEGIN == this->work_thread_state_)
     {
-        auto interval_seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - work_thread_run_time_);
+        auto interval_seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - this->work_thread_run_time_);
         return (int)interval_seconds.count();
     }
     else
@@ -77,7 +78,7 @@ void CModuleLogic::check_session_io_timeout(uint32 connect_timeout) const
     sessions_interface_.check_session_io_timeout(connect_timeout, session_list);
     for (const auto& session_io : session_list)
     {
-        PSS_LOGGER_DEBUG("[CModuleLogic::check_session_io_timeout]work_thread_id_={0}, session_id={1} is timeout.", work_thread_id_, session_io.session_id_);
+        PSS_LOGGER_DEBUG("[CModuleLogic::check_session_io_timeout]work_thread_id_={0}, session_id={1} is timeout.", this->work_thread_id_, session_io.session_id_);
         App_WorkThreadLogic::instance()->close_session_event(session_io.session_id_);
     }
 }
@@ -85,12 +86,12 @@ void CModuleLogic::check_session_io_timeout(uint32 connect_timeout) const
 uint16 CModuleLogic::get_last_dispose_command_id() const
 {
     //返回最后一个处理的命令ID
-    return last_dispose_command_id_;
+    return this->last_dispose_command_id_;
 }
 
 void CModuleLogic::each_session_id(const session_func& session_fn) const
 {
-    sessions_interface_.each_session_id(session_fn);
+    this->sessions_interface_.each_session_id(session_fn);
 }
 
 /**
@@ -99,7 +100,7 @@ void CModuleLogic::each_session_id(const session_func& session_fn) const
  * @param timeout_seconds  超时秒数
  * @param connect_timeout  连接超时
  * @param io_send_time_check  IO发生时间检查
- * @param logic_list 逻辑列表
+ * @param logic_list 业务逻辑列表
  * @param session_service 
 */
 void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,  
@@ -119,9 +120,9 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     App_tms::instance()->Init();
 
     //如果存在发送周期，则启动一个定时器，定时检测发送缓冲
-    if (io_send_time_check_ > 0)
+    if ( this->io_send_time_check_ > 0 )
     {
-        auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(1) , chrono::milliseconds(io_send_time_check_) , 
+        auto timer_ptr_send_check = App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(1) , chrono::milliseconds(this->io_send_time_check_) , 
                                                                                                 [this]()
                                                                                                 {
                                                                                                     //发送检查和发送数据消息
@@ -135,12 +136,12 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
                                                                                                );
     }
 
-    this->load_module_.set_session_service(session_service);
+    this->load_module_.set_session_service( session_service );
 
-    //加载第三方模块插件列表（将模块接口及模块指令等信息加载到该内存中）
-    for (const auto& logic_library : logic_list)
+    //加载业务逻辑插件列表（将模块接口及模块指令等信息加载到该内存中）
+    for ( const auto& logic_library : logic_list )
     {
-        //初始化 load_module_ 属性
+        //初始化 load_module_ 属性 ( 业务逻辑模块 )
         this->load_module_.load_plugin_module(
                                                 logic_library.logic_path_, 
                                                 logic_library.logic_file_name_, 
@@ -193,37 +194,42 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
 
     PSS_LOGGER_DEBUG("[ load_module_ ]>>>>>>>>>>>>>>>>>");
 
-    //每个逻辑ID ， 创建对应的执行线程
-    for (int i = 0; i < thread_count; i++)
+    //每个“工作线程ID” ， 创建对应的执行“业务逻辑任务”线程
+    /**
+    *  1.每个"工作线程ID",对应一个“业务逻辑任务”线程
+    *  2.“业务逻辑任务”中，维持一个消息队列，用来存储该“业务逻辑任务线程”需要执行的消息
+    */
+    for (int i = 0; i < thread_count; i++ )
     {
         auto thread_logic = make_shared< CModuleLogic >();
-        //绑定 “逻辑ID”与“[模块指令，指令的处理接口]”
+        //绑定 “工作线程ID”与“[模块指令，指令的处理接口]”
         thread_logic->init_logic( this->load_module_.get_module_function_list() , (uint16)i ); 
+
         this->thread_module_list_.emplace_back( thread_logic );
 
         //初始化线程（thread_count线程，创建thread_count逻辑任务）
         App_tms::instance()->CreateLogic(i);
-
     }
-    //模块初始化结束标志
+
+    //“业务逻辑模块”初始化结束标志
     this->module_init_finish_ = true;
 
 
-    //创建插件使用的线程 ( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ?)
+    //创建插件使用的线程 ( 业务逻辑模块未初始化完毕时，以下代码才能起到作用 )
     for ( auto thread_id : this->plugin_work_thread_buffer_list_ )
     {
         //查找线程是否已经存在
         auto f = this->plugin_work_thread_list_.find( thread_id );
-        if ( f != this->plugin_work_thread_list_.end() ) //存在
+        if ( f != this->plugin_work_thread_list_.end() ) //该工作线程ID已存在存在
         {
             continue;
         }
 
         auto thread_logic = make_shared<CModuleLogic>();
-        //绑定 “逻辑ID”与“[模块指令，指令的处理接口]”
-        thread_logic->init_logic(this->load_module_.get_module_function_list(), (uint16)thread_id);
+        //绑定 “插件使用的线程ID”与“[模块指令，指令的处理接口]”
+        thread_logic->init_logic( this->load_module_.get_module_function_list() , (uint16)thread_id );
 
-        this->plugin_work_thread_list_[thread_id] = thread_logic;
+        this->plugin_work_thread_list_[ thread_id ] = thread_logic;
 
         //初始化线程
         App_tms::instance()->CreateLogic(thread_id);
@@ -233,18 +239,18 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     //等待10毫秒，让所有线程创建完毕
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    //加载插件投递事件( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ）
+    //加载插件投递事件(  业务逻辑模块未初始化完毕时，以下代码才能起到作用 ）
     for (const auto& plugin_events : this->plugin_work_thread_buffer_message_list_)
     {
-        this->do_frame_message(plugin_events.tag_thread_id_,
-                                        plugin_events.message_tag_,
-                                        plugin_events.send_packet_,
-                                        plugin_events.delay_timer_ );
+        this->do_frame_message( plugin_events.tag_thread_id_,
+                                plugin_events.message_tag_,
+                                plugin_events.send_packet_,
+                                plugin_events.delay_timer_  );
 
     }
     this->plugin_work_thread_buffer_message_list_.clear();
 
-    //加载插件逻辑( ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? )
+    //加载插件逻辑(  业务逻辑模块未初始化完毕时，以下代码才能起到作用 )
     for (const auto& plugin_logic : plugin_work_thread_buffer_Func_list_)
     {
         do_work_thread_logic(plugin_logic->tag_thread_id_,
@@ -260,7 +266,7 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
                                                                                                                 //添加到数据队列处理
                                                                                                                 App_tms::instance()->AddMessage(0, [this, timeout_seconds] ()
                                                                                                                                                                             {
-                                                                                                                                                                                run_check_task(timeout_seconds);
+                                                                                                                                                                                this->run_check_task(timeout_seconds);
                                                                                                                                                                             });
                                                                                                             }
     );
@@ -603,32 +609,39 @@ void CWorkThreadLogic::do_io_message_delivery(uint32 connect_id, std::shared_ptr
 void CWorkThreadLogic::do_plugin_thread_module_logic(shared_ptr<CModuleLogic> module_logic, const std::string& message_tag, std::shared_ptr<CMessage_Packet> recv_packet) const
 {
     //添加到数据队列处理
-    App_tms::instance()->AddMessage(module_logic->get_work_thread_id(), [message_tag, recv_packet, module_logic]() {
-        CMessage_Source source;
-        auto send_packet = std::make_shared<CMessage_Packet>();
+    App_tms::instance()->AddMessage( module_logic->get_work_thread_id() , 
+                                    [message_tag, recv_packet, module_logic]() {
+                                        CMessage_Source source;
+                                        auto send_packet = std::make_shared<CMessage_Packet>();
 
-        source.work_thread_id_ = module_logic->get_work_thread_id();
-        source.remote_ip_.m_strClientIP = message_tag;
-        source.type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_FRAME;
+                                        source.work_thread_id_ = module_logic->get_work_thread_id();
+                                        source.remote_ip_.m_strClientIP = message_tag;
+                                        source.type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_FRAME;
 
-        module_logic->do_thread_module_logic(source, recv_packet, send_packet);
+                                        module_logic->do_thread_module_logic(source, recv_packet, send_packet);
 
-        //内部模块回调不在处理 send_packet 部分。
+                                        //内部模块回调不在处理 send_packet 部分。
 
-        });
+                                    }
+                                );
 }
 
+/**
+ * @brief 创建工作线程
+ * @param thread_id  工作线程ID标识
+ * @return 
+*/
 bool CWorkThreadLogic::create_frame_work_thread(uint32 thread_id)
 {
     std::lock_guard <std::recursive_mutex> lock(plugin_timer_mutex_);
 
-    if (thread_id < this->thread_count_ )
+    if (thread_id < this->thread_count_ ) //判断是否小于线程数
     {
         PSS_LOGGER_DEBUG("[CWorkThreadLogic::create_frame_work_thread]thread id must more than config thread count.");
         return false;
     }
 
-    if ( false == module_init_finish_ )
+    if ( false == this->module_init_finish_ )  //"默认的业务逻辑模块"是否初始化完成
     {
         //如果模块还没全部启动完毕，将这个创建线程的过程，放入vector里面，等模块全部加载完毕，启动。
         this->plugin_work_thread_buffer_list_.emplace_back(thread_id);
@@ -636,18 +649,18 @@ bool CWorkThreadLogic::create_frame_work_thread(uint32 thread_id)
     else
     {
         //查找这个线程ID是否已经存在了
-        auto f = plugin_work_thread_list_.find(thread_id);
-        if (f != plugin_work_thread_list_.end())
+        auto f = plugin_work_thread_list_.find( thread_id );
+        if (f != plugin_work_thread_list_.end()) //该工作线程ID标识 已存在
         {
             PSS_LOGGER_DEBUG("[CWorkThreadLogic::create_frame_work_thread]thread id already exist.");
             return false;
         }
 
         //创建线程
-        auto thread_logic = make_shared<CModuleLogic>();
-        thread_logic->init_logic(load_module_.get_module_function_list(), (uint16)thread_id);
+        auto thread_logic = make_shared< CModuleLogic >();
+        thread_logic->init_logic( this->load_module_.get_module_function_list(), (uint16)thread_id );
 
-        plugin_work_thread_list_[thread_id] = thread_logic;
+        this->plugin_work_thread_list_[thread_id] = thread_logic;
 
         //初始化线程
         App_tms::instance()->CreateLogic(thread_id);
@@ -895,7 +908,7 @@ void CWorkThreadLogic::run_check_task(uint32 timeout_seconds) const
 
 bool CWorkThreadLogic::send_frame_message(uint16 tag_thread_id, const std::string& message_tag, std::shared_ptr<CMessage_Packet> send_packet, CFrame_Message_Delay delay_timer)
 {
-    if (false == module_init_finish_)
+    if (false == this->module_init_finish_) //当模块未完全加载完毕时
     {
         CDelayPluginMessage plugin_message;
         plugin_message.tag_thread_id_ = tag_thread_id;
@@ -908,13 +921,13 @@ bool CWorkThreadLogic::send_frame_message(uint16 tag_thread_id, const std::strin
         return true;
     }
 
-    return do_frame_message(tag_thread_id, message_tag, send_packet, delay_timer);
+    return this->do_frame_message(tag_thread_id, message_tag, send_packet, delay_timer);
 }
 
 bool CWorkThreadLogic::do_frame_message(uint16 tag_thread_id, const std::string& message_tag, std::shared_ptr<CMessage_Packet> send_packet, CFrame_Message_Delay delay_timer)
 {
     auto f = plugin_work_thread_list_.find(tag_thread_id);
-    if (f == plugin_work_thread_list_.end())
+    if ( f == plugin_work_thread_list_.end() )
     {
         return false;
     }
@@ -924,7 +937,7 @@ bool CWorkThreadLogic::do_frame_message(uint16 tag_thread_id, const std::string&
     if (delay_timer.delay_seconds_ == std::chrono::seconds(0))
     {
         //不需要延时，立刻投递
-        this->do_plugin_thread_module_logic(plugin_thread, message_tag, send_packet);
+        this->do_plugin_thread_module_logic( plugin_thread , message_tag , send_packet );
     }
     else
     {
@@ -955,8 +968,9 @@ bool CWorkThreadLogic::do_frame_message(uint16 tag_thread_id, const std::string&
 
 bool CWorkThreadLogic::do_work_thread_logic(uint16 tag_thread_id, CFrame_Message_Delay delay_timer, const task_function& func)
 {
-    auto f = plugin_work_thread_list_.find(tag_thread_id);
-    if (f == plugin_work_thread_list_.end())
+    auto f = this->plugin_work_thread_list_.find(tag_thread_id);
+
+    if (f == this->plugin_work_thread_list_.end())
     {
         return false;
     }
@@ -964,21 +978,23 @@ bool CWorkThreadLogic::do_work_thread_logic(uint16 tag_thread_id, CFrame_Message
     if (delay_timer.delay_seconds_ == std::chrono::seconds(0))
     {
         //立刻执行线程函数
-        App_tms::instance()->AddMessage(tag_thread_id, func);
+        App_tms::instance()->AddMessage( tag_thread_id , func );
     }
     else
     {
         //需要延时，延时后投递
-        auto timer_ptr = App_TimerManager::instance()->GetTimerPtr()->addTimer(delay_timer.delay_seconds_, [this, tag_thread_id, delay_timer, func]()
-            {
-                //对定时器列表操作加锁
-                plugin_timer_mutex_.lock();
-                plgin_timer_list_.erase(delay_timer.timer_id_);
-                plugin_timer_mutex_.unlock();
+        auto timer_ptr = App_TimerManager::instance()->GetTimerPtr()->addTimer(delay_timer.delay_seconds_ , 
+                                                                                [this, tag_thread_id, delay_timer, func]()
+                                                                                {
+                                                                                    //对定时器列表操作加锁
+                                                                                    plugin_timer_mutex_.lock();
+                                                                                    plgin_timer_list_.erase(delay_timer.timer_id_);
+                                                                                    plugin_timer_mutex_.unlock();
 
-                //延时到期，进行投递
-                App_tms::instance()->AddMessage(tag_thread_id, func);
-            });
+                                                                                    //延时到期，进行投递
+                                                                                    App_tms::instance()->AddMessage(tag_thread_id, func);
+                                                                                }
+                                                                            );
 
         //添加映射关系(只有在定时器ID > 0的时候才能删除)
         if (delay_timer.timer_id_ > 0)
@@ -1002,6 +1018,6 @@ bool CWorkThreadLogic::run_work_thread_logic(uint16 tag_thread_id, CFrame_Messag
         return true;
     }
 
-    return do_work_thread_logic(tag_thread_id, delay_timer, func);
+    return this->do_work_thread_logic(tag_thread_id, delay_timer, func);
 }
 

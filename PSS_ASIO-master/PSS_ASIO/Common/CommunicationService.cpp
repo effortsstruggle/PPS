@@ -60,7 +60,7 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 
 void CCommunicationService::io_connect(CCommunicationIOInfo& connect_info)
 {
-    communication_list_[connect_info.io_info_.server_id] = connect_info;
+    communication_list_[ connect_info.io_info_.server_id ] = connect_info;
     
     if (false == communication_is_run_)
     {
@@ -160,7 +160,7 @@ void CCommunicationService::run_check_task()
     PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
 
     each(  
-            [this](CCommunicationIOInfo& io_info) {
+            [this]( CCommunicationIOInfo& io_info ) {
                 if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
                 {
                     //重新建立链接

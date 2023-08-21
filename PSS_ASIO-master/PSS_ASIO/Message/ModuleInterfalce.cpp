@@ -6,8 +6,9 @@
 */
 void CModuleInterface::copy_from_module_list(const command_to_module_function& command_to_module_function)
 {
-    command_to_module_function_.clear();
-    command_to_module_function_ = command_to_module_function;
+    this->command_to_module_function_.clear();
+
+    this->command_to_module_function_ = command_to_module_function;
 }
 
 /**

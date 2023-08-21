@@ -50,7 +50,7 @@ public:
 };
 
 /**
- * @brief CModuleLogic 模块逻辑
+ * @brief CModuleLogic 业务逻辑模块类
 */
 class CModuleLogic
 {
@@ -82,7 +82,7 @@ public:
 private:
     CSessionInterface sessions_interface_;
     
-    CModuleInterface modules_interface_; //模块指令处理类
+    CModuleInterface modules_interface_; //业务逻辑模块的指令处理类
     
     uint16 work_thread_id_ = 0; //工作线程ID
 
@@ -92,6 +92,8 @@ private:
     
     std::chrono::steady_clock::time_point work_thread_run_time_ = std::chrono::steady_clock::now();
 };
+
+
 
 /**
  * @brief CWorkThreadLogic 工作线程逻辑
@@ -170,14 +172,14 @@ public:
     int do_io_bridge_data(uint32 connect_id, uint32 io_bradge_connect_id_, CSessionBuffer& session_recv_buffer, std::size_t length, shared_ptr<ISession> session);
 
 private:
-    using hashmappluginworkthread = unordered_map<uint32, shared_ptr<CModuleLogic>>;
+    using hashmappluginworkthread = unordered_map<uint32, shared_ptr<CModuleLogic> >;
     using hashmaplogictimer = unordered_map<uint64, brynet::Timer::WeakPtr>;
     
-    hashmappluginworkthread plugin_work_thread_list_;//[]
+    hashmappluginworkthread plugin_work_thread_list_;//[ 工作线程ID标识，业务模块逻辑]
 
     hashmaplogictimer plgin_timer_list_;
 
-    std::vector< std::shared_ptr<CModuleLogic> > thread_module_list_;  //模块逻辑列表（工作线程ID，[指令,指令处理接口] 等信息）
+    std::vector< std::shared_ptr<CModuleLogic> > thread_module_list_;  //业务逻辑模表列表（ 工作线程ID，[指令,指令处理接口] 等信息）
 
     CLoadModule load_module_; //模块（插件）加载封装类
 
@@ -189,13 +191,13 @@ private:
 
     ICommunicationInterface* communicate_service_ = nullptr; //通信服务(服务器间链接库)
 
-    bool        module_init_finish_ = false; //模块初始化结束标志
+    bool module_init_finish_ = false; //“业务逻辑模块”初始化结束标志
 
-    vector<uint32> plugin_work_thread_buffer_list_;
+    std::vector<uint32> plugin_work_thread_buffer_list_;
 
-    vector< CDelayPluginMessage > plugin_work_thread_buffer_message_list_;
+    std::vector< CDelayPluginMessage > plugin_work_thread_buffer_message_list_;
 
-    vector<std::shared_ptr<CDelayPluginFunc>> plugin_work_thread_buffer_Func_list_;
+    std::vector< std::shared_ptr<CDelayPluginFunc> > plugin_work_thread_buffer_Func_list_;
 
     std::recursive_mutex plugin_timer_mutex_;
    

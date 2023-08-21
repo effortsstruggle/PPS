@@ -151,7 +151,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
                                                                 (uint16)config_work_thread_.work_timeout_seconds_  ,
                                                                 (uint32)config_work_thread_.client_connect_timeout_  ,
                                                                 (uint16)config_work_thread_.io_send_time_check_  ,
-                                                                App_ServerConfig::instance()->get_config_logic_list()  ,
+                                                                App_ServerConfig::instance()->get_config_logic_list()  , 
                                                                 App_SessionService::instance()
                                                             );
 

@@ -76,14 +76,14 @@ private:
     void delete_module_name_list(const string& module_name);
 
 private:
-    using hashmapModuleList = unordered_map<string, shared_ptr<_ModuleInfo>>;
-    hashmapModuleList                  module_list_; //模块注册列表 [模块名称,模块信息]
+    using hashmapModuleList = unordered_map<string, shared_ptr<_ModuleInfo> >;
+    hashmapModuleList                  module_list_; //业务逻辑模块注册列表 [模块名称,模块信息]  (
 
-    std::vector<std::string>                     module_name_list_;  //当前插件名称列表
+    std::vector<std::string>                     module_name_list_;  //当前业务逻辑模块名称列表
 
-    command_to_module_function command_to_module_function_; //[模块指令 , 指令的处理函数] 映射
+    command_to_module_function command_to_module_function_; //[ 业务逻辑模块指令 , 指令的处理函数 ] 映射
 
-    plugin_name_to_module_run plugin_name_to_module_run_; //[模块名称 , 模块运行接口] 映射
+    plugin_name_to_module_run plugin_name_to_module_run_; //[ 业务逻辑模块名称 , 模块运行接口 ] 映射
     
     ISessionService* session_service_; //会话服务
 };

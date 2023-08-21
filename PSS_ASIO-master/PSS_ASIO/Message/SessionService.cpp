@@ -76,6 +76,12 @@ bool CSessionService::run_work_thread_logic(uint16 tag_thread_id, CFrame_Message
     return App_WorkThreadLogic::instance()->run_work_thread_logic(tag_thread_id, delay_timer, func);
 }
 
+
+/**
+ * @brief create_frame_work_thread 创建工作线程 
+ * @param thread_id  工作线程ID标识
+ * @return 
+*/
 bool CSessionService::create_frame_work_thread(uint32 thread_id)
 {
     return App_WorkThreadLogic::instance()->create_frame_work_thread(thread_id);

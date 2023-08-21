@@ -161,7 +161,7 @@ config_packet_list& CServerConfig::get_config_packet_list()
 
 config_logic_list& CServerConfig::get_config_logic_list()
 {
-    return config_logic_list_ ;
+    return this->config_logic_list_ ;
 }
 
 config_tcp_list& CServerConfig::get_config_tcp_list()

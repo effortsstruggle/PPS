@@ -37,7 +37,7 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
     module_info->module_param_ = module_param;
 
     //1、开始注册模块函数
-    if (false == this->load_module_info(module_info))
+    if (false == this->load_module_info( module_info ))
     {
         return false;
     }
@@ -53,38 +53,40 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
 
     //3.开始调用模块初始化
     CFrame_Object module_frame_object;
+
     module_frame_object.session_service_ = this->session_service_;
-    //加载模块(注册模块的一些指令)
-    int nRet = module_info->load_module_( (IFrame_Object* )&module_frame_object , module_info->module_param_ );
+
+    //加载模块( 注册模块的一些指令 ... 等 )
+    int nRet = module_info->load_module_( ( IFrame_Object* )&module_frame_object , module_info->module_param_ );
     if (nRet != 0)
     {
-        PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] module_name = {0}, Execute Function LoadModuleData is error!", module_file_name);
+        PSS_LOGGER_DEBUG("[ CLoadModule::LoadMoudle ] module_name = { 0 }, Execute Function LoadModuleData is error!", module_file_name);
         return false;
     }
 
     //4.获得模块中所有的注册指令(注册)
     for (const auto& command_info : module_frame_object.module_command_list_)
     {
-        if (command_info.type_ == ENUM_LOGIC_COMMAND_TYPE::COMMAND_TYPE_NO_FN) 
+        if ( command_info.type_ == ENUM_LOGIC_COMMAND_TYPE::COMMAND_TYPE_NO_FN) 
         {
-            this->command_to_module_function_[command_info.command_id_] = module_info->do_message_;
+            this->command_to_module_function_[ command_info.command_id_ ] = module_info->do_message_;
         }
         else
         {
-            this->command_to_module_function_[command_info.command_id_] = command_info.logic_fn_;
+            this->command_to_module_function_[ command_info.command_id_ ] = command_info.logic_fn_;
         }
 
         //记录当前插件加载的命令信息
         module_info->command_id_list_.emplace_back(command_info.command_id_);
     }
 
-    //5.添加模块间调用的映射(与模块的"module_run接口"作映射)
+    //5.添加模块间调用的映射( 与模块的"module_run接口"作映射 )
     this->plugin_name_to_module_run_[ module_file_name ] = module_info->module_run_finction_ptr_;
 
     //6.将注册成功的模块，加入到Hash数组中
     this->module_list_[ module_file_name ] = module_info;
 
-    this->module_name_list_.emplace_back(module_file_name);
+    this->module_name_list_.emplace_back( module_file_name );
 
     PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] Begin Load ModuleName[{0}] OK!", module_file_name);
     return true;

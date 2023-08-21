@@ -14,10 +14,13 @@
 
 using namespace std;
 
+/**
+ * @brief 消息类型
+*/
 enum class EM_LOGIC_TYPE
 {
-    LOGIC_TYPE_RUN = 0,
-    LOGIC_TYPE_CLOSE
+    LOGIC_TYPE_RUN = 0, //运行
+    LOGIC_TYPE_CLOSE //关闭
 };
 
 /**
@@ -31,7 +34,7 @@ public:
 };
 
 /**
- * @brief  CLogicTasK  逻辑任务
+ * @brief  CLogicTasK  业务逻辑任务
 */
 class CLogicTasK
 {
@@ -42,11 +45,15 @@ public:
      * @brief 消息入队
      * @param msg 
     */
-    void Put(std::shared_ptr<CLogicMessage> msg)
+    void Put(std::shared_ptr< CLogicMessage > msg)
     {
         this->m_thread_queue.Push(msg);
     }
 
+    /**
+     * @brief 开启线程
+     * @param u4ThreadID 工作线程ID
+    */
     void start(uint32 u4ThreadID)
     {
         this->m_run = true;
@@ -57,35 +64,42 @@ public:
                                         this->svc();
                                     }
                                 );
+
         this->m_u4ThreadID = u4ThreadID;
     }
 
     void Close()
     {
-        m_run = false;
+        this->m_run = false;
 
         auto pLogicMessage = std::make_shared<CLogicMessage>();
         pLogicMessage->m_emType = EM_LOGIC_TYPE::LOGIC_TYPE_CLOSE;
-        Put(pLogicMessage);
+        
+        this->Put(pLogicMessage);
 
         //PSS_LOGGER_DEBUG("[Close]Thread({0}) put close.", m_u4ThreadID);
-        m_ttlogic.join();
+        this->m_ttlogic.join();
     }
 
+    /**
+     * @brief svc 业务逻辑任务的线程处理函数
+    */
     void svc()
     {
-        m_tvBegin = CTimeStamp::Get_Time_Stamp();
+        //获取当前时间
+        this->m_tvBegin = CTimeStamp::Get_Time_Stamp();
 
         while ( this->m_run )
         {
-            shared_ptr<CLogicMessage> msg;
+            //任务执行的逻辑消息类型
+            std::shared_ptr< CLogicMessage > msg;
 
             //获取消息
             this->m_thread_queue.Pop( msg );
 
             if ( EM_LOGIC_TYPE::LOGIC_TYPE_RUN == msg->m_emType )
             {
-                //获得了数据，进行处理
+                //获得了数据，进行处理（通过"框架定时器" ，添加的需要执行的函数）
                 msg->m_func();
             }
             else
@@ -103,16 +117,16 @@ public:
     }
 
 private:
-    //消息队列
-    CMessageQueue< shared_ptr<CLogicMessage> > m_thread_queue;
+
+    CMessageQueue< std::shared_ptr<CLogicMessage> > m_thread_queue;   //消息队列
 
     bool m_run = false;
 
-    std::thread m_ttlogic; //逻辑任务线程
+    std::thread m_ttlogic; //“业务逻辑任务”线程
     
-    PSS_Time_Point m_tvBegin;
+    PSS_Time_Point m_tvBegin; //记录当前时间
     
-    uint32 m_u4ThreadID = 0; //逻辑ID
+    uint32 m_u4ThreadID = 0; //工作线程ID（业务逻辑ID）
 };
 
 class TMS
@@ -133,21 +147,23 @@ public:
 
     /**
      * @brief CreateLogic 创建一个逻辑线程
-     * @param u4LogicID 逻辑ID
+     * @param u4LogicID 工作线程ID
      * @return 
     */
     bool CreateLogic(uint32 u4LogicID)  
     {
-        auto f = this->m_mapLogicList.find(u4LogicID);
-        if (f != this->m_mapLogicList.end()) //找到该逻辑线程ID
+        auto f = this->m_mapLogicList.find( u4LogicID );
+
+        if (f != this->m_mapLogicList.end()) //找到该工作线程ID
         {
             return false;
         }
         else //未找到
         {
-            //创建线程，并开启
+            //创建“业务逻辑任务”线程，并开启
             auto pLogicTask = std::make_shared<CLogicTasK>();
-            pLogicTask->start(u4LogicID);
+
+            pLogicTask->start( u4LogicID );
 
             this->m_mapLogicList[ u4LogicID ] = pLogicTask;
 
@@ -215,7 +231,7 @@ public:
 
     /**
      * @brief AddMessage 添加消息(即时)
-     * @param u4LogicID  消息ID
+     * @param u4LogicID  工作线程ID
      * @param func 所对应的任务执行函数
      * @return 
     */
@@ -223,17 +239,19 @@ public:
     {
         auto f = this->m_mapLogicList.find( u4LogicID );
 
-        if ( f != this->m_mapLogicList.end( ) ) //消息已存在
+        if ( f != this->m_mapLogicList.end( ) ) //工作线程ID已存在
         {
             auto pLogicMessage = std::make_shared< CLogicMessage >();
-
             pLogicMessage->m_func = func;
-            
-            this->m_mapLogicList[ u4LogicID ]->Put( pLogicMessage );
-            
+
+            //为该工作线程ID对应的 "业务逻辑任务"，添加需要执行的 消息 ； 
+            std::shared_ptr<CLogicTasK> logic_task_ = this->m_mapLogicList[u4LogicID] ;
+            logic_task_->Put( pLogicMessage );
+
             return true;
+
         }
-        else //消息未存在
+        else //工作线程ID未存在
         {
             return false;
         }
@@ -319,9 +337,9 @@ private:
     using mapthreads = map<uint32, std::shared_ptr<CLogicTasK> >;
     using mapthreadidtologicid = map<std::string, uint32>;
     
-    mapthreads m_mapLogicList; //[逻辑ID，逻辑任务] ； 每一个逻辑任务对应一个线程
+    mapthreads m_mapLogicList; //[ 工作线程ID，逻辑任务 ] ； 每一个逻辑任务对应一个线程
   
-    mapthreadidtologicid m_TidtologicidList; //[ 线程ID , 逻辑ID ]
+    mapthreadidtologicid m_TidtologicidList; //[ 真实的线程ID , 工作线程ID ]
     
     std::thread m_ttTimer; //定时器线程
      

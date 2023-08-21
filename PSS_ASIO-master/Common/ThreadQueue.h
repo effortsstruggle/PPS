@@ -6,6 +6,10 @@
 #include <condition_variable>
 #include <thread>
 
+/**
+ * @brief CMessageQueue 消息队列
+ * @tparam Type 
+*/
 template<class Type>
 class CMessageQueue
 {
