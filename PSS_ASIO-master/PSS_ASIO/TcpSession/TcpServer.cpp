@@ -29,6 +29,9 @@ void CTcpServer::close() const
     }
 }
 
+/**
+ * @brief  do_accept 执行等待连接
+*/
 void CTcpServer::do_accept()
 {
     acceptor_->async_accept(
@@ -36,14 +39,15 @@ void CTcpServer::do_accept()
         {
             if (!ec)
             {
-                std::make_shared<CTcpSession>(std::move(socket), io_context_)->open(packet_parse_id_, max_recv_size_);
+                std::shared_ptr<CTcpSession> tcp_session_ = std::make_shared<CTcpSession>(std::move(socket), io_context_);
+                tcp_session_->open(packet_parse_id_, max_recv_size_);
             }
             else
             {
-                send_accept_listen_fail(ec);
+                this->send_accept_listen_fail(ec);
             }
 
-            do_accept();
+            this->do_accept();
         });
 }
 

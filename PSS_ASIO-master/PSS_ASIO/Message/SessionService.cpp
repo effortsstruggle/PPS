@@ -8,7 +8,7 @@ void CSessionService::get_server_listen_info(std::vector<CConfigNetIO>& io_list,
     {
         //获得列表信息
         const auto& tcp_list = App_ServerConfig::instance()->get_config_tcp_list();
-        io_list.assign(tcp_list.begin(), tcp_list.end());
+        io_list.assign( tcp_list.begin(), tcp_list.end() );
     }
     else if (io_type == EM_CONNECT_IO_TYPE::CONNECT_IO_UDP)
     {
@@ -63,6 +63,14 @@ void CSessionService::close_io_session(uint32 connect_id)
 
 }
 
+/**
+ * @brief  send_frame_message 插件发送消息至本地
+ * @param tag_thread_id 
+ * @param message_tag 
+ * @param send_packet 
+ * @param delay_timer 
+ * @return 
+*/
 bool CSessionService::send_frame_message(uint16 tag_thread_id, const std::string& message_tag, std::shared_ptr<CMessage_Packet> send_packet, CFrame_Message_Delay delay_timer)
 {
     return App_WorkThreadLogic::instance()->send_frame_message(tag_thread_id,
@@ -71,14 +79,22 @@ bool CSessionService::send_frame_message(uint16 tag_thread_id, const std::string
         delay_timer);
 }
 
+
+/**
+ * @brief  运行工作线程逻辑
+ * @param tag_thread_id 
+ * @param delay_timer 
+ * @param func 
+ * @return 
+*/
 bool CSessionService::run_work_thread_logic(uint16 tag_thread_id, CFrame_Message_Delay delay_timer, const task_function& func)
 {
-    return App_WorkThreadLogic::instance()->run_work_thread_logic(tag_thread_id, delay_timer, func);
+    return App_WorkThreadLogic::instance()->run_work_thread_logic( tag_thread_id ,  delay_timer , func );
 }
 
 
 /**
- * @brief create_frame_work_thread 创建工作线程 
+ * @brief create_frame_work_thread 创建插件工作线程（由插件决定） 
  * @param thread_id  工作线程ID标识
  * @return 
 */
@@ -126,6 +142,7 @@ uint32 CSessionService::get_curr_thread_logic_id()
 bool CSessionService::add_plugin_api(const std::string& api_name, const plugin_api_logic& func)
 {
     auto f = this->func_list_.find( api_name );
+
     if ( f != this->func_list_.end() )
     {
         PSS_LOGGER_INFO("[CSessionService::add_plugin_api]{0} is exist.", api_name);
@@ -134,6 +151,7 @@ bool CSessionService::add_plugin_api(const std::string& api_name, const plugin_a
     else
     {
         this->func_list_[api_name] = func;
+
         return true;
     }
 }
@@ -147,9 +165,10 @@ bool CSessionService::add_plugin_api(const std::string& api_name, const plugin_a
 std::string CSessionService::do_plugin_api(const std::string& api_name, const std::string& api_func_param)
 {
     auto f = this->func_list_.find(api_name);
+
     if (f != this->func_list_.end())
     {
-        return f->second(api_func_param);
+        return f->second( api_func_param );
     }
     else
     {

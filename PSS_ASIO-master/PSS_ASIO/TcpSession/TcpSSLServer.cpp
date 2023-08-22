@@ -1,42 +1,41 @@
 #include "TcpSSLServer.h"
 #ifdef SSL_SUPPORT
 
-CTcpSSLServer::CTcpSSLServer(asio::io_context& io_context, 
-    std::string server_ip, 
-    io_port_type port,
-    uint32 packet_parse_id, 
-    uint32 max_recv_size, 
-    std::string ssl_server_password,
-    std::string ssl_server_pem_file,
-    std::string ssl_server_dh_file) :
-context_(asio::ssl::context::sslv23),
-packet_parse_id_(packet_parse_id),
-max_recv_size_(max_recv_size),
-ssl_server_password_(ssl_server_password),
-ssl_server_pem_file_(ssl_server_pem_file),
-ssl_server_dh_file_(ssl_server_dh_file),
-io_context_(&io_context)
+CTcpSSLServer::CTcpSSLServer(
+                                                    asio::io_context& io_context, 
+                                                    std::string server_ip, 
+                                                    io_port_type port,
+                                                    uint32 packet_parse_id, 
+                                                    uint32 max_recv_size, 
+                                                    std::string ssl_server_password,
+                                                    std::string ssl_server_pem_file,
+                                                    std::string ssl_server_dh_file
+                                                )  :
+                                                context_(asio::ssl::context::sslv23),
+                                                packet_parse_id_(packet_parse_id),
+                                                max_recv_size_(max_recv_size),
+                                                ssl_server_password_(ssl_server_password),
+                                                ssl_server_pem_file_(ssl_server_pem_file),
+                                                ssl_server_dh_file_(ssl_server_dh_file),
+                                                io_context_(&io_context)
 {
     try
     {
-        acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint(asio::ip::address_v4::from_string(server_ip), port));
+        this->acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint(asio::ip::address_v4::from_string(server_ip), port));
 
-        context_.set_options(
-            asio::ssl::context::default_workarounds
-            | asio::ssl::context::no_sslv2
-            | asio::ssl::context::single_dh_use);
+        this->context_.set_options(  asio::ssl::context::default_workarounds  |  asio::ssl::context::no_sslv2  | asio::ssl::context::single_dh_use );
         
-        context_.set_password_callback(std::bind(&CTcpSSLServer::get_password, this));
-        context_.use_certificate_chain_file(ssl_server_pem_file_);
-        context_.use_private_key_file(ssl_server_pem_file_, asio::ssl::context::pem);
-        context_.use_tmp_dh_file(ssl_server_dh_file_);
+        this->context_.set_password_callback(std::bind(&CTcpSSLServer::get_password, this));
+        this->context_.use_certificate_chain_file(ssl_server_pem_file_);
+        this->context_.use_private_key_file(ssl_server_pem_file_, asio::ssl::context::pem);
+        this->context_.use_tmp_dh_file(ssl_server_dh_file_);
 
         //处理链接建立消息
         PSS_LOGGER_INFO("[CTcpSSLServer::do_accept]({0}:{1}) Begin Accept.",
             acceptor_->local_endpoint().address().to_string(),
             acceptor_->local_endpoint().port());
 
-        do_accept();
+        this->do_accept();
     }
     catch (std::system_error const& ex)
     {
@@ -54,6 +53,9 @@ std::string CTcpSSLServer::get_password() const
     return ssl_server_password_;
 }
 
+/**
+ * @brief  do_accept 异步等待连接
+*/
 void CTcpSSLServer::do_accept()
 {
     acceptor_->async_accept(
@@ -63,7 +65,7 @@ void CTcpSSLServer::do_accept()
             {
                 std::make_shared<CTcpSSLSession>(
                     asio::ssl::stream<tcp::socket>(
-                        std::move(socket), context_), io_context_)->open(packet_parse_id_, max_recv_size_);
+                        std::move( socket ), context_), io_context_)->open(packet_parse_id_, max_recv_size_);
             }
             else
             {

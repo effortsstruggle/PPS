@@ -98,7 +98,7 @@ int load_module(IFrame_Object* frame_object, string module_param)
 
     ::session_service->do_plugin_api("test_logic", "hello free eyes");
 
-    PSS_LOGGER_DEBUG("[load_module]({0})finish.", module_param);
+    PSS_LOGGER_DEBUG("[ load_module ]( { 0 } ) finish.", module_param);
 
     //测试服务器间通讯
     shm_queue::shm_key key = 11111;
@@ -138,20 +138,20 @@ void unload_module()
     PSS_LOGGER_DEBUG("[unload_module]finish.");
 }
 
-//执行消息处理
+//执行消息处理()
 int do_module_message(const CMessage_Source& source, std::shared_ptr<CMessage_Packet> recv_packet, std::shared_ptr<CMessage_Packet> send_packet)
 {
     //插件消息处理
     //PSS_LOGGER_DEBUG("[do_module_message]command_id={0}.", recv_packet.command_id_);
 
     MESSAGE_FUNCTION_BEGIN(recv_packet->command_id_);
-    MESSAGE_FUNCTION(LOGIC_COMMAND_CONNECT, base_command->logic_connect, source, recv_packet, send_packet);
+    MESSAGE_FUNCTION( LOGIC_COMMAND_CONNECT, base_command->logic_connect, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(LOGIC_COMMAND_DISCONNECT, base_command->logic_disconnect, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(LOGIC_CONNECT_SERVER_ERROR, base_command->logic_test_connect_error, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(LOGIC_LISTEN_SERVER_ERROR, base_command->logic_test_listen_error, source, recv_packet, send_packet);
     //MESSAGE_FUNCTION(COMMAND_TEST_SYNC, base_command->logic_test_sync, source, recv_packet, send_packet);
     //MESSAGE_FUNCTION(COMMAND_TEST_ASYN, base_command->logic_test_asyn, source, recv_packet, send_packet);
-    MESSAGE_FUNCTION(COMMAND_TEST_FRAME, base_command->logic_test_frame, source, recv_packet, send_packet);
+    MESSAGE_FUNCTION( COMMAND_TEST_FRAME, base_command->logic_test_frame, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(COMMAND_TEST_HTTP_POST, base_command->logic_http_post, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(COMMAND_WEBSOCKET_SHARK_HAND, base_command->logic_http_websocket_shark_hand, source, recv_packet, send_packet);
     MESSAGE_FUNCTION(COMMAND_WEBSOCKET_DATA, base_command->logic_http_websocket_data, source, recv_packet, send_packet);

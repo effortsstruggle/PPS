@@ -25,7 +25,7 @@ void CCommunicationService::init_communication_service(asio::io_context* io_serv
 }
 
 /**
- * @brief 添加服务器链接
+ * @brief 添加客户端链接（ 由客户端调用 ）
  * @param io_info 
  * @param io_type 
  * @return 
@@ -33,9 +33,13 @@ void CCommunicationService::init_communication_service(asio::io_context* io_serv
 bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
 {
     std::lock_guard <std::recursive_mutex> lock(mutex_);
+
     CCommunicationIOInfo connect_info;
+    
     connect_info.connect_id_ = 0;
+    
     connect_info.io_info_ = io_info;
+    
     connect_info.io_type_ = io_type;
 
     this->io_connect( connect_info );
@@ -45,9 +49,9 @@ bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONN
 
 void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 {
-    auto f = communication_list_.find(server_id);
+    auto f = this->communication_list_.find( server_id );
     
-    if (f != communication_list_.end())
+    if (f != this->communication_list_.end())
     {
         
         f->second.connect_id_ = connect_id;
@@ -68,13 +72,14 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 }
 
 /**
- * @brief io_connect 建立IO链接，并接收数据
+ * @brief io_connect 建立服务器间IO链接，并接收数据
  * @param connect_info 
 */
 void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
 {
     this->communication_list_[ connect_info.io_info_.server_id ] = connect_info;
-    if (false == communication_is_run_)
+
+    if (false == this->communication_is_run_)
     {
         //还在初始化中，不启动链接
         return;
@@ -83,7 +88,7 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TCP )
     {
         //IO是TCP
-        auto tcp_client_session = make_shared<CTcpClientSession>(io_service_context_);
+        auto tcp_client_session = make_shared<CTcpClientSession>( io_service_context_ );
 		//建立网络链接
 		if (true == tcp_client_session->start(connect_info.io_info_))
 		{
@@ -178,7 +183,7 @@ void CCommunicationService::each(Communication_funtion communication_funtion)
 {
     for (auto& client_info : this->communication_list_)
     {
-        communication_funtion( client_info.second );
+        communication_funtion(  client_info.second  );
     }
 }
 
@@ -190,20 +195,20 @@ void CCommunicationService::run_check_task()
     //lock_guard自身作用域中，具有构造时加锁，析构时释放锁
     std::lock_guard <std::recursive_mutex> lock(mutex_);
 
-    PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
+    PSS_LOGGER_DEBUG("[ CCommunicationService::run_check_task ] begin size={ 0 }.", communication_list_.size());
 
-    each(  
-            [this]( CCommunicationIOInfo& io_info ) {
-                if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
-                {
-                    //重新建立链接
-                    this->io_connect(io_info);
-                }
-            }
-        );
+    this->each(  
+                        [this](  CCommunicationIOInfo& io_info  ) {
+                            if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
+                            {
+                                //重新建立链接
+                                this->io_connect(io_info);
+                            }
+                        }
+                    );
 
 
-    PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
+    PSS_LOGGER_DEBUG("[ CCommunicationService::run_check_task ] end.");
 }
 
 void CCommunicationService::close()

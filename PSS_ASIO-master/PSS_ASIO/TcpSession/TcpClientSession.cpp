@@ -6,7 +6,7 @@ CTcpClientSession::CTcpClientSession(asio::io_context* io_context)
 }
 
 /**
- * @brief 开始建立网络链接
+ * @brief 开始建立Tcp链接
  * @param io_info 
  * @return 
 */
@@ -49,7 +49,9 @@ bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
 
     //异步链接
     tcp::endpoint end_point(asio::ip::address::from_string(io_info.server_ip.c_str()), io_info.server_port);
+    
     tcp::resolver::results_type::iterator endpoint_iter;
+
     this->socket_.async_connect(  end_point, 
                                             std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
                                         );

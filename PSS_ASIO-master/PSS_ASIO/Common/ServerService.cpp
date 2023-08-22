@@ -140,9 +140,9 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //初始化框架定时器 ,并开启定时器线程
     App_TimerManager::instance()->Start();
 
-    //初始化IO通信服务
+    //初始化服务器间IO通信服务
     uint16 timeout_ = (uint16)App_ServerConfig::instance()->get_config_workthread().s2s_timeout_seconds_ ;
-    App_CommunicationService::instance()->init_communication_service( &this->io_context_ , timeout_);
+    App_CommunicationService::instance()->init_communication_service( &this->io_context_ , timeout_ );
     App_WorkThreadLogic::instance()->init_communication_service(  App_CommunicationService::instance() );
 
     //初始化执行库
@@ -160,9 +160,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //加载Tcp监听
     for( auto tcp_server : App_ServerConfig::instance()->get_config_tcp_list() )
     {
-        if (tcp_server.ssl_server_password_ != ""
-            && tcp_server.ssl_server_pem_file_ != ""
-            && tcp_server.ssl_dh_pem_file_ != "")
+        if (tcp_server.ssl_server_password_ != "" && tcp_server.ssl_server_pem_file_ != ""  && tcp_server.ssl_dh_pem_file_ != "" ) //SSL
         {
         #ifdef SSL_SUPPORT
             auto tcp_ssl_service = std::make_shared<CTcpSSLServer>(  io_context_,
@@ -180,7 +178,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
             PSS_LOGGER_DEBUG("[CServerService::init_servce]you must set SSL_SUPPORT macro on compilation options.");
         #endif
         }
-        else
+        else //TCP
         {
             //正常的tcp链接
             auto tcp_service = std::make_shared<CTcpServer>(io_context_ ,

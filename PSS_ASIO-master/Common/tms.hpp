@@ -99,7 +99,7 @@ public:
 
             if ( EM_LOGIC_TYPE::LOGIC_TYPE_RUN == msg->m_emType )
             {
-                //获得了数据，进行处理（通过"框架定时器" ，添加的需要执行的函数）
+                //获得了数据，进行处理（ 通过"框架定时器" ，添加的需要执行的函数 ）
                 msg->m_func();
             }
             else
@@ -245,7 +245,7 @@ public:
             pLogicMessage->m_func = func;
 
             //为该工作线程ID对应的 "业务逻辑任务"，添加需要执行的 消息 ； 
-            std::shared_ptr<CLogicTasK> logic_task_ = this->m_mapLogicList[u4LogicID] ;
+            std::shared_ptr<CLogicTasK> logic_task_ = this->m_mapLogicList[ u4LogicID ] ;
             logic_task_->Put( pLogicMessage );
 
             return true;

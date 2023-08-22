@@ -55,7 +55,8 @@ void CTcpSession::open(uint32 packet_parse_id, uint32 recv_size)
     }
 #endif
 
-    do_read();
+    //开始接收数据
+    this->do_read();
 }
 
 _ClientIPInfo CTcpSession::get_remote_ip(uint32 connect_id)
