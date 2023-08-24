@@ -5,10 +5,10 @@
  * @param io_service_context 
  * @param timeout_seconds 
 */
-void CCommunicationService::init_communication_service(asio::io_context* io_service_context, uint16 timeout_seconds)
+void CCommunicationService::init_communication_service ( asio::io_context* io_service_context ,  uint16 timeout_seconds)
 {
     //读取配置文件，链接服务器
-    io_service_context_ = io_service_context;
+    this->io_service_context_ = io_service_context;
 
     //定时检查任务，检查服务器间链接的状态。（ 程序运行期间，一直检测该会话是否处于链接状态 ） 心跳机制
     App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(0) , chrono::seconds(timeout_seconds) , 
@@ -25,14 +25,14 @@ void CCommunicationService::init_communication_service(asio::io_context* io_serv
 }
 
 /**
- * @brief 添加客户端链接（ 由客户端调用 ）
+ * @brief 添加服务器间的连接 
  * @param io_info 
  * @param io_type 
  * @return 
 */
-bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
+bool CCommunicationService::add_connect( const CConnect_IO_Info& io_info , EM_CONNECT_IO_TYPE io_type )
 {
-    std::lock_guard <std::recursive_mutex> lock(mutex_);
+    std::lock_guard <std::recursive_mutex> lock( this->mutex_ );
 
     CCommunicationIOInfo connect_info;
     
@@ -88,32 +88,33 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TCP )
     {
         //IO是TCP
-        auto tcp_client_session = make_shared<CTcpClientSession>( io_service_context_ );
+        auto tcp_client_session = make_shared< CTcpClientSession >(  this->io_service_context_ );
 		//建立网络链接
-		if (true == tcp_client_session->start(connect_info.io_info_))
+		if ( true == tcp_client_session->start( connect_info.io_info_ ) )
 		{
             //存储通信类
-            this->communication_list_[connect_info.io_info_.server_id].session_ = tcp_client_session;
+            this->communication_list_[ connect_info.io_info_.server_id ].session_ = tcp_client_session;
 		}
+
 	}
     else if(connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_UDP)
     {
         //IO是UDP
-        auto udp_client_session = make_shared<CUdpClientSession>(io_service_context_);
+        auto udp_client_session = make_shared< CUdpClientSession >( this->io_service_context_ );
         
-        udp_client_session->start(connect_info.io_info_);
+        udp_client_session->start( connect_info.io_info_ );
 
         //存储通信类
         this->communication_list_[ connect_info.io_info_.server_id ].session_ = udp_client_session;
     }
-    else if (connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TTY)
+    else if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TTY )
     {
         //IO是TTY
-		auto tty_client_session = make_shared<CTTyServer>(
-			connect_info.io_info_.packet_parse_id,
-			connect_info.io_info_.recv_size,
-			connect_info.io_info_.send_size
-			);
+		auto tty_client_session = make_shared< CTTyServer >(
+			                                                                                        connect_info.io_info_.packet_parse_id,
+			                                                                                        connect_info.io_info_.recv_size,
+			                                                                                        connect_info.io_info_.send_size
+			                                                                                  );
 
         //开启串口，接收数据
 		tty_client_session->start(
@@ -130,7 +131,7 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     else if (connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_SSL)
     {
 #ifdef SSL_SUPPORT
-        auto ssl_client_session = make_shared<CTcpSSLClientSession>(io_service_context_);
+        auto ssl_client_session = make_shared< CTcpSSLClientSession >(io_service_context_);
         
         ssl_client_session->start(connect_info.io_info_);
 
@@ -139,6 +140,8 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
         PSS_LOGGER_DEBUG("[CCommunicationService::io_connect]you mest use SSL_SUPPORT macro support ths ssl.");
 #endif
     }
+
+
 }
 
 void CCommunicationService::run_server_to_server()
@@ -179,7 +182,7 @@ bool CCommunicationService::is_exist(uint32 server_id)
  * @brief each 转发接口，为每个IO通信请求链接
  * @param communication_funtion 
 */
-void CCommunicationService::each(Communication_funtion communication_funtion)
+void CCommunicationService::each( Communication_funtion communication_funtion )
 {
     for (auto& client_info : this->communication_list_)
     {
@@ -198,7 +201,7 @@ void CCommunicationService::run_check_task()
     PSS_LOGGER_DEBUG("[ CCommunicationService::run_check_task ] begin size={ 0 }.", communication_list_.size());
 
     this->each(  
-                        [this](  CCommunicationIOInfo& io_info  ) {
+                        [ this ] (  CCommunicationIOInfo& io_info  )  {
                             if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
                             {
                                 //重新建立链接

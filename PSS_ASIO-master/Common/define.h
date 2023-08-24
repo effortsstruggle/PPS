@@ -77,10 +77,10 @@ enum class EM_NET_TYPE
     NET_TYPE_BROADCAST,           //UDP广播网络
 };
 
-//IO链接状态
+//IO链接状态 (用来处理交给“桥接的服务器”处理，还是自己处理)
 enum class EM_SESSION_STATE
 {
-    SESSION_IO_LOGIC = 0,     //IO消息工作线程处理状态
+    SESSION_IO_LOGIC = 0,     //IO消息工作线程处理状态 
     SESSION_IO_BRIDGE,        //IO消息桥接状态
 };
 

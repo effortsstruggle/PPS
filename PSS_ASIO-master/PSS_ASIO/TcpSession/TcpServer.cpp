@@ -6,12 +6,12 @@ CTcpServer::CTcpServer(asio::io_context& io_context, const std::string& server_i
     try
     {
         io_context_ = &io_context;
-        acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint( asio::ip::address_v4::from_string(server_ip) , port ) );
+        acceptor_ = std::make_shared<tcp::acceptor>( io_context , tcp::endpoint( asio::ip::address_v4::from_string( server_ip ) , port ) );
 
         //处理链接建立消息
-        PSS_LOGGER_INFO("[CTcpServer::do_accept]({0}:{1}) Begin Accept.",
-            acceptor_->local_endpoint().address().to_string(),
-            acceptor_->local_endpoint().port());
+        PSS_LOGGER_INFO("[ CTcpServer::do_accept]( { 0 } : { 1 } ) Begin Accept.",
+                                        acceptor_->local_endpoint().address().to_string(),
+                                        acceptor_->local_endpoint().port() );
 
         this->do_accept();
     }
@@ -37,10 +37,11 @@ void CTcpServer::do_accept()
     acceptor_->async_accept(
         [this](std::error_code ec, tcp::socket socket)
         {
-            if (!ec)
+            if ( ! ec ) //成功建立链接 ,建立一个Tcp会话服务
             {
-                std::shared_ptr<CTcpSession> tcp_session_ = std::make_shared<CTcpSession>(std::move(socket), io_context_);
-                tcp_session_->open(packet_parse_id_, max_recv_size_);
+                std::shared_ptr< CTcpSession > tcp_session_ = std::make_shared< CTcpSession >( std::move(socket) , this->io_context_ );
+
+                tcp_session_->open( this->packet_parse_id_ ,  this->max_recv_size_ );
             }
             else
             {

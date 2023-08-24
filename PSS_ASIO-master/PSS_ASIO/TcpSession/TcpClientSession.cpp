@@ -1,7 +1,7 @@
 ﻿#include "TcpClientSession.h"
 
-CTcpClientSession::CTcpClientSession(asio::io_context* io_context)
-    : socket_(*io_context), io_context_(io_context)
+CTcpClientSession::CTcpClientSession( asio::io_context* io_context)
+    : socket_( *io_context ), io_context_( io_context )
 {
 }
 
@@ -14,11 +14,11 @@ bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
 {
     this->server_id_ = io_info.server_id;
 
-    this->packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(io_info.packet_parse_id);
+    this->packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo( io_info.packet_parse_id );
 
-    this->session_recv_buffer_.Init(io_info.recv_size);
+    this->session_recv_buffer_.Init( io_info.recv_size );
 
-    this->session_send_buffer_.Init(io_info.send_size);
+    this->session_send_buffer_.Init( io_info.send_size );
 
     //赋值对应的IP和端口信息
     //本地IP及端口
@@ -34,7 +34,9 @@ bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
     if ( io_info.client_port > 0 && io_info.client_ip.length() > 0)
     {
         asio::ip::tcp::endpoint localEndpoint(asio::ip::address::from_string( io_info.client_ip ), io_info.client_port );
+
         this->socket_.open( asio::ip::tcp::v4() , connect_error );
+
         this->socket_.set_option( asio::ip::tcp::socket::reuse_address(true) );
 
         try
@@ -43,18 +45,18 @@ bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
         }
         catch (std::system_error const& ex)
         {
-            PSS_LOGGER_ERROR("[CTcpClientSession::start] bind addr error remote:[{}:{}] local:[{}:{}] ex.what:{}.", io_info.server_ip, io_info.server_port,io_info.client_ip,io_info.client_port, ex.what());
+            PSS_LOGGER_ERROR("[ CTcpClientSession::start ] bind addr error remote:[ { } : { } ] local:[ { } : { } ] ex.what:{ }.", io_info.server_ip, io_info.server_port,io_info.client_ip,io_info.client_port, ex.what());
         }
     }
 
     //异步链接
-    tcp::endpoint end_point(asio::ip::address::from_string(io_info.server_ip.c_str()), io_info.server_port);
+    tcp::endpoint end_point(asio::ip::address::from_string( io_info.server_ip.c_str( ) ) , io_info.server_port );
     
     tcp::resolver::results_type::iterator endpoint_iter;
 
-    this->socket_.async_connect(  end_point, 
-                                            std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
-                                        );
+    this->socket_.async_connect(  end_point , 
+                                                    std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
+                                                );
     return true;
 }
 
@@ -152,8 +154,8 @@ void CTcpClientSession::do_write_immediately(uint32 connect_id, const char* data
     auto self(shared_from_this());
 
     io_context_->dispatch([self, connect_id, send_buffer]() {
-        asio::async_write(self->socket_, asio::buffer(send_buffer->data_.c_str(), send_buffer->buffer_length_),
-            [self, connect_id, send_buffer](std::error_code ec, std::size_t send_length)
+        asio::async_write( self->socket_ , asio::buffer( send_buffer->data_.c_str( ) , send_buffer->buffer_length_ ),
+            [self, connect_id, send_buffer]( std::error_code ec , std::size_t send_length )
             {
                 if (ec)
                 {
@@ -165,8 +167,10 @@ void CTcpClientSession::do_write_immediately(uint32 connect_id, const char* data
                 {
                     self->add_send_finish_size(connect_id, send_length);
                 }
-            });
-        });
+            }
+         );
+       }
+    );
 }
 
 void CTcpClientSession::do_write(uint32 connect_id)
@@ -199,7 +203,8 @@ void CTcpClientSession::do_write(uint32 connect_id)
             {
                 self->add_send_finish_size(connect_id, length);
             }
-        });
+        }
+    );
 }
 
 void CTcpClientSession::add_send_finish_size(uint32 connect_id, size_t send_length)
@@ -317,7 +322,7 @@ void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
 }
 
 /**
- * @brief 异步链接，处理函数
+ * @brief 异步connect 的 回调函数
  * @param ec 
  * @param endpoint_iter 
 */
@@ -333,14 +338,17 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
 
         //处理链接建立消息
         this->remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
+
         this->remote_ip_.m_u2Port = socket_.remote_endpoint().port();
+
         this->local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
+
         this->local_ip_.m_u2Port = socket_.local_endpoint().port();
 
         PSS_LOGGER_DEBUG("[CTcpClientSession::start]remote({0}:{1})", remote_ip_.m_strClientIP, remote_ip_.m_u2Port);
         PSS_LOGGER_DEBUG("[CTcpClientSession::start]local({0}:{1})", local_ip_.m_strClientIP, local_ip_.m_u2Port);
 
-        this->packet_parse_interface_->packet_connect_ptr_( connect_id_ , remote_ip_ , local_ip_ , io_type_ , App_IoBridge::instance());
+        this->packet_parse_interface_->packet_connect_ptr_( connect_id_ , remote_ip_ , local_ip_ , io_type_ , App_IoBridge::instance() );
 
         //添加点对点映射
         if (true == App_IoBridge::instance()->regedit_session_id(this->remote_ip_ , this->io_type_ , this->connect_id_))

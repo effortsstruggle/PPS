@@ -14,7 +14,7 @@ void CModuleLogic::add_session(uint32 connect_id, shared_ptr<ISession> session, 
 
 shared_ptr<ISession> CModuleLogic::get_session_interface(uint32 connect_id)
 {
-    auto ret = sessions_interface_.get_session_interface(connect_id);
+    auto ret = this->sessions_interface_.get_session_interface( connect_id );
 
 #ifdef GCOV_TEST
     auto local_ip = sessions_interface_.get_session_local_ip(connect_id);
@@ -61,7 +61,7 @@ int CModuleLogic::do_thread_module_logic(const CMessage_Source& source, std::sha
     this->work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_BEGIN;
     
     //处理插件加载进来的命令
-    auto ret = this->modules_interface_.do_module_message( source ,  recv_packet ,  send_packet);
+    auto ret = this->modules_interface_.do_module_message( source ,  recv_packet ,  send_packet );
     
     this->work_thread_state_ = ENUM_WORK_THREAD_STATE::WORK_THREAD_END;
     
@@ -403,11 +403,12 @@ void CWorkThreadLogic::add_frame_events(uint16 command_id, uint32 mark_id, const
 void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
 {
     //session 建立连接
-    uint16 curr_thread_index = connect_id % thread_count_ ;
+    uint16 curr_thread_index = connect_id % this->thread_count_ ;
 
     auto module_logic = this->thread_module_list_[ curr_thread_index ];
 
-    auto server_id = session->get_mark_id(connect_id);
+    auto server_id = session->get_mark_id( connect_id );
+
     if (server_id > 0)
     {
         //关联服务器间链接
@@ -418,7 +419,7 @@ void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession
     App_tms::instance()->AddMessage(   curr_thread_index, 
                                                                 [session, connect_id, module_logic, local_info, romote_info]() 
                                                                 {
-                                                                    module_logic->add_session(connect_id, session, local_info, romote_info);
+                                                                    module_logic->add_session( connect_id, session, local_info, romote_info);
 
                                                                     CMessage_Source source;
                                                                     auto recv_packet = std::make_shared<CMessage_Packet>();
@@ -433,7 +434,8 @@ void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession
                                                                     source.local_ip_ = local_info;
                                                                     source.remote_ip_ = romote_info;
 
-                                                                    module_logic->do_thread_module_logic(source, recv_packet, send_packet);
+                                                                    module_logic->do_thread_module_logic( source , recv_packet, send_packet);
+
                                                                 }
     );
 }
@@ -497,8 +499,8 @@ int CWorkThreadLogic::assignation_thread_module_logic(const uint32 connect_id, c
 #endif
         //添加到数据队列处理
         App_tms::instance()->AddMessage(curr_thread_index, [this, session, connect_id, message_list, module_logic]() {
-            //插件逻辑处理
-            do_work_thread_module_logic(session, connect_id, message_list, module_logic);
+                //插件逻辑处理
+                this->do_work_thread_module_logic( session , connect_id , message_list , module_logic);
             });
 
 #ifdef GCOV_TEST
@@ -552,8 +554,10 @@ void CWorkThreadLogic::do_work_thread_module_logic(shared_ptr<ISession> session,
     source.type_ = session->get_io_type();
     source.connect_mark_id_ = session->get_mark_id(connect_id);
 
+    //执行接收到的消息 
     for (auto recv_packet : message_list)
     {
+
         auto curr_send_packet = std::make_shared<CMessage_Packet>();
         module_logic->do_thread_module_logic(source, recv_packet, curr_send_packet);
 
@@ -572,7 +576,7 @@ void CWorkThreadLogic::do_work_thread_module_logic(shared_ptr<ISession> session,
         if (io_session->is_need_send_format() == true)
         {
             auto curr_format_send_packet = std::make_shared<CMessage_Packet>();
-            if(true == io_session->format_send_packet(source.connect_id_, curr_send_packet, curr_format_send_packet))
+            if( true == io_session->format_send_packet(source.connect_id_, curr_send_packet, curr_format_send_packet) )
             {
                 //将格式化后的数据填充到send_packet
                 send_packet.buffer_.append(curr_format_send_packet->buffer_.c_str(), curr_format_send_packet->buffer_.size());
@@ -585,7 +589,7 @@ void CWorkThreadLogic::do_work_thread_module_logic(shared_ptr<ISession> session,
         }
     }
 
-    if (send_packet.buffer_.size() > 0)
+    if ( send_packet.buffer_.size() > 0 )
     {
         //有需要发送的内容
         session->set_write_buffer(connect_id, send_packet.buffer_.c_str(), send_packet.buffer_.size());
@@ -804,12 +808,19 @@ void CWorkThreadLogic::send_io_buffer() const
     }
 }
 
+/**
+ * @brief 设置桥接ID
+ * @param from_io_connect_id 
+ * @param to_io_connect_id 
+ * @return 
+*/
 bool CWorkThreadLogic::set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id)
 {
     auto curr_post_thread_index = to_io_connect_id % thread_count_;
-    auto post_module_logic = thread_module_list_[curr_post_thread_index];
 
-    auto session_io = post_module_logic->get_session_interface(to_io_connect_id);
+    auto post_module_logic = this->thread_module_list_[ curr_post_thread_index ];
+
+    auto session_io = post_module_logic->get_session_interface( to_io_connect_id ) ;
     if (nullptr == session_io)
     {
         //没找到对应链接
@@ -819,46 +830,59 @@ bool CWorkThreadLogic::set_io_bridge_connect_id(uint32 from_io_connect_id, uint3
     {
         //设置端到端的桥接id
         session_io->set_io_bridge_connect_id(from_io_connect_id, to_io_connect_id);
+
         return true;
     }
 }
 
+/**
+ * @brief  do_io_bridge_data 接收数据 转发给“桥接服务器”处理
+ * @param connect_id 
+ * @param io_bradge_connect_id_ 
+ * @param session_recv_buffer 
+ * @param length 
+ * @param session 
+ * @return 
+*/
 int CWorkThreadLogic::do_io_bridge_data(uint32 connect_id, uint32 io_bradge_connect_id_, CSessionBuffer& session_recv_buffer, std::size_t length, shared_ptr<ISession> session)
 {
     int ret = 0;
     auto bridge_packet = std::make_shared<CMessage_Packet>();
-    bridge_packet->buffer_.append(session_recv_buffer.read(), length);
-    if (io_bradge_connect_id_ > 0)
-    {
-        if (false == send_io_bridge_message(io_bradge_connect_id_, bridge_packet))
-        {
-            //发送失败，将数据包会给业务逻辑去处理
-            vector<std::shared_ptr<CMessage_Packet>> message_error_list;
-            bridge_packet->command_id_ = LOGIC_IOTOIO_DATA_ERROR;
-            message_error_list.emplace_back(bridge_packet);
+    bridge_packet->buffer_.append( session_recv_buffer.read() , length );
 
-            //添加消息处理
-            assignation_thread_module_logic(connect_id, message_error_list, session);
-            ret = 1;
-        }
-        else
-        {
-            ret = 0;
-        }
+    if ( io_bradge_connect_id_ > 0)
+    {
+            if ( false == this->send_io_bridge_message( io_bradge_connect_id_, bridge_packet ) )
+            {
+                //发送失败，将数据包会给业务逻辑去处理
+                std::vector<std::shared_ptr<CMessage_Packet>> message_error_list;
+                bridge_packet->command_id_ = LOGIC_IOTOIO_DATA_ERROR;
+                message_error_list.emplace_back(bridge_packet);
+
+                //添加消息处理
+                this->assignation_thread_module_logic( connect_id, message_error_list, session);
+
+                ret = 1;
+            }
+            else
+            {
+                ret = 0;
+            }
     }
     else
     {
-        //发送失败，将数据包会给业务逻辑去处理
+        //发送失败，将数据包重新交给给业务逻辑去处理
         vector<std::shared_ptr<CMessage_Packet>> message_error_list;
         bridge_packet->command_id_ = LOGIC_IOTOIO_DATA_ERROR;
         message_error_list.emplace_back(bridge_packet);
 
         //添加消息处理
-        assignation_thread_module_logic(connect_id, message_error_list, session);
+        this->assignation_thread_module_logic(connect_id, message_error_list, session);
         ret = 2;
     }
 
     session_recv_buffer.move(length);
+
     return ret;
 }
 
@@ -877,12 +901,15 @@ void CWorkThreadLogic::send_io_message(uint32 connect_id, std::shared_ptr<CMessa
 bool CWorkThreadLogic::send_io_bridge_message(uint32 io_bridge_connect_id, std::shared_ptr<CMessage_Packet> send_packet)
 {
     uint16 curr_thread_index = io_bridge_connect_id % thread_count_;
+
     auto module_logic = thread_module_list_[curr_thread_index];
 
-    auto session = module_logic->get_session_interface(io_bridge_connect_id);
+    auto session = module_logic->get_session_interface( io_bridge_connect_id );
+
     if (nullptr != session)
     {
-        session->do_write_immediately(io_bridge_connect_id, send_packet->buffer_.c_str(), send_packet->buffer_.size());
+        session->do_write_immediately( io_bridge_connect_id, send_packet->buffer_.c_str(), send_packet->buffer_.size() );
+
         return true;
     }
     else

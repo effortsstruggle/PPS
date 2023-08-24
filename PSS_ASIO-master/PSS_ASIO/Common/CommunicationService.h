@@ -68,7 +68,7 @@ public:
 private:
     using communication_list = unordered_map<uint32, CCommunicationIOInfo>; //Hash映射
     using server_connect_id_list = unordered_map<uint32, uint32>; //Hash映射
-    communication_list communication_list_;  //[服务器ID ，IO通信类]
+    communication_list communication_list_;  //[ 服务器ID  ，IO通信类]
     server_connect_id_list server_connect_id_list_;//[连接ID , 服务器ID]
 
     std::recursive_mutex mutex_; //嵌套锁/递归锁（可多次上锁，来获得对互斥量对象的多层使用权；释放量时，需要调用与该lock层次相同的unlock）

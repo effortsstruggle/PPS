@@ -120,7 +120,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     #endif
 
     //注册监控中断事件(LINUX)
-    asio::signal_set  signals( this->io_context_, SIGINT, SIGTERM );
+    asio::signal_set  signals( this->io_context_ , SIGINT , SIGTERM );
 
     signals.async_wait
     ( 
@@ -163,7 +163,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         if (tcp_server.ssl_server_password_ != "" && tcp_server.ssl_server_pem_file_ != ""  && tcp_server.ssl_dh_pem_file_ != "" ) //SSL
         {
         #ifdef SSL_SUPPORT
-            auto tcp_ssl_service = std::make_shared<CTcpSSLServer>(  io_context_,
+            auto tcp_ssl_service = std::make_shared< CTcpSSLServer >(  io_context_,
 																	tcp_server.ip_,
 																	tcp_server.port_,
 																	tcp_server.packet_parse_id_,
@@ -181,11 +181,13 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         else //TCP
         {
             //正常的tcp链接
-            auto tcp_service = std::make_shared<CTcpServer>(io_context_ ,
-                                                       tcp_server.ip_ ,
-                                                       tcp_server.port_ ,
-                                                       tcp_server.packet_parse_id_ ,
-                                                       tcp_server.recv_buff_size_ );
+            auto tcp_service = std::make_shared< CTcpServer >(
+                                                                                               io_context_ ,
+                                                                                               tcp_server.ip_ ,
+                                                                                               tcp_server.port_ ,
+                                                                                               tcp_server.packet_parse_id_ ,
+                                                                                               tcp_server.recv_buff_size_ 
+                                                                                            );
 
             this->tcp_service_list_.emplace_back( tcp_service );
         }
@@ -194,27 +196,33 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     //加载UDP监听
     for (auto udp_server : App_ServerConfig::instance()->get_config_udp_list())
     {
-        auto udp_service = std::make_shared<CUdpServer>(io_context_, 
-                                                        udp_server.ip_,
-                                                        udp_server.port_,
-                                                        udp_server.packet_parse_id_,
-                                                        udp_server.recv_buff_size_,
-                                                        udp_server.send_buff_size_,
-                                                        udp_server.em_net_type_);
+        auto udp_service = std::make_shared< CUdpServer >(
+                                                                                                io_context_, 
+                                                                                                udp_server.ip_,
+                                                                                                udp_server.port_,
+                                                                                                udp_server.packet_parse_id_,
+                                                                                                udp_server.recv_buff_size_,
+                                                                                                udp_server.send_buff_size_,
+                                                                                                udp_server.em_net_type_
+                                                                                            );
         udp_service->start();
-        this->udp_service_list_.emplace_back(udp_service);
+
+        this->udp_service_list_.emplace_back( udp_service );
     }
 
     //加载KCP监听
     for (auto kcp_server : App_ServerConfig::instance()->get_config_kcp_list())
     {
-        auto kcp_service = std::make_shared<CKcpServer>(io_context_,
-                                                        kcp_server.ip_,
-                                                        kcp_server.port_,
-                                                        kcp_server.packet_parse_id_,
-                                                        kcp_server.recv_buff_size_,
-                                                        kcp_server.send_buff_size_);
+        auto kcp_service = std::make_shared<CKcpServer>(
+                                                                                            io_context_,
+                                                                                            kcp_server.ip_,
+                                                                                            kcp_server.port_,
+                                                                                            kcp_server.packet_parse_id_,
+                                                                                            kcp_server.recv_buff_size_,
+                                                                                            kcp_server.send_buff_size_
+                                                                                        );
         kcp_service->start();
+
         this->kcp_service_list_.emplace_back(kcp_service);
     }
 
@@ -222,10 +230,10 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     for (auto tty_server : App_ServerConfig::instance()->get_config_tty_list())
     {
         auto tty_service = make_shared<CTTyServer>(
-                                                    tty_server.packet_parse_id_,
-                                                    tty_server.recv_buff_size_,
-                                                    tty_server.send_buff_size_
-                                                  );
+                                                                                    tty_server.packet_parse_id_,
+                                                                                    tty_server.recv_buff_size_,
+                                                                                    tty_server.send_buff_size_
+                                                                                  );
         tty_service->start( 
                             &io_context_, 
                             tty_server.tty_name_, 
@@ -243,7 +251,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     io_context_.run();
 
 
-    PSS_LOGGER_DEBUG("[ CServerService::init_servce ] server is over.");
+    PSS_LOGGER_DEBUG(" [ CServerService::init_servce ] server is over. ");
     this->close_service();
 
     return true;

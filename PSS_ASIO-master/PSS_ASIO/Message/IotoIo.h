@@ -7,6 +7,9 @@
 #include "spdlog/fmt/fmt.h"
 #include "IIoBridge.hpp"
 
+/**
+ * @brief CIo_Connect_Info 
+*/
 class CIo_Connect_Info
 {
 public:
@@ -15,9 +18,11 @@ public:
     _ClientIPInfo from_io_;
     EM_CONNECT_IO_TYPE from_io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_TCP;
     uint32 from_session_id_ = 0;
+    
     _ClientIPInfo to_io_;
     EM_CONNECT_IO_TYPE to_io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_TCP;
     uint32 to_session_id_ = 0;
+    
     ENUM_IO_BRIDGE_TYPE bridge_type_ = ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH;
 
     // 赋值运算符重载函数
@@ -40,7 +45,7 @@ public:
 };
 
 /**
- * @brief CIotoIo 一个IO 到 另一个IO
+ * @brief CIotoIo IO 到 IO的会话
 */
 class CIotoIo 
 {
@@ -69,9 +74,13 @@ private:
 
     void delete_session_list(uint32 session_id);
 
-    using hashmapconnectlist = unordered_map<std::string, uint32>;
-    hashmapconnectlist connect_list_;
-    vector<CIo_Connect_Info> io_2_io_list_;
-    vector<CIo_Connect_Info> session_to_session_list_;
+    using hashmapconnectlist = unordered_map< std::string , uint32 >;
+
+    hashmapconnectlist connect_list_;  //【客户端信息  / 服务器信息， 会话ID 】
+
+    std::vector<CIo_Connect_Info> io_2_io_list_;
+
+    std::vector<CIo_Connect_Info> session_to_session_list_;//【客户端信息 ， 服务器信息】
+
     std::mutex mutex_;
 };

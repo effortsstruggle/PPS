@@ -176,6 +176,15 @@ std::string CSessionService::do_plugin_api(const std::string& api_name, const st
     }
 }
 
+/**
+ * @brief  add_session_io_mapping  添加会话映射（由客户端调用）
+ * @param from_io 
+ * @param from_io_type 
+ * @param to_io 
+ * @param to_io_type 
+ * @param bridge_type 
+ * @return 
+*/
 bool CSessionService::add_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type, const _ClientIPInfo& to_io, EM_CONNECT_IO_TYPE to_io_type, ENUM_IO_BRIDGE_TYPE bridge_type /*= ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH*/)
 {
     return App_IoBridge::instance()->add_session_io_mapping(from_io, from_io_type, to_io, to_io_type, bridge_type);

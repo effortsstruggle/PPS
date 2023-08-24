@@ -31,7 +31,7 @@ CTcpSSLServer::CTcpSSLServer(
         this->context_.use_tmp_dh_file(ssl_server_dh_file_);
 
         //处理链接建立消息
-        PSS_LOGGER_INFO("[CTcpSSLServer::do_accept]({0}:{1}) Begin Accept.",
+        PSS_LOGGER_INFO("[ CTcpSSLServer::do_accept ]( { 0 } : { 1 } ) Begin Accept.",
             acceptor_->local_endpoint().address().to_string(),
             acceptor_->local_endpoint().port());
 
@@ -58,22 +58,24 @@ std::string CTcpSSLServer::get_password() const
 */
 void CTcpSSLServer::do_accept()
 {
-    acceptor_->async_accept(
-        [this](const std::error_code& error, tcp::socket socket)
+    acceptor_->async_accept
+    (
+
+        [ this ] ( const std::error_code& error , tcp::socket socket )
         {
             if (!error)
             {
                 std::make_shared<CTcpSSLSession>(
-                    asio::ssl::stream<tcp::socket>(
-                        std::move( socket ), context_), io_context_)->open(packet_parse_id_, max_recv_size_);
+                    asio::ssl::stream<tcp::socket>(  std::move( socket ) , this->context_  ) , this->io_context_  )->open( packet_parse_id_ , max_recv_size_ );
             }
             else
             {
                 PSS_LOGGER_DEBUG("[CTcpSSLServer::do_accept]listen error={0}", error.message());
             }
 
-            do_accept();
-        });
+            this->do_accept();
+        }
+    );
 }
 
 void CTcpSSLServer::send_accept_listen_fail(std::error_code ec) const
