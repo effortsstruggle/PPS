@@ -1,9 +1,20 @@
 ﻿#include "IotoIo.h"
 
+
+/**
+ * @brief  add_session_io_mapping 添加 "io to io" 及 " session to session " 的映射
+ * @param from_io  
+ * @param from_io_type 
+ * @param to_io 
+ * @param to_io_type 
+ * @param bridge_type 
+ * @return 
+*/
 bool CIotoIo::add_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE from_io_type, const _ClientIPInfo& to_io, EM_CONNECT_IO_TYPE to_io_type, ENUM_IO_BRIDGE_TYPE bridge_type)
 {
     std::lock_guard <std::mutex> lock(mutex_);
 
+    //查找 from_io 是否存在
     for (const auto& Connect_Info : this->io_2_io_list_)
     {
         if ( true == this->compare_connect_io( from_io , from_io_type , Connect_Info.from_io_ , Connect_Info.from_io_type_ ) )
@@ -275,9 +286,15 @@ bool CIotoIo::compare_connect_io(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYP
     }
 }
 
+/**
+ * @brief  get_regedit_session_id 获取已注册的会话ID
+ * @param from_io  客户端IP信息
+ * @param io_type  连接类型 
+ * @return 
+*/
 uint32 CIotoIo::get_regedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE io_type)
 {
-    auto from_io_key = this->get_connect_list_key( from_io, io_type );
+    auto from_io_key = this->get_connect_list_key( from_io , io_type );
 
     auto f = this->connect_list_.find( from_io_key );
 

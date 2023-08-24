@@ -10,7 +10,7 @@ CTcpClientSession::CTcpClientSession( asio::io_context* io_context)
  * @param io_info 
  * @return 
 */
-bool CTcpClientSession::start(const CConnect_IO_Info& io_info)
+bool CTcpClientSession::start( const CConnect_IO_Info& io_info )
 {
     this->server_id_ = io_info.server_id;
 
@@ -351,7 +351,7 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
         this->packet_parse_interface_->packet_connect_ptr_( connect_id_ , remote_ip_ , local_ip_ , io_type_ , App_IoBridge::instance() );
 
         //添加点对点映射
-        if (true == App_IoBridge::instance()->regedit_session_id(this->remote_ip_ , this->io_type_ , this->connect_id_))
+        if (true == App_IoBridge::instance()->regedit_session_id( this->remote_ip_ , this->io_type_ , this->connect_id_))
         {
             io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
         }

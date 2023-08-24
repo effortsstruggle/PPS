@@ -854,7 +854,7 @@ int CWorkThreadLogic::do_io_bridge_data(uint32 connect_id, uint32 io_bradge_conn
     {
             if ( false == this->send_io_bridge_message( io_bradge_connect_id_, bridge_packet ) )
             {
-                //发送失败，将数据包会给业务逻辑去处理
+                //发送失败，将数据包会给 ”本地的业务逻辑 “去处理
                 std::vector<std::shared_ptr<CMessage_Packet>> message_error_list;
                 bridge_packet->command_id_ = LOGIC_IOTOIO_DATA_ERROR;
                 message_error_list.emplace_back(bridge_packet);
@@ -902,12 +902,14 @@ bool CWorkThreadLogic::send_io_bridge_message(uint32 io_bridge_connect_id, std::
 {
     uint16 curr_thread_index = io_bridge_connect_id % thread_count_;
 
-    auto module_logic = thread_module_list_[curr_thread_index];
+    auto module_logic = thread_module_list_[ curr_thread_index ];
 
+    //通过桥接id , 获取对应的会话
     auto session = module_logic->get_session_interface( io_bridge_connect_id );
 
     if (nullptr != session)
     {
+        //通过桥接ID  ，获取对应的桥接会话 ； 
         session->do_write_immediately( io_bridge_connect_id, send_packet->buffer_.c_str(), send_packet->buffer_.size() );
 
         return true;

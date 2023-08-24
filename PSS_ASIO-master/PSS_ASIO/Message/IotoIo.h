@@ -8,18 +8,18 @@
 #include "IIoBridge.hpp"
 
 /**
- * @brief CIo_Connect_Info 
+ * @brief CIo_Connect_Info  IO连接信息
 */
 class CIo_Connect_Info
 {
 public:
     CIo_Connect_Info() = default;
 
-    _ClientIPInfo from_io_;
+    _ClientIPInfo from_io_; //从哪来
     EM_CONNECT_IO_TYPE from_io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_TCP;
     uint32 from_session_id_ = 0;
     
-    _ClientIPInfo to_io_;
+    _ClientIPInfo to_io_; //到哪去
     EM_CONNECT_IO_TYPE to_io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_TCP;
     uint32 to_session_id_ = 0;
     
@@ -75,12 +75,12 @@ private:
     void delete_session_list(uint32 session_id);
 
     using hashmapconnectlist = unordered_map< std::string , uint32 >;
+                                                                    
+    hashmapconnectlist connect_list_;  //【客户端信息  / 服务器信息 （IP:Port TCP/UDP）， 连接ID 】 连接ID 是全局唯一的
 
-    hashmapconnectlist connect_list_;  //【客户端信息  / 服务器信息， 会话ID 】
+    std::vector< CIo_Connect_Info > io_2_io_list_;
 
-    std::vector<CIo_Connect_Info> io_2_io_list_;
-
-    std::vector<CIo_Connect_Info> session_to_session_list_;//【客户端信息 ， 服务器信息】
+    std::vector< CIo_Connect_Info > session_to_session_list_;//【客户端信息 ， 服务器信息】
 
     std::mutex mutex_;
 };
