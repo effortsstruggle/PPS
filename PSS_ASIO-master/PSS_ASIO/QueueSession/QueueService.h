@@ -4,6 +4,9 @@
 #include "shm_queue/shm_queue.hpp"
 #include <map>
 
+/**
+ * @brief 管理业务逻辑插件与平台交互的消息
+*/
 class CQueueSessionManager
 {
 public:
@@ -19,7 +22,7 @@ public:
 
 private:
     using hashmapqueuelist = unordered_map<shm_queue::shm_key, std::shared_ptr<shm_queue::CShm_message_queue>>;
-    hashmapqueuelist queue_list_;
+    hashmapqueuelist queue_list_; //<共享内存唯一标识 ， 共享消息队列>
     std::mutex mutex_;
 };
 

@@ -55,7 +55,7 @@ namespace shm_queue {
             //首先锁住进程所，让读取先不做操作
             ::WaitForSingleObject(process_mutext_, INFINITE);
 
-            //寻找一个空余的共享内存卡槽，将数据插入进去
+            //寻找一个空余的共享内存卡槽（找到开始位置），将数据插入进去
             for (auto& message : message_list_)
             {
                 if (message->shm_message_ == Shm_message_type::MESSAGE_IS_EMPTY)
@@ -143,7 +143,7 @@ namespace shm_queue {
                 {
                     close_func_(shm_key_);
                 }
-                });
+            });
         }
 
         //关闭当前接收线程
@@ -218,10 +218,10 @@ namespace shm_queue {
         {
             for (int i = 0; i < message_count; i++)
             {
-                CShm_head* shm_head = (CShm_head*)&shm_ptr_[i * (sizeof(CShm_head) + message_size)];
-                shm_head->message_begin_ = i * (sizeof(CShm_head) + message_size) + sizeof(CShm_head);
-                shm_head->message_end_ = i * (sizeof(CShm_head) + message_size) + sizeof(CShm_head) + message_count;
-                if (shm_memory_state_ == Shm_memory_state::SHM_INIT)
+                CShm_head* shm_head = (CShm_head*)&shm_ptr_[i * ( sizeof(CShm_head) + message_size )];
+                shm_head->message_begin_ = i * ( sizeof(CShm_head) + message_size ) + sizeof(CShm_head);
+                shm_head->message_end_ = i * ( sizeof(CShm_head) + message_size ) + sizeof(CShm_head) + message_count;
+                if ( shm_memory_state_ == Shm_memory_state::SHM_INIT )
                 {
                     shm_head->message_max_size_ = message_size;
                     shm_head->shm_message_ = Shm_message_type::MESSAGE_IS_EMPTY;

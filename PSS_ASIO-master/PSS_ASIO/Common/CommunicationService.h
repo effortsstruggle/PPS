@@ -20,17 +20,17 @@
 class CCommunicationIOInfo
 {
 public:
-    std::shared_ptr<ISession> session_;
+    std::shared_ptr<ISession> session_; //会话信息
     
     uint32 connect_id_; //连接ID
     
-    CConnect_IO_Info io_info_; //链接信息
+    CConnect_IO_Info io_info_; //IO的连接信息
 
     EM_CONNECT_IO_TYPE io_type_; //连接IO的类型
 
 };
 
-using Communication_funtion = std::function<void(CCommunicationIOInfo&)>;
+using Communication_funtion = std::function<void (CCommunicationIOInfo&)>;
 
 /**
  * @brief IO通信服务

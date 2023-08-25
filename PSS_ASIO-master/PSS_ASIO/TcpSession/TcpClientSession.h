@@ -66,11 +66,12 @@ private:
 
     asio::io_context* io_context_ = nullptr;
     uint32 server_id_  = 0; //服务器ID
-    uint32 connect_id_ = 0; //链接ID
 
-    uint32 io_bradge_connect_id_ = 0;
+    uint32 connect_id_ = 0; //连接ID
 
-    bool is_connect_ = false;
+    uint32 io_bradge_connect_id_ = 0; //与当前会话绑定的桥接ID
+
+    bool is_connect_ = false; //是否成功建立连接标志
     
 
     CSessionBuffer session_recv_buffer_;    //接收缓冲区

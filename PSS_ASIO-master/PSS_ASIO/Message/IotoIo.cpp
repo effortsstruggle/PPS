@@ -93,10 +93,10 @@ bool CIotoIo::delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT
 }
 
 /**
- * @brief  regedit_session_id 注册客户端会话记录
+ * @brief  regedit_session_id 注册会话记录
  * @param from_io 
  * @param io_type 
- * @param session_id  新的会话ID
+ * @param session_id  新的会话ID(建立的连接ID ， 一定时唯一的)
  * @return 
 */
 bool CIotoIo::regedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYPE io_type, uint32 session_id)
@@ -177,22 +177,28 @@ void CIotoIo::unregedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_T
     }
 
 }
-
+/**
+ * @brief get_to_session_id 获取会话ID
+ * @param session_id （连接ID）
+ * @param from_io 
+ * @return 
+*/
 uint32 CIotoIo::get_to_session_id(uint32 session_id, const _ClientIPInfo& from_io)
 {
     std::lock_guard <std::mutex> lock(mutex_);
+
     for (const auto& s_2_s :  this->session_to_session_list_)
     {
         if ( s_2_s.from_session_id_ == session_id 
-            && (s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_FROM || s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH))
+            && ( s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_FROM || s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH ) )
         {
-            return this->get_endpoint_session_id(from_io, s_2_s);
+            return this->get_endpoint_session_id( from_io , s_2_s );
         }
         
         if (s_2_s.to_session_id_ == session_id
             &&(s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_TO || s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH))
         {
-            return get_endpoint_session_id(from_io, s_2_s);
+            return this->get_endpoint_session_id( from_io, s_2_s );
         }
     }
 
@@ -240,22 +246,22 @@ const CIo_Connect_Info* CIotoIo::find_io_to_io_list(const _ClientIPInfo& from_io
 
 uint32 CIotoIo::get_endpoint_session_id(const _ClientIPInfo& from_io, const CIo_Connect_Info& s_2_s)
 {
-    if (s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH)
+    if ( s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_BATH )
     {
         return s_2_s.to_session_id_;
     }
     else if (s_2_s.bridge_type_ == ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_FROM)
     {
-        //判断两个IP是否相等
+        //判断两个IP是否相等及端口
         if (from_io == s_2_s.from_io_)
         {
             return s_2_s.to_session_id_;
         }
     }
-    else
+    else // ENUM_IO_BRIDGE_TYPE::IO_BRIDGE_TO
     {
         //判断两个IP是否相等
-        if (from_io == s_2_s.to_io_)
+        if ( from_io == s_2_s.to_io_ )
         {
             return s_2_s.to_session_id_;
         }

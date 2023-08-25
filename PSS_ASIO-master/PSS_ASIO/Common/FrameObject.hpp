@@ -10,7 +10,7 @@ enum class ENUM_LOGIC_COMMAND_TYPE
 };
 
 /**
- * @brief 逻辑指令ID    
+ * @brief 业务逻辑指令ID    
 */
 class CLogic_Command_Info
 {

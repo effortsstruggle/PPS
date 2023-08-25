@@ -45,7 +45,7 @@ bool CIoBridge::delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNE
 }
 
 /**
- * @brief  regedit_session_id 注册会话机制
+ * @brief  regedit_session_id 注册 session
  * @param from_io  客户端IO信息
  * @param io_type 连接类型（Tcp / Udp ）
  * @param session_id  会话ID

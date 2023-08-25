@@ -2,7 +2,7 @@
 
 #include "define.h"
 
-//所有IO接口的虚类
+//所有IO接口的虚类(IO Session)
 //add by freeeyes
 
 //提供一个格式化发送数据的函数接口

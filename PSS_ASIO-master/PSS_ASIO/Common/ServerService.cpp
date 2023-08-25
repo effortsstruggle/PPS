@@ -80,7 +80,7 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     #endif
 
     //读取配置文件
-    if (false == App_ServerConfig::instance()->read_server_config_file(pss_config_file_name))
+    if ( false == App_ServerConfig::instance()->read_server_config_file(pss_config_file_name) )
     {
         PSS_LOGGER_DEBUG("[CServerService::init_servce] configure file {0} read fail. ", pss_config_file_name);
         return false;
@@ -182,12 +182,12 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
         {
             //正常的tcp链接
             auto tcp_service = std::make_shared< CTcpServer >(
-                                                                                               io_context_ ,
-                                                                                               tcp_server.ip_ ,
-                                                                                               tcp_server.port_ ,
-                                                                                               tcp_server.packet_parse_id_ ,
-                                                                                               tcp_server.recv_buff_size_ 
-                                                                                            );
+                                                                io_context_ ,
+                                                                tcp_server.ip_ ,
+                                                                tcp_server.port_ ,
+                                                                tcp_server.packet_parse_id_ ,
+                                                                tcp_server.recv_buff_size_ 
+                                                            );
 
             this->tcp_service_list_.emplace_back( tcp_service );
         }
@@ -197,14 +197,14 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     for (auto udp_server : App_ServerConfig::instance()->get_config_udp_list())
     {
         auto udp_service = std::make_shared< CUdpServer >(
-                                                                                                io_context_, 
-                                                                                                udp_server.ip_,
-                                                                                                udp_server.port_,
-                                                                                                udp_server.packet_parse_id_,
-                                                                                                udp_server.recv_buff_size_,
-                                                                                                udp_server.send_buff_size_,
-                                                                                                udp_server.em_net_type_
-                                                                                            );
+                                                            io_context_, 
+                                                            udp_server.ip_,
+                                                            udp_server.port_,
+                                                            udp_server.packet_parse_id_,
+                                                            udp_server.recv_buff_size_,
+                                                            udp_server.send_buff_size_,
+                                                            udp_server.em_net_type_
+                                                        );
         udp_service->start();
 
         this->udp_service_list_.emplace_back( udp_service );
@@ -214,13 +214,13 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     for (auto kcp_server : App_ServerConfig::instance()->get_config_kcp_list())
     {
         auto kcp_service = std::make_shared<CKcpServer>(
-                                                                                            io_context_,
-                                                                                            kcp_server.ip_,
-                                                                                            kcp_server.port_,
-                                                                                            kcp_server.packet_parse_id_,
-                                                                                            kcp_server.recv_buff_size_,
-                                                                                            kcp_server.send_buff_size_
-                                                                                        );
+                                                            io_context_,
+                                                            kcp_server.ip_,
+                                                            kcp_server.port_,
+                                                            kcp_server.packet_parse_id_,
+                                                            kcp_server.recv_buff_size_,
+                                                            kcp_server.send_buff_size_
+                                                        );
         kcp_service->start();
 
         this->kcp_service_list_.emplace_back(kcp_service);
@@ -230,10 +230,10 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
     for (auto tty_server : App_ServerConfig::instance()->get_config_tty_list())
     {
         auto tty_service = make_shared<CTTyServer>(
-                                                                                    tty_server.packet_parse_id_,
-                                                                                    tty_server.recv_buff_size_,
-                                                                                    tty_server.send_buff_size_
-                                                                                  );
+                                                    tty_server.packet_parse_id_,
+                                                    tty_server.recv_buff_size_,
+                                                    tty_server.send_buff_size_
+                                                  );
         tty_service->start( 
                             &io_context_, 
                             tty_server.tty_name_, 

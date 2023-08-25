@@ -111,10 +111,10 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     {
         //IO是TTY
 		auto tty_client_session = make_shared< CTTyServer >(
-			                                                                                        connect_info.io_info_.packet_parse_id,
-			                                                                                        connect_info.io_info_.recv_size,
-			                                                                                        connect_info.io_info_.send_size
-			                                                                                  );
+			                                                    connect_info.io_info_.packet_parse_id,
+			                                                    connect_info.io_info_.recv_size,
+			                                                    connect_info.io_info_.send_size
+			                                                );
 
         //开启串口，接收数据
 		tty_client_session->start(
@@ -180,7 +180,7 @@ bool CCommunicationService::is_exist(uint32 server_id)
 
 /**
  * @brief each 转发接口，为每个IO通信请求链接
- * @param communication_funtion 
+ * @param communication_funtion  -- using Communication_funtion = std::function<void (CCommunicationIOInfo&)>;
 */
 void CCommunicationService::each( Communication_funtion communication_funtion )
 {

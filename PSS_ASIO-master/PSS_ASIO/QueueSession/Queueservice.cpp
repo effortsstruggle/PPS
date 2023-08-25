@@ -4,8 +4,8 @@
 bool CQueueSessionManager::create_queue(shm_queue::shm_key key, size_t message_size, int message_count)
 {
     std::lock_guard <std::mutex> lock(mutex_);
-    auto f = queue_list_.find(key);
-    if (f != queue_list_.end())
+    auto f = this->queue_list_.find(key);
+    if (f != this->queue_list_.end())
     {
         return true;
     }
@@ -18,7 +18,7 @@ bool CQueueSessionManager::create_queue(shm_queue::shm_key key, size_t message_s
     }
     else
     {
-        queue_list_[key] = message_queue;
+        this->queue_list_[key] = message_queue;
         return true;
     }
 }
@@ -99,7 +99,7 @@ bool CQueueSessionManager::set_recv_function(shm_queue::shm_key key, const shm_q
     auto f = queue_list_.find(key);
     if (f != queue_list_.end())
     {
-        f->second->recv_message(fn_logic);
+        f->second->recv_message( fn_logic );
         return true;
     }
     else

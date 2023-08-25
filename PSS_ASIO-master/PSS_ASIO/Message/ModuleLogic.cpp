@@ -9,7 +9,7 @@ void CModuleLogic::init_logic(const command_to_module_function& command_to_modul
 
 void CModuleLogic::add_session(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
 {
-    this->sessions_interface_.add_session_interface(connect_id, session, local_info, romote_info);
+    this->sessions_interface_.add_session_interface( connect_id, session , local_info , romote_info );
 }
 
 shared_ptr<ISession> CModuleLogic::get_session_interface(uint32 connect_id)
@@ -206,7 +206,7 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
 
     for (const auto& command_info : this->load_module_.get_module_function_list( )  )
     {
-        PSS_LOGGER_DEBUG("[load_module_]register command id={0}", command_info.first);
+        PSS_LOGGER_DEBUG("[ load_module_ ] register command id ={ 0 }", command_info.first);
     }
 
     PSS_LOGGER_DEBUG("[ load_module_ ] >>>>>>>>>>>>>>>>> ");
@@ -214,8 +214,8 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     //每个“工作线程ID” ， 创建对应的执行“业务逻辑任务”线程
     /**
     *  1. thread_count ： 本地的工作线程ID ， plugin_work_thread_buffer_list_ 插件的工作线程ID
-    *  2. 每个"工作线程ID",对应一个“业务逻辑任务”线程
-    *  3.“业务逻辑任务”中，维持一个消息队列，用来存储该“业务逻辑任务线程”需要执行的消息
+    *  2. 每个"工作线程ID",对应一个“业务逻辑任务[ CLogicTasK ]”线程
+    *  3.“业务逻辑任务 [CLogicTasK]”中，维持一个消息队列，用来存储该“业务逻辑任务线程”需要执行的消息
     */
     for (int i = 0 ; i < thread_count ; i++ )
     {
@@ -280,23 +280,24 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     for (const auto& plugin_logic : this->plugin_work_thread_buffer_Func_list_)
     {
         this->do_work_thread_logic (
-                                                        plugin_logic->tag_thread_id_,
-                                                        plugin_logic->delay_timer_,
-                                                        plugin_logic->func_
-                                                    );
+                                        plugin_logic->tag_thread_id_,
+                                        plugin_logic->delay_timer_,
+                                        plugin_logic->func_
+                                    );
     }
     this->plugin_work_thread_buffer_Func_list_.clear();
 
     //定时检查任务，定时检查服务器状态
     App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(chrono::seconds(0), chrono::seconds(timeout_seconds), 
-                                                                                                            [this, timeout_seconds]()
-                                                                                                            {
-                                                                                                                //添加到数据队列处理
-                                                                                                                App_tms::instance()->AddMessage(0, [this, timeout_seconds] ()
-                                                                                                                                                                            {
-                                                                                                                                                                                this->run_check_task(timeout_seconds);
-                                                                                                                                                                            });
-                                                                                                            }
+                                                                [this, timeout_seconds]()
+                                                                {
+                                                                    //添加到数据队列处理
+                                                                    App_tms::instance()->AddMessage(0, [this, timeout_seconds] ()
+                                                                                                        {
+                                                                                                            this->run_check_task(timeout_seconds);
+                                                                                                        }
+                                                                                                  );
+                                                                }
     );
     
 }
@@ -402,7 +403,7 @@ void CWorkThreadLogic::add_frame_events(uint16 command_id, uint32 mark_id, const
 
 void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
 {
-    //session 建立连接
+    //session 建立连接 ( 0 , 1 , 2 ）默认的3个业务逻辑模块
     uint16 curr_thread_index = connect_id % this->thread_count_ ;
 
     auto module_logic = this->thread_module_list_[ curr_thread_index ];
@@ -416,27 +417,27 @@ void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession
     }
 
     //向插件告知链接建立消息
-    App_tms::instance()->AddMessage(   curr_thread_index, 
-                                                                [session, connect_id, module_logic, local_info, romote_info]() 
-                                                                {
-                                                                    module_logic->add_session( connect_id, session, local_info, romote_info);
+    App_tms::instance()->AddMessage(curr_thread_index, 
+                                    [session, connect_id, module_logic, local_info, romote_info]() 
+                                    {
+                                        module_logic->add_session( connect_id, session, local_info, romote_info);
 
-                                                                    CMessage_Source source;
-                                                                    auto recv_packet = std::make_shared<CMessage_Packet>();
-                                                                    auto send_packet = std::make_shared<CMessage_Packet>();
+                                        CMessage_Source source;
+                                        auto recv_packet = std::make_shared<CMessage_Packet>();
+                                        auto send_packet = std::make_shared<CMessage_Packet>();
 
-                                                                    recv_packet->command_id_ = LOGIC_COMMAND_CONNECT;
+                                        recv_packet->command_id_ = LOGIC_COMMAND_CONNECT;
 
-                                                                    source.connect_id_ = connect_id;
-                                                                    source.work_thread_id_ = module_logic->get_work_thread_id();
-                                                                    source.type_ = session->get_io_type();
-                                                                    source.connect_mark_id_ = session->get_mark_id(connect_id);
-                                                                    source.local_ip_ = local_info;
-                                                                    source.remote_ip_ = romote_info;
+                                        source.connect_id_ = connect_id;
+                                        source.work_thread_id_ = module_logic->get_work_thread_id();
+                                        source.type_ = session->get_io_type();
+                                        source.connect_mark_id_ = session->get_mark_id(connect_id);
+                                        source.local_ip_ = local_info;
+                                        source.remote_ip_ = romote_info;
 
-                                                                    module_logic->do_thread_module_logic( source , recv_packet, send_packet);
+                                        module_logic->do_thread_module_logic( source , recv_packet, send_packet);
 
-                                                                }
+                                    }
     );
 }
 

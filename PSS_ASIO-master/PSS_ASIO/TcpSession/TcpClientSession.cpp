@@ -50,13 +50,13 @@ bool CTcpClientSession::start( const CConnect_IO_Info& io_info )
     }
 
     //异步链接
-    tcp::endpoint end_point(asio::ip::address::from_string( io_info.server_ip.c_str( ) ) , io_info.server_port );
+    tcp::endpoint end_point( asio::ip::address::from_string( io_info.server_ip.c_str( ) ) , io_info.server_port );
     
     tcp::resolver::results_type::iterator endpoint_iter;
 
     this->socket_.async_connect(  end_point , 
-                                                    std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
-                                                );
+                                  std::bind(&CTcpClientSession::handle_connect, this , std::placeholders::_1 , endpoint_iter) 
+                               );
     return true;
 }
 
@@ -220,7 +220,7 @@ EM_CONNECT_IO_TYPE CTcpClientSession::get_io_type()
 uint32 CTcpClientSession::get_mark_id(uint32 connect_id)
 {
     PSS_UNUSED_ARG(connect_id);
-    return server_id_;
+    return this->server_id_;
 }
 
 std::chrono::steady_clock::time_point& CTcpClientSession::get_recv_time(uint32 connect_id)
@@ -277,13 +277,17 @@ void CTcpClientSession::do_read_some(std::error_code ec, std::size_t length)
         recv_data_size_ += length;
         this->session_recv_buffer_.set_write_data(length);
         
-        PSS_LOGGER_DEBUG("[CTcpClientSession::do_write]recv length={}.", length);
+        PSS_LOGGER_DEBUG("[ CTcpClientSession::do_write ] recv length = { }.", length);
 
         //判断是否有桥接
-        if (EM_SESSION_STATE::SESSION_IO_BRIDGE == io_state_)
+        if (EM_SESSION_STATE::SESSION_IO_BRIDGE == this->io_state_)
         {
             //将数据转发给桥接接口
-            auto ret = App_WorkThreadLogic::instance()->do_io_bridge_data(connect_id_, io_bradge_connect_id_, session_recv_buffer_, length, shared_from_this());
+            auto ret = App_WorkThreadLogic::instance()->do_io_bridge_data( this->connect_id_ ,
+                                                                           this->io_bradge_connect_id_ , 
+                                                                           this->session_recv_buffer_, 
+                                                                           length, 
+                                                                           shared_from_this() );
             if (1 == ret)
             {
                 //远程IO链接已断开
@@ -336,29 +340,28 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
 
         this->recv_data_time_ = std::chrono::steady_clock::now();
 
-        //处理链接建立消息
-        this->remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
-
+        //处理链接建立消息 (连接的远程服务器信息)
+        this->remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string(); 
         this->remote_ip_.m_u2Port = socket_.remote_endpoint().port();
 
+        //本地的连接信息
         this->local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
-
         this->local_ip_.m_u2Port = socket_.local_endpoint().port();
 
-        PSS_LOGGER_DEBUG("[CTcpClientSession::start]remote({0}:{1})", remote_ip_.m_strClientIP, remote_ip_.m_u2Port);
-        PSS_LOGGER_DEBUG("[CTcpClientSession::start]local({0}:{1})", local_ip_.m_strClientIP, local_ip_.m_u2Port);
+        PSS_LOGGER_DEBUG("[ CTcpClientSession::start ]remote({ 0 }:{ 1 })", remote_ip_.m_strClientIP, remote_ip_.m_u2Port);
+        PSS_LOGGER_DEBUG("[ CTcpClientSession::start ]local({ 0 }:{ 1 })", local_ip_.m_strClientIP, local_ip_.m_u2Port);
 
         this->packet_parse_interface_->packet_connect_ptr_( connect_id_ , remote_ip_ , local_ip_ , io_type_ , App_IoBridge::instance() );
 
         //添加点对点映射
         if (true == App_IoBridge::instance()->regedit_session_id( this->remote_ip_ , this->io_type_ , this->connect_id_))
         {
-            io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
+            this->io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
         }
 
         //查看这个链接是否有桥接信息
         this->io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id(this->connect_id_ , this->remote_ip_);
-        if (this->io_bradge_connect_id_ > 0)
+        if ( this->io_bradge_connect_id_ > 0 )
         {
             App_WorkThreadLogic::instance()->set_io_bridge_connect_id(this->connect_id_ , this->io_bradge_connect_id_);
         }

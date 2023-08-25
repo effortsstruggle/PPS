@@ -9,7 +9,7 @@ using plugin_api_logic = std::function< std::string(std::string) >;
 //暴露给插件调用的接口
 //add by freeeyes
 
-//逻辑调用框架接口信息
+//逻辑调用框架接口信息( 插件Session )
 class ISessionService
 {
 public:

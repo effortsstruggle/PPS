@@ -51,5 +51,5 @@ public:
     };
 private:
     using hashmapsessions = unordered_map<uint32, CSessionIOInfo>;
-    hashmapsessions sessions_list_;
+    hashmapsessions sessions_list_; //[会话ID ， 会话IO信息]
 };

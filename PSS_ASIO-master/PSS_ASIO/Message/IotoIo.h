@@ -45,7 +45,7 @@ public:
 };
 
 /**
- * @brief CIotoIo IO 到 IO的会话
+ * @brief CIotoIo IO 到 IO的 session
 */
 class CIotoIo 
 {

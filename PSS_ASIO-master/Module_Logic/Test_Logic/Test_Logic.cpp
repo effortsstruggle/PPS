@@ -100,7 +100,7 @@ int load_module(IFrame_Object* frame_object, string module_param)
 
     PSS_LOGGER_DEBUG("[ load_module ]( { 0 } ) finish.", module_param);
 
-    //测试服务器间通讯
+    //测试业务逻辑插件与平台通信
     shm_queue::shm_key key = 11111;
     bool ret = session_service->create_queue(key, 100, 10);
     if (ret)
