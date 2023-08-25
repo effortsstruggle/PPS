@@ -20,9 +20,9 @@ using asio::ip::tcp;
 class CTcpSession : public std::enable_shared_from_this<CTcpSession>, public ISession
 {
 public:
-    explicit CTcpSession(tcp::socket socket, asio::io_context* io_context);
+    explicit CTcpSession( tcp::socket socket, asio::io_context* io_context );
 
-    void open(uint32 packet_parse_id, uint32 recv_size);
+    void open( uint32 packet_parse_id , uint32 recv_size );
 
     _ClientIPInfo get_remote_ip(uint32 connect_id) final;
 
@@ -61,8 +61,11 @@ private:
     asio::io_context* io_context_ = nullptr;
     uint32 connect_id_ = 0;
     uint32 io_bradge_connect_id_ = 0;
-    CSessionBuffer session_recv_buffer_;
+
+    CSessionBuffer session_recv_buffer_ ; //接收缓冲区
+    
     std::string session_send_buffer_;
+    
     shared_ptr<_Packet_Parse_Info> packet_parse_interface_ = nullptr;
 
     std::mutex send_thread_mutex_;
@@ -74,9 +77,11 @@ private:
 
     _ClientIPInfo remote_ip_;
     _ClientIPInfo local_ip_;
-    std::chrono::steady_clock::time_point recv_data_time_ = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point recv_data_time_ = std::chrono::steady_clock::now(); //开启接收数据的时间
 
     EM_CONNECT_IO_TYPE io_type_ = EM_CONNECT_IO_TYPE::CONNECT_IO_TCP;
+
     EM_SESSION_STATE io_state_ = EM_SESSION_STATE::SESSION_IO_LOGIC;
+
 };
 

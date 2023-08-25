@@ -20,11 +20,12 @@ void CModuleInterface::copy_from_module_list(const command_to_module_function& c
 */
 int CModuleInterface::do_module_message(const CMessage_Source& source, std::shared_ptr<CMessage_Packet> recv_packet, std::shared_ptr<CMessage_Packet> send_packet)
 {
-    auto f = this->command_to_module_function_.find( recv_packet->command_id_ );
-    if (f != this->command_to_module_function_.end()) //存在该指令
+    auto f = this->command_to_module_function_.find(  recv_packet->command_id_  );
+
+    if ( f != this->command_to_module_function_.end() ) //存在该指令
     {
-        //执行插件函数 (插件的do_module_message 或 指定的指令的接口)
-        return f->second(source, recv_packet, send_packet);
+        //执行插件函数 ( 插件的do_module_message 或 指定的指令的接口 )
+        return f->second( source , recv_packet ,  send_packet );
     }
     else //不存在该指令
     {
@@ -33,7 +34,10 @@ int CModuleInterface::do_module_message(const CMessage_Source& source, std::shar
     }
 }
 
+/**
+ * @brief close     清空加载的插件指令
+*/
 void CModuleInterface::close()
 {
-    command_to_module_function_.clear();
+    this->command_to_module_function_.clear();
 }

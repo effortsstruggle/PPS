@@ -175,11 +175,11 @@ private:
     using hashmappluginworkthread = unordered_map<uint32, shared_ptr<CModuleLogic> >;
     using hashmaplogictimer = unordered_map<uint64, brynet::Timer::WeakPtr>;
     
-    hashmappluginworkthread plugin_work_thread_list_;//[ 工作线程ID标识，业务模块逻辑]
+    hashmappluginworkthread plugin_work_thread_list_;//[ 插件工作线程ID，业务模块逻辑 ]
 
     hashmaplogictimer plgin_timer_list_;
 
-    std::vector< std::shared_ptr<CModuleLogic> > thread_module_list_;  //业务逻辑模表列表（ 工作线程ID，[指令,指令处理接口] 等信息）
+    std::vector< std::shared_ptr< CModuleLogic > > thread_module_list_;  //业务逻辑模表列表（ 工作线程ID，[指令,指令处理接口] 等信息）
 
     CLoadModule load_module_; //模块（插件）加载封装类
 
@@ -189,13 +189,13 @@ private:
 
     uint16 io_send_time_check_ = 0; //IO发送周期检查
 
-    ICommunicationInterface* communicate_service_ = nullptr; //通信服务(服务器间链接库)
+    ICommunicationInterface* communicate_service_ = nullptr; //IO通信服务(服务器间链接库)
 
     bool module_init_finish_ = false; //“业务逻辑模块”初始化结束标志
 
-    std::vector<uint32> plugin_work_thread_buffer_list_;
+    std::vector<uint32> plugin_work_thread_buffer_list_; //插件的工作线程ID缓冲区列表（由插入的插件确定）
 
-    std::vector< CDelayPluginMessage > plugin_work_thread_buffer_message_list_;
+    std::vector< CDelayPluginMessage > plugin_work_thread_buffer_message_list_;  //插件的指令列表
 
     std::vector< std::shared_ptr<CDelayPluginFunc> > plugin_work_thread_buffer_Func_list_;
 

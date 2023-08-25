@@ -13,7 +13,7 @@
 //定义插件函数指针入口
 using load_module_function_ptr = int(*)(IFrame_Object*, string module_param);
 using unload_module_function_ptr = void(*)(void);
-using do_message_function_ptr = int(*)(const CMessage_Source&, std::shared_ptr<CMessage_Packet>, std::shared_ptr<CMessage_Packet>);
+using do_message_function_ptr = int(*)( const CMessage_Source& , std::shared_ptr<CMessage_Packet> , std::shared_ptr<CMessage_Packet> );
 using get_module_state_function_ptr = bool(*)(uint32&);
 using set_output_function_ptr = void(*)(shared_ptr<spdlog::logger>);
 using module_run_finction_ptr = int(*)(std::shared_ptr<CMessage_Packet>, std::shared_ptr<CMessage_Packet>);
@@ -27,21 +27,23 @@ using plugin_name_to_module_run = unordered_map<std::string, module_run_finction
 class _ModuleInfo
 {
 public:
-    string           module_file_name_;     //模块文件名称
-    string           module_file_path_;     //模块路径
-    string           module_param_;         //模块启动参数
+    _ModuleInfo() = default;
+
+    std::string           module_file_name_;     //模块文件名称
+    std::string           module_file_path_;     //模块路径
+    std::string           module_param_;         //模块启动参数
     PSS_Time_Point   load_module_time_ = CTimeStamp::Get_Time_Stamp(); //模块创建时间
     Pss_Library_Handler hModule_                     = nullptr; //模块句柄（在内存中的位置）
-    load_module_function_ptr load_module_            = nullptr; //
+    load_module_function_ptr load_module_            = nullptr; // 加载模块
     unload_module_function_ptr unload_module_        = nullptr;
-    do_message_function_ptr do_message_              = nullptr; //指令的处理接口
+    do_message_function_ptr do_message_              = nullptr;  // 指令的处理接口
     get_module_state_function_ptr get_module_state_  = nullptr;
     set_output_function_ptr set_output_              = nullptr;
     module_run_finction_ptr module_run_finction_ptr_ = nullptr; //模块运行的接口
 
     vector<uint16> command_id_list_; //模块指令列表（通过第三方模块来获取）
 
-    _ModuleInfo() = default;
+
 };
 
 class CLoadModule
@@ -77,13 +79,14 @@ private:
 
 private:
     using hashmapModuleList = unordered_map<string, shared_ptr<_ModuleInfo> >;
-    hashmapModuleList                  module_list_; //业务逻辑模块注册列表 [模块名称,模块信息]  (
 
-    std::vector<std::string>                     module_name_list_;  //当前业务逻辑模块名称列表
+    hashmapModuleList                  module_list_; //[ 模块名称,模块信息 ]  ( 业务逻辑模块注册列表 ）
+
+    std::vector<std::string>                     module_name_list_;  //当前 [ 业务逻辑模块名称 ] 列表
 
     command_to_module_function command_to_module_function_; //[ 业务逻辑模块指令 , 指令的处理函数 ] 映射
 
     plugin_name_to_module_run plugin_name_to_module_run_; //[ 业务逻辑模块名称 , 模块运行接口 ] 映射
     
-    ISessionService* session_service_; //会话服务
+    ISessionService* session_service_; //[ 本地与插件的会话 ]
 };

@@ -5,10 +5,10 @@
  * @param io_service_context 
  * @param timeout_seconds 
 */
-void CCommunicationService::init_communication_service(asio::io_context* io_service_context, uint16 timeout_seconds)
+void CCommunicationService::init_communication_service ( asio::io_context* io_service_context ,  uint16 timeout_seconds)
 {
     //读取配置文件，链接服务器
-    io_service_context_ = io_service_context;
+    this->io_service_context_ = io_service_context;
 
     //定时检查任务，检查服务器间链接的状态。（ 程序运行期间，一直检测该会话是否处于链接状态 ） 心跳机制
     App_TimerManager::instance()->GetTimerPtr()->addTimer_loop(  chrono::seconds(0) , chrono::seconds(timeout_seconds) , 
@@ -25,17 +25,21 @@ void CCommunicationService::init_communication_service(asio::io_context* io_serv
 }
 
 /**
- * @brief 添加服务器链接
+ * @brief 添加服务器间的连接 
  * @param io_info 
  * @param io_type 
  * @return 
 */
-bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
+bool CCommunicationService::add_connect( const CConnect_IO_Info& io_info , EM_CONNECT_IO_TYPE io_type )
 {
-    std::lock_guard <std::recursive_mutex> lock(mutex_);
+    std::lock_guard <std::recursive_mutex> lock( this->mutex_ );
+
     CCommunicationIOInfo connect_info;
+    
     connect_info.connect_id_ = 0;
+    
     connect_info.io_info_ = io_info;
+    
     connect_info.io_type_ = io_type;
 
     this->io_connect( connect_info );
@@ -45,9 +49,9 @@ bool CCommunicationService::add_connect(const CConnect_IO_Info& io_info, EM_CONN
 
 void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 {
-    auto f = communication_list_.find(server_id);
+    auto f = this->communication_list_.find( server_id );
     
-    if (f != communication_list_.end())
+    if (f != this->communication_list_.end())
     {
         
         f->second.connect_id_ = connect_id;
@@ -68,7 +72,7 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 }
 
 /**
- * @brief io_connect 建立IO链接，并接收数据
+ * @brief io_connect 建立服务器间IO链接，并接收数据
  * @param connect_info 
 */
 void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
@@ -84,32 +88,33 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TCP )
     {
         //IO是TCP
-        auto tcp_client_session = make_shared<CTcpClientSession>(io_service_context_);
+        auto tcp_client_session = make_shared< CTcpClientSession >(  this->io_service_context_ );
 		//建立网络链接
-		if (true == tcp_client_session->start(connect_info.io_info_))
+		if ( true == tcp_client_session->start( connect_info.io_info_ ) )
 		{
             //存储通信类
-            this->communication_list_[connect_info.io_info_.server_id].session_ = tcp_client_session;
+            this->communication_list_[ connect_info.io_info_.server_id ].session_ = tcp_client_session;
 		}
+
 	}
     else if(connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_UDP)
     {
         //IO是UDP
-        auto udp_client_session = make_shared<CUdpClientSession>(io_service_context_);
+        auto udp_client_session = make_shared< CUdpClientSession >( this->io_service_context_ );
         
-        udp_client_session->start(connect_info.io_info_);
+        udp_client_session->start( connect_info.io_info_ );
 
         //存储通信类
         this->communication_list_[ connect_info.io_info_.server_id ].session_ = udp_client_session;
     }
-    else if (connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TTY)
+    else if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TTY )
     {
         //IO是TTY
-		auto tty_client_session = make_shared<CTTyServer>(
-			connect_info.io_info_.packet_parse_id,
-			connect_info.io_info_.recv_size,
-			connect_info.io_info_.send_size
-			);
+		auto tty_client_session = make_shared< CTTyServer >(
+			                                                                                        connect_info.io_info_.packet_parse_id,
+			                                                                                        connect_info.io_info_.recv_size,
+			                                                                                        connect_info.io_info_.send_size
+			                                                                                  );
 
         //开启串口，接收数据
 		tty_client_session->start(
@@ -126,7 +131,7 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
     else if (connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_SSL)
     {
 #ifdef SSL_SUPPORT
-        auto ssl_client_session = make_shared<CTcpSSLClientSession>(io_service_context_);
+        auto ssl_client_session = make_shared< CTcpSSLClientSession >(io_service_context_);
         
         ssl_client_session->start(connect_info.io_info_);
 
@@ -135,6 +140,8 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
         PSS_LOGGER_DEBUG("[CCommunicationService::io_connect]you mest use SSL_SUPPORT macro support ths ssl.");
 #endif
     }
+
+
 }
 
 void CCommunicationService::run_server_to_server()
@@ -175,11 +182,11 @@ bool CCommunicationService::is_exist(uint32 server_id)
  * @brief each 转发接口，为每个IO通信请求链接
  * @param communication_funtion 
 */
-void CCommunicationService::each(Communication_funtion communication_funtion)
+void CCommunicationService::each( Communication_funtion communication_funtion )
 {
     for (auto& client_info : this->communication_list_)
     {
-        communication_funtion( client_info.second );
+        communication_funtion(  client_info.second  );
     }
 }
 
@@ -191,20 +198,20 @@ void CCommunicationService::run_check_task()
     //lock_guard自身作用域中，具有构造时加锁，析构时释放锁
     std::lock_guard <std::recursive_mutex> lock(mutex_);
 
-    PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]begin size={}.", communication_list_.size());
+    PSS_LOGGER_DEBUG("[ CCommunicationService::run_check_task ] begin size={ 0 }.", communication_list_.size());
 
-    each(  
-            [this]( CCommunicationIOInfo& io_info ) {
-                if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
-                {
-                    //重新建立链接
-                    this->io_connect(io_info);
-                }
-            }
-        );
+    this->each(  
+                        [ this ] (  CCommunicationIOInfo& io_info  )  {
+                            if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
+                            {
+                                //重新建立链接
+                                this->io_connect(io_info);
+                            }
+                        }
+                    );
 
 
-    PSS_LOGGER_DEBUG("[CCommunicationService::run_check_task]end.");
+    PSS_LOGGER_DEBUG("[ CCommunicationService::run_check_task ] end.");
 }
 
 void CCommunicationService::close()

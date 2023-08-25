@@ -7,7 +7,7 @@
 #include <thread>
 
 /**
- * @brief CMessageQueue 消息队列
+ * @brief CMessageQueue 消息队列 
  * @tparam Type 
 */
 template<class Type>

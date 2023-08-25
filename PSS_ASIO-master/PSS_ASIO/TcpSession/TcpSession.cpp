@@ -1,42 +1,52 @@
 ﻿#include "TcpSession.h"
 
 CTcpSession::CTcpSession(tcp::socket socket, asio::io_context* io_context)
-    : socket_(std::move(socket)), io_context_(io_context)
+    : socket_( std::move( socket ) ) , io_context_( io_context )
 {
+
 }
 
+/**
+ * @brief  open 打开Tcp会话
+ * @param packet_parse_id 
+ * @param recv_size 
+*/
 void CTcpSession::open(uint32 packet_parse_id, uint32 recv_size)
 {
-    connect_id_ = App_ConnectCounter::instance()->CreateCounter();
+    //自动增加
+    this->connect_id_ = App_ConnectCounter::instance()->CreateCounter();
 
-    packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(packet_parse_id);
+    this->packet_parse_interface_ = App_PacketParseLoader::instance()->GetPacketParseInfo(packet_parse_id);
 
-    session_recv_buffer_.Init(recv_size);
+    this->session_recv_buffer_.Init( recv_size );
 
-    recv_data_time_ = std::chrono::steady_clock::now();
+    this->recv_data_time_ = std::chrono::steady_clock::now( ) ;
 
     //处理链接建立消息
-    remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
-    remote_ip_.m_u2Port = socket_.remote_endpoint().port();
-    local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
-    local_ip_.m_u2Port = socket_.local_endpoint().port();
-    packet_parse_interface_->packet_connect_ptr_(connect_id_, remote_ip_, local_ip_, io_type_, App_IoBridge::instance());
+    this->remote_ip_.m_strClientIP = socket_.remote_endpoint().address().to_string();
+    this->remote_ip_.m_u2Port = socket_.remote_endpoint().port();
+    
+    this->local_ip_.m_strClientIP = socket_.local_endpoint().address().to_string();
+    this->local_ip_.m_u2Port = socket_.local_endpoint().port();
+    
+    this->packet_parse_interface_->packet_connect_ptr_( this->connect_id_ , this->remote_ip_ , this->local_ip_ , this->io_type_, App_IoBridge::instance( ) );
+
 
     //添加点对点映射
-    if (true == App_IoBridge::instance()->regedit_session_id(remote_ip_, io_type_, connect_id_))
+    if ( true == App_IoBridge::instance()->regedit_session_id( this->remote_ip_ ,  this->io_type_ , this->connect_id_ ) )
     {
-        io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
+       this->io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
     }
 
     //查看这个链接是否有桥接信息
-    io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id(connect_id_, remote_ip_);
-    if (io_bradge_connect_id_ > 0)
+    this->io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id( connect_id_ , remote_ip_  );
+    if ( io_bradge_connect_id_ > 0 ) //有桥接信息
     {
-        App_WorkThreadLogic::instance()->set_io_bridge_connect_id(connect_id_, io_bradge_connect_id_);
+        App_WorkThreadLogic::instance()->set_io_bridge_connect_id( connect_id_ ,  io_bradge_connect_id_ );
     }
 
     //加入session 映射
-    App_WorkThreadLogic::instance()->add_thread_session(connect_id_, shared_from_this(), local_ip_, remote_ip_);
+    App_WorkThreadLogic::instance()->add_thread_session( connect_id_,  shared_from_this() , local_ip_, remote_ip_);
 
 #ifdef GCOV_TEST
     //测试发送写入失败回调消息
@@ -55,7 +65,8 @@ void CTcpSession::open(uint32 packet_parse_id, uint32 recv_size)
     }
 #endif
 
-    do_read();
+    //开始接收数据
+    this->do_read();
 }
 
 _ClientIPInfo CTcpSession::get_remote_ip(uint32 connect_id)
@@ -108,7 +119,7 @@ void CTcpSession::do_read()
     }
 
     auto self(shared_from_this());
-    socket_.async_read_some(asio::buffer(session_recv_buffer_.get_curr_write_ptr(), session_recv_buffer_.get_buffer_size()),
+    socket_.async_read_some(asio::buffer( session_recv_buffer_.get_curr_write_ptr() , session_recv_buffer_.get_buffer_size() ),
         [self](std::error_code ec, std::size_t length)
         {
             self->do_read_some(ec, length);
@@ -187,7 +198,7 @@ void CTcpSession::do_read_some(std::error_code ec, std::size_t length)
         if (EM_SESSION_STATE::SESSION_IO_BRIDGE == io_state_)
         {
             //将数据转发给桥接接口
-            auto ret = App_WorkThreadLogic::instance()->do_io_bridge_data(connect_id_, io_bradge_connect_id_, session_recv_buffer_, length, shared_from_this());
+            auto ret = App_WorkThreadLogic::instance()->do_io_bridge_data( connect_id_ , io_bradge_connect_id_ , session_recv_buffer_ , length , shared_from_this() );
             if (1 == ret)
             {
                 //远程IO链接已断开
@@ -196,10 +207,10 @@ void CTcpSession::do_read_some(std::error_code ec, std::size_t length)
         }
         else
         {
-            //处理数据拆包
+            //处理数据拆包(消息报)
             vector<std::shared_ptr<CMessage_Packet>> message_list;
             bool ret = packet_parse_interface_->packet_from_recv_buffer_ptr_(connect_id_, &session_recv_buffer_, message_list, io_type_);
-            if (!ret)
+            if (! ret )
             {
                 //链接断开(解析包不正确)
                 App_WorkThreadLogic::instance()->close_session_event(connect_id_);
@@ -210,18 +221,19 @@ void CTcpSession::do_read_some(std::error_code ec, std::size_t length)
                 recv_data_time_ = std::chrono::steady_clock::now();
 
                 //添加消息处理
-                App_WorkThreadLogic::instance()->assignation_thread_module_logic(connect_id_, message_list, shared_from_this());
+                App_WorkThreadLogic::instance()->assignation_thread_module_logic( connect_id_, message_list, shared_from_this() );
             }
         }
 
         //继续读数据
-        do_read();
+       this->do_read();
     }
     else
     {
         //链接断开
         App_WorkThreadLogic::instance()->close_session_event(connect_id_);
     }
+
 }
 
 void CTcpSession::send_write_fail_to_logic(const std::string& write_fail_buffer, std::size_t buffer_length)
@@ -280,13 +292,13 @@ void CTcpSession::set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_
 {
     if (to_io_connect_id > 0)
     {
-        io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
-        io_bradge_connect_id_ = from_io_connect_id;
+        this->io_state_ = EM_SESSION_STATE::SESSION_IO_BRIDGE;
+        this->io_bradge_connect_id_ = from_io_connect_id;
     }
     else
     {
-        io_state_ = EM_SESSION_STATE::SESSION_IO_LOGIC;
-        io_bradge_connect_id_ = 0;
+        this->io_state_ = EM_SESSION_STATE::SESSION_IO_LOGIC;
+        this->io_bradge_connect_id_ = 0;
     }
 }
 

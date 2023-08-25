@@ -145,11 +145,16 @@ bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string
     return true;
 }
 
+/**
+ * @brief  GetPacketParseInfo 获取“协议解析库”
+ * @param u4PacketParseID 
+ * @return 
+*/
 shared_ptr<_Packet_Parse_Info> CLoadPacketParse::GetPacketParseInfo(uint32 u4PacketParseID)
 {
-    auto f = m_objPacketParseList.find(u4PacketParseID);
+    auto f = this->m_objPacketParseList.find( u4PacketParseID );
 
-    if(m_objPacketParseList.end() == f)
+    if( this->m_objPacketParseList.end() == f )
     {
         //这里打印输出错误
         PSS_LOGGER_DEBUG("[CLoadPacketParse::GetPacketParseInfo]can't find u4PacketParseID({0}).", u4PacketParseID);

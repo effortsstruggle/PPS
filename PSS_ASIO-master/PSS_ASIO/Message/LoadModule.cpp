@@ -43,7 +43,8 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
     }
 
     //2.查找此模块是否已经被注册，有则把信息老信息清理
-    auto f = this->module_list_.find( module_info->module_file_name_ );
+    auto f = this->module_list_.find( module_info->module_file_name_  );
+
     if ( this->module_list_.end() != f) //已注册
     {
         //卸载旧的插件
@@ -57,7 +58,7 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
     module_frame_object.session_service_ = this->session_service_;
 
     //加载模块( 注册模块的一些指令 ... 等 )
-    int nRet = module_info->load_module_( ( IFrame_Object* )&module_frame_object , module_info->module_param_ );
+    int nRet = module_info->load_module_(  ( IFrame_Object* )&module_frame_object , module_info->module_param_ );
     if (nRet != 0)
     {
         PSS_LOGGER_DEBUG("[ CLoadModule::LoadMoudle ] module_name = { 0 }, Execute Function LoadModuleData is error!", module_file_name);
@@ -76,8 +77,8 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
             this->command_to_module_function_[ command_info.command_id_ ] = command_info.logic_fn_;
         }
 
-        //记录当前插件加载的命令信息
-        module_info->command_id_list_.emplace_back(command_info.command_id_);
+        //记录当前插件加载的命令信息（记录命令ID）
+        module_info->command_id_list_.emplace_back( command_info.command_id_ );
     }
 
     //5.添加模块间调用的映射( 与模块的"module_run接口"作映射 )
@@ -88,7 +89,8 @@ bool CLoadModule::load_plugin_module(const string& module_file_path, const strin
 
     this->module_name_list_.emplace_back( module_file_name );
 
-    PSS_LOGGER_DEBUG("[CLoadModule::LoadMoudle] Begin Load ModuleName[{0}] OK!", module_file_name);
+    PSS_LOGGER_DEBUG("[ CLoadModule::LoadMoudle ]  Begin Load ModuleName[ { 0 } ] OK!" , module_file_name );
+
     return true;
 }
 
@@ -233,6 +235,7 @@ void CLoadModule::delete_module_name_list(const string& module_name)
 {
     //删除vector中的name
     auto iter = std::remove(module_name_list_.begin(), module_name_list_.end(), module_name);
+
     module_name_list_.erase(iter, module_name_list_.end());
 }
 
@@ -243,7 +246,8 @@ command_to_module_function& CLoadModule::get_module_function_list()
 
 int CLoadModule::plugin_in_name_to_module_run(const std::string& module_name, std::shared_ptr<CMessage_Packet> send_packet, std::shared_ptr<CMessage_Packet> return_packet)
 {
-    auto f = plugin_name_to_module_run_.find(module_name);
+    auto f = this->plugin_name_to_module_run_.find(module_name);
+
     if (f != plugin_name_to_module_run_.end())
     {
         //找到了，执行代码
