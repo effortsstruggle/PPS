@@ -1,7 +1,7 @@
 ﻿#include "CommunicationService.h"
 
 /**
- * @brief init_communication_service 初始化通信服务
+ * @brief init_communication_service 初始化IO通信服务
  * @param io_service_context 
  * @param timeout_seconds 
 */
@@ -74,7 +74,8 @@ void CCommunicationService::set_connect_id(uint32 server_id, uint32 connect_id)
 void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
 {
     this->communication_list_[ connect_info.io_info_.server_id ] = connect_info;
-    if (false == communication_is_run_)
+
+    if (false == this->communication_is_run_)
     {
         //还在初始化中，不启动链接
         return;

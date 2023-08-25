@@ -22,7 +22,7 @@ io_context_(&io_context)
         acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint(asio::ip::address_v4::from_string(server_ip), port));
 
         context_.set_options(
-            asio::ssl::context::default_workarounds
+              asio::ssl::context::default_workarounds
             | asio::ssl::context::no_sslv2
             | asio::ssl::context::single_dh_use);
         
