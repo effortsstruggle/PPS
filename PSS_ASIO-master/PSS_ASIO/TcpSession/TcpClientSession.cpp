@@ -371,6 +371,7 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
         std::string write_fail_text = "test write fail";
         send_write_fail_to_logic(write_fail_text, write_fail_text.length());
 #endif
+
         //添加映射关系
         App_WorkThreadLogic::instance()->add_thread_session(this->connect_id_, shared_from_this(), this->local_ip_, this->remote_ip_);
 
@@ -383,12 +384,12 @@ void CTcpClientSession::handle_connect(const asio::error_code& ec, tcp::resolver
         this->is_connect_ = false;
 
         //连接建立失败
-        PSS_LOGGER_DEBUG("[CTcpClientSession::handle_connect]({0}:{1}  ==> {2}:{3})error({4})", 
+        PSS_LOGGER_DEBUG( "[CTcpClientSession::handle_connect]({0}:{1}  ==> {2}:{3})error({4})", 
             local_ip_.m_strClientIP,
             local_ip_.m_u2Port,
             remote_ip_.m_strClientIP,
             remote_ip_.m_u2Port,
-            ec.message());
+            ec.message() );
 
         //发送消息给逻辑块
         App_WorkThreadLogic::instance()->add_frame_events( LOGIC_CONNECT_SERVER_ERROR,

@@ -66,13 +66,13 @@ bool CServerService::init_servce(const std::string& pss_config_file_name)
 {
     //指定当前目录，防止访问文件失败
     #if PSS_PLATFORM == PLATFORM_WIN
-        TCHAR szFileName[MAX_PATH] = { 0 };
+        TCHAR szFileName[ MAX_PATH ] = { 0 };
         //获取模块文件名
-        ::GetModuleFileName(0, szFileName, MAX_PATH) ;
+        ::GetModuleFileName( 0 , szFileName , MAX_PATH ) ;
 
-        LPTSTR pszEnd = _tcsrchr( szFileName, TEXT('\\') );
+        LPTSTR pszEnd = _tcsrchr( szFileName , TEXT('\\') );
 
-        if (pszEnd != 0)
+        if ( pszEnd != 0)
         {
             pszEnd++;
             *pszEnd = 0;
@@ -290,7 +290,7 @@ void CServerService::close_service()
         kcp_service->close_all();
     }
 
-    tcp_service_list_.clear();
+    this->tcp_service_list_.clear();
 
     App_SessionService::instance()->close();
 

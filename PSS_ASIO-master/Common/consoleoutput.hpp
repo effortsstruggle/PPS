@@ -64,10 +64,10 @@ public:
         else
         {
             //文件输出
-            console = spdlog::rotating_logger_mt("console",
-                this->m_Console_Output_Info.m_strConsoleName.c_str(),
-                this->m_Console_Output_Info.m_nLogFileMaxSize,
-                this->m_Console_Output_Info.m_nFileCount);
+            console = spdlog::rotating_logger_mt( "console",
+                this->m_Console_Output_Info.m_strConsoleName.c_str() ,
+                this->m_Console_Output_Info.m_nLogFileMaxSize ,
+                this->m_Console_Output_Info.m_nFileCount ) ;
         }
 
         //设置输出抬头

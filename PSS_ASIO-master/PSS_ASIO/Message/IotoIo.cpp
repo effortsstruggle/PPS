@@ -39,7 +39,7 @@ bool CIotoIo::add_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT_IO
     auto from_session_id = this->get_regedit_session_id( from_io , from_io_type );
     auto to_session_id = this->get_regedit_session_id( to_io , to_io_type );
 
-    if ( from_session_id > 0 && to_session_id > 0 )
+    if ( from_session_id > 0 && to_session_id > 0 ) //两个会话都已存在
     {
         //建立连接关系
         this->session_to_session_list_.emplace_back( connect_info );
@@ -94,7 +94,7 @@ bool CIotoIo::delete_session_io_mapping(const _ClientIPInfo& from_io, EM_CONNECT
 
 /**
  * @brief  regedit_session_id 注册会话记录
- * @param from_io 
+ * @param from_io 从哪来
  * @param io_type 
  * @param session_id  新的会话ID(建立的连接ID ， 一定时唯一的)
  * @return 
@@ -109,7 +109,7 @@ bool CIotoIo::regedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_TYP
     
     bool is_find = false;
 
-    //寻找链接是否已经存在
+    //寻找”点对点链接：是否已经存在
     for ( auto& io_connect : this->io_2_io_list_ )
     {
         //判断服务器 与客户端会话是否存在 ， 若存在更新 新的会话ID
@@ -178,7 +178,7 @@ void CIotoIo::unregedit_session_id(const _ClientIPInfo& from_io, EM_CONNECT_IO_T
 
 }
 /**
- * @brief get_to_session_id 获取会话ID
+ * @brief get_to_session_id 获取桥接会话ID
  * @param session_id （连接ID）
  * @param from_io 
  * @return 

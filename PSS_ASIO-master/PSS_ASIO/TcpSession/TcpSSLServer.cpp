@@ -23,14 +23,11 @@ CTcpSSLServer::CTcpSSLServer(
     {
         this->acceptor_ = std::make_shared<tcp::acceptor>(io_context, tcp::endpoint(asio::ip::address_v4::from_string(server_ip), port));
 
-<<<<<<< HEAD
         context_.set_options(
               asio::ssl::context::default_workarounds
             | asio::ssl::context::no_sslv2
             | asio::ssl::context::single_dh_use);
-=======
-        this->context_.set_options(  asio::ssl::context::default_workarounds  |  asio::ssl::context::no_sslv2  | asio::ssl::context::single_dh_use );
->>>>>>> 98b801c5f2de5f704cee54c1c07aa8f13fd94651
+
         
         this->context_.set_password_callback(std::bind(&CTcpSSLServer::get_password, this));
         this->context_.use_certificate_chain_file(ssl_server_pem_file_);
@@ -70,12 +67,15 @@ void CTcpSSLServer::do_accept()
 
         [ this ] ( const std::error_code& error , tcp::socket socket )
         {
-            if (!error)
+            if (!error)  //连接成功
             {
-                std::make_shared<CTcpSSLSession>(
-                    asio::ssl::stream<tcp::socket>(  std::move( socket ) , this->context_  ) , this->io_context_  )->open( packet_parse_id_ , max_recv_size_ );
+                std::shared_ptr<CTcpSSLSession> tcp_ssl_session_ = std::make_shared<CTcpSSLSession>(
+                    asio::ssl::stream<tcp::socket>(std::move(socket), this->context_),
+                    this->io_context_);
+
+                 tcp_ssl_session_->open( this->packet_parse_id_ , this->max_recv_size_ );
             }
-            else
+            else //连接失败
             {
                 PSS_LOGGER_DEBUG("[CTcpSSLServer::do_accept]listen error={0}", error.message());
             }

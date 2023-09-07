@@ -19,8 +19,10 @@ void CTcpSSLSession::open(uint32 packet_parse_id, uint32 recv_size)
     //处理链接建立消息
     remote_ip_.m_strClientIP = ssl_socket_.lowest_layer().remote_endpoint().address().to_string();
     remote_ip_.m_u2Port = ssl_socket_.lowest_layer().remote_endpoint().port();
+
     local_ip_.m_strClientIP = ssl_socket_.lowest_layer().local_endpoint().address().to_string();
     local_ip_.m_u2Port = ssl_socket_.lowest_layer().local_endpoint().port();
+
     packet_parse_interface_->packet_connect_ptr_(connect_id_, remote_ip_, local_ip_, io_type_, App_IoBridge::instance());
 
     //添加点对点映射
@@ -31,6 +33,7 @@ void CTcpSSLSession::open(uint32 packet_parse_id, uint32 recv_size)
 
     //查看这个链接是否有桥接信息
     io_bradge_connect_id_ = App_IoBridge::instance()->get_to_session_id(connect_id_, remote_ip_);
+
     if (io_bradge_connect_id_ > 0)
     {
         App_WorkThreadLogic::instance()->set_io_bridge_connect_id(connect_id_, io_bradge_connect_id_);

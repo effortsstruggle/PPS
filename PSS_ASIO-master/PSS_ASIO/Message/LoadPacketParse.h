@@ -11,12 +11,12 @@
 //对应模块提供的统一接口
 using packet_from_recv_buffer = bool (*)(uint32 connectid, CSessionBuffer* buffer, vector<std::shared_ptr<CMessage_Packet>>& message_list, EM_CONNECT_IO_TYPE emIOType);
 using parse_format_send_buffer = bool(*)(uint32 connectid, std::shared_ptr<CMessage_Packet> message, std::shared_ptr<CMessage_Packet> format_message, EM_CONNECT_IO_TYPE emIOType);
-using is_need_send_format = bool(*)();
 using packet_connect = bool(*)(uint32 connectid, const _ClientIPInfo& objClientIPInfo, const _ClientIPInfo& objLocalIPInfo, EM_CONNECT_IO_TYPE emIOType, IIoBridge* io_bridge);
 using packet_disconnect = void(*)(uint32 connectid, EM_CONNECT_IO_TYPE emIOType, IIoBridge* io_bridge);
 using packet_load = void(*)(IIoBridge* io_bridge);
 using packet_close = void(*)(IIoBridge* io_bridge);
 using packet_set_output = void(*)(shared_ptr<spdlog::logger>);
+using is_need_send_format = bool(*)();
 
 
 /**

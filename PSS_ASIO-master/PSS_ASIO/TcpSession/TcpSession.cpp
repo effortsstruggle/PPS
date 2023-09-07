@@ -147,7 +147,8 @@ void CTcpSession::do_write(uint32 connect_id)
 
     //异步发送
     auto self(shared_from_this());
-    io_context_->dispatch([self, send_buffer, connect_id]() {
+    io_context_->dispatch( [ self , send_buffer , connect_id] () 
+    {
         asio::async_write(self->socket_, asio::buffer(send_buffer->data_.c_str(), send_buffer->buffer_length_),
             [self, send_buffer, connect_id](std::error_code ec, std::size_t length)
             {

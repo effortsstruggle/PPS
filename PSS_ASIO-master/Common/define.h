@@ -199,13 +199,13 @@ inline void log_screen()
 
 
 template<typename First, typename ...Rest>
-void log_screen(First&& first, Rest && ...rest)
+void log_screen( First&& first,  Rest && ...rest )
 {
     std::cout << std::forward<First>(first) ;
     //这里常用的方式std::forward<Rest>(rest)...的意思是对每一个都进行同样的处理。
     //实际表述是(std::forward<1>(1)...std::forward<n>(n)))
     //递归处理，每次提取一个。
-    log_screen(std::forward<Rest>(rest)...);
+    log_screen( std::forward<Rest>(rest)... );
 }
 
 //定义操作宏 （日志库spdlog）

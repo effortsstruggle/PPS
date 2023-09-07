@@ -75,7 +75,7 @@ namespace brynet {
         }
 
         /**
-         * @brief  获取定时器执行的时间
+         * @brief  获取定时器是否到时
          * @return 
         */
         std::chrono::nanoseconds getLeftTime()
@@ -92,15 +92,15 @@ namespace brynet {
 
         void  cancel()
         {
-            std::call_once( mExecuteOnceFlag ,  [this]() {
-                mCallback = nullptr;
+            std::call_once(  this->mExecuteOnceFlag ,  [this]() {
+                this->mCallback = nullptr;
                 }  
             );
         }
 
         ENUM_TIMER_TYPE get_timer_type()
         {
-            return mTimerType;
+            return this->mTimerType;
         }
 
     private:
@@ -269,13 +269,13 @@ namespace brynet {
                     return ENUM_WHILE_STATE::WHILE_STATE_CONTINUE;
                 }
 
-                this->mtx_queue.lock();
+                this->mtx_queue.lock() ;
                 //取出优先级最高的定时器
-                auto tmp = this->mTimers.top();
-                this->mtx_queue.unlock();
+                auto tmp = this->mTimers.top() ;
+                this->mtx_queue.unlock() ;
 
                 //条件变量同步
-                auto timer_wait = tmp->getLeftTime();
+                auto timer_wait = tmp->getLeftTime() ;
                 if ( timer_wait > std::chrono::nanoseconds::zero() ) //判断该定时器是否到期
                 {
                     //此时需要等待上一个定时器到期
@@ -384,9 +384,9 @@ namespace brynet {
             //按定时器执行时间排序
             bool operator() (  const Timer::Ptr&  left  ,  const Timer::Ptr&  right  ) const
             {
-                const auto startDiff = left->getStartTime() - right->getStartTime();
-                const auto lastDiff = left->getLastTime() - right->getLastTime();
-                const auto diff = startDiff.count() + lastDiff.count();
+                const auto startDiff = left->getStartTime() - right->getStartTime() ;
+                const auto lastDiff = left->getLastTime() - right->getLastTime() ;
+                const auto diff = startDiff.count() + lastDiff.count() ;
                 return diff > 0;
             }
         };

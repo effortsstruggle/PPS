@@ -34,7 +34,7 @@ public:
 };
 
 /**
- * @brief  CLogicTasK  业务逻辑任务
+ * @brief  CLogicTasK  业务逻辑任务 （执行）
 */
 class CLogicTasK
 {
@@ -118,7 +118,7 @@ public:
 
 private:
 
-    CMessageQueue< std::shared_ptr<CLogicMessage> > m_thread_queue;   //消息队列
+    CMessageQueue< std::shared_ptr<CLogicMessage> > m_thread_queue;   //消息队列（逻辑任务所执行的逻辑消息）
 
     bool m_run = false;
 

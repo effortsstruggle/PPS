@@ -9,8 +9,8 @@
 */
 void CSessionInterface::add_session_interface(uint32 connect_id, shared_ptr<ISession> session, const _ClientIPInfo& local_info, const _ClientIPInfo& romote_info)
 {
-    auto f = sessions_list_.find(connect_id);
-    if (f == sessions_list_.end())
+    auto f = this->sessions_list_.find( connect_id );
+    if ( f == this->sessions_list_.end() )
     {
         CSessionIOInfo session_info;
         session_info.local_info_ = local_info;

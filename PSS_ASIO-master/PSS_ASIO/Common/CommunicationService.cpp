@@ -85,6 +85,11 @@ void CCommunicationService::io_connect( CCommunicationIOInfo& connect_info )
         return;
     }
 
+    /**
+     * @brief  本程序与插件服务器建立网络连接
+     * @param connect_info 
+    */
+
     if ( connect_info.io_type_ == EM_CONNECT_IO_TYPE::CONNECT_IO_TCP )
     {
         //IO是TCP
@@ -202,7 +207,7 @@ void CCommunicationService::run_check_task()
 
     this->each(  
                         [ this ] (  CCommunicationIOInfo& io_info  )  {
-                            if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() )
+                            if ( io_info.session_ == nullptr || false == io_info.session_->is_connect() ) //判断是否已连接
                             {
                                 //重新建立链接
                                 this->io_connect(io_info);

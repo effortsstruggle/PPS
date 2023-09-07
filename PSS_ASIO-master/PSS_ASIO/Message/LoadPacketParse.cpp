@@ -40,7 +40,7 @@ void CLoadPacketParse::dispaly_error_message(const std::string& func_name,
 bool CLoadPacketParse::LoadPacketInfo( uint32 u4PacketParseID, const std::string& packet_parse_path, const std::string& packet_parse_file)
 {
     //隐式加载PacketParse接口
-    auto pPacketParseInfo = std::make_shared<_Packet_Parse_Info>();
+    auto pPacketParseInfo = std::make_shared< _Packet_Parse_Info >();
 
     if (nullptr == pPacketParseInfo)
     {

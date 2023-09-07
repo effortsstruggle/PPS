@@ -41,7 +41,7 @@ void CSessionService::send_io_message(uint32 connect_id, std::shared_ptr<CMessag
 
 bool CSessionService::connect_io_server(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
 {
-    if (io_info.server_id == 0)
+    if ( io_info.server_id == 0 )
     {
         PSS_LOGGER_INFO("[CSessionService::connect_io_server]server id must over 0, connect fail.");
         return false;

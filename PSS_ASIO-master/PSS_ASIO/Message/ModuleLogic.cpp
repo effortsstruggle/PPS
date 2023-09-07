@@ -36,7 +36,7 @@ shared_ptr<ISession> CModuleLogic::get_session_interface(uint32 connect_id)
 
 void CModuleLogic::delete_session_interface(uint32 connect_id)
 {
-    sessions_interface_.delete_session_interface(connect_id);
+    this->sessions_interface_.delete_session_interface(connect_id);
 }
 
 /**
@@ -48,7 +48,7 @@ void CModuleLogic::close()
 }
 
 /**
- * @brief do_thread_module_logic 执行逻辑（执行插件加载进来的命令）
+ * @brief do_thread_module_logic 执行业务模块逻辑（执行插件加载进来的命令）
  * @param source 
  * @param recv_packet 
  * @param send_packet 
@@ -232,8 +232,6 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
     //“业务逻辑模块”初始化结束标志
     this->module_init_finish_ = true;
 
-
-
     //创建插件使用的线程 ( 业务逻辑模块未初始化完毕时，以下代码才能起到作用 )
     for ( auto thread_id : this->plugin_work_thread_buffer_list_ )
     {
@@ -252,7 +250,7 @@ void CWorkThreadLogic::init_work_thread_logic(  int thread_count ,
         this->plugin_work_thread_list_[ thread_id ] = thread_logic;
 
         //初始化线程
-        App_tms::instance()->CreateLogic(thread_id);
+        App_tms::instance()->CreateLogic( thread_id );
     }
     this->plugin_work_thread_buffer_list_.clear();
 
@@ -369,7 +367,7 @@ void CWorkThreadLogic::do_work_thread_frame_events(uint16 command_id , uint32 ma
 
     recv_packet->command_id_ = command_id;
 
-    if (recv_packet->command_id_ == LOGIC_CONNECT_SERVER_ERROR)
+    if ( recv_packet->command_id_ == LOGIC_CONNECT_SERVER_ERROR )
     {
         source.connect_id_ = 0;
         source.work_thread_id_ = module_logic->get_work_thread_id();
@@ -377,7 +375,7 @@ void CWorkThreadLogic::do_work_thread_frame_events(uint16 command_id , uint32 ma
         source.remote_ip_.m_strClientIP = remote_ip;
         source.remote_ip_.m_u2Port = remote_port;
     }
-    else if (recv_packet->command_id_ == LOGIC_LISTEN_SERVER_ERROR)
+    else if ( recv_packet->command_id_ == LOGIC_LISTEN_SERVER_ERROR )
     {
         source.connect_id_ = 0;
         source.work_thread_id_ = module_logic->get_work_thread_id();
@@ -420,6 +418,7 @@ void CWorkThreadLogic::add_thread_session(uint32 connect_id, shared_ptr<ISession
     App_tms::instance()->AddMessage(curr_thread_index, 
                                     [session, connect_id, module_logic, local_info, romote_info]() 
                                     {
+                                    
                                         module_logic->add_session( connect_id, session, local_info, romote_info);
 
                                         CMessage_Source source;
@@ -796,16 +795,24 @@ uint32 CWorkThreadLogic::get_curr_thread_logic_id() const
     return App_tms::instance()->GetLogicThreadID();
 }
 
+
+/**
+ * @brief  send_io_buffer 发送IO缓冲区的数据
+*/
 void CWorkThreadLogic::send_io_buffer() const
 {
-    //到时间了，群发数据
-    for (auto module_logic : thread_module_list_)
+    //到时间了，群发数据(   各个业务逻辑的 维护的各个会话 信息  )
+    for (auto module_logic : this->thread_module_list_)
     {
-        module_logic->each_session_id([module_logic](uint32 session_id) {
-            //将缓冲中的数据发送出去
-            auto session = module_logic->get_session_interface(session_id);
-            session->do_write(session_id);
-            });
+        module_logic->each_session_id
+        ( 
+                [ module_logic ]( uint32 session_id ) 
+                {
+                    //将缓冲中的数据发送出去
+                    auto session = module_logic->get_session_interface( session_id );
+                    session->do_write(session_id);
+                }
+        );
     }
 }
 
@@ -817,6 +824,7 @@ void CWorkThreadLogic::send_io_buffer() const
 */
 bool CWorkThreadLogic::set_io_bridge_connect_id(uint32 from_io_connect_id, uint32 to_io_connect_id)
 {
+    // curr_post_thread_index 不超过 3
     auto curr_post_thread_index = to_io_connect_id % thread_count_;
 
     auto post_module_logic = this->thread_module_list_[ curr_post_thread_index ];
@@ -910,7 +918,7 @@ bool CWorkThreadLogic::send_io_bridge_message(uint32 io_bridge_connect_id, std::
 
     if (nullptr != session)
     {
-        //通过桥接ID  ，获取对应的桥接会话 ； 
+        //发送数据
         session->do_write_immediately( io_bridge_connect_id, send_packet->buffer_.c_str(), send_packet->buffer_.size() );
 
         return true;
@@ -921,17 +929,23 @@ bool CWorkThreadLogic::send_io_bridge_message(uint32 io_bridge_connect_id, std::
     }
 }
 
+/**
+ * @brief  connect_io_server 插件连接本地的 IO服务器
+ * @param io_info 
+ * @param io_type 
+ * @return 
+*/
 bool CWorkThreadLogic::connect_io_server(const CConnect_IO_Info& io_info, EM_CONNECT_IO_TYPE io_type)
 {
     //寻找当前server_id是否存在
-    if (true == communicate_service_->is_exist(io_info.server_id))
+    if ( true == this->communicate_service_->is_exist( io_info.server_id ) )
     {
-        PSS_LOGGER_DEBUG("[CWorkThreadLogic::connect_io_server]server_id={0} is exist.",io_info.server_id);
+        PSS_LOGGER_DEBUG("[CWorkThreadLogic::connect_io_server]server_id={0} is exist.", io_info.server_id );
         return false;
     }
     else
     {
-        return communicate_service_->add_connect(io_info, io_type);
+        return  this->communicate_service_->add_connect( io_info, io_type );
     }
 }
 
@@ -992,7 +1006,7 @@ void CWorkThreadLogic::run_check_task(uint32 timeout_seconds) const
 }
 
 /**
- * @brief  send_frame_message 发送消息
+ * @brief  send_frame_message 插件发送消息
  * @param tag_thread_id 
  * @param message_tag 
  * @param send_packet 
@@ -1004,7 +1018,7 @@ bool CWorkThreadLogic::send_frame_message( uint16 tag_thread_id, const std::stri
     if (false == this->module_init_finish_) //当模块未完全加载完毕时
     {
         CDelayPluginMessage plugin_message;
-        plugin_message.tag_thread_id_ = tag_thread_id;
+        plugin_message.tag_thread_id_ = tag_thread_id; 
         plugin_message.message_tag_ = message_tag;
         plugin_message.send_packet_ = send_packet;
         plugin_message.delay_timer_ = delay_timer;
@@ -1019,8 +1033,8 @@ bool CWorkThreadLogic::send_frame_message( uint16 tag_thread_id, const std::stri
 
 /**
  * @brief do_frame_message 处理 插件（客户端）发送至本地的消息（指令）
- * @param tag_thread_id 
- * @param message_tag 
+ * @param tag_thread_id  工作线程ID
+ * @param message_tag  客户端IP
  * @param send_packet 
  * @param delay_timer 
  * @return 
@@ -1073,7 +1087,7 @@ bool CWorkThreadLogic::do_frame_message(uint16 tag_thread_id, const std::string&
 
 /**
  * @brief  run_work_thread_logic  运行工作线程逻辑（谁来运行？？？？）
- * @param tag_thread_id 
+ * @param tag_thread_id  工作线程ID（业务逻辑ID）
  * @param delay_timer 
  * @param func 
  * @return 
@@ -1097,8 +1111,8 @@ bool CWorkThreadLogic::run_work_thread_logic(uint16 tag_thread_id, CFrame_Messag
 }
 
 /**
- * @brief  do_work_thread_logic 执行工作线程逻辑（谁来执行？？？？？）
- * @param tag_thread_id 
+ * @brief  do_work_thread_logic 执行工作线程逻辑
+ * @param tag_thread_id  工作线程ID（业务逻辑ID）
  * @param delay_timer 
  * @param func 
  * @return 

@@ -28,18 +28,18 @@ const std::string JSON_MODULE_COMMAND_ID = ", \"command id\":\"";
 const std::string JSON_MODULE_WORK_THREAD_TIMEOUT = "\", \"work_thread_timeout\":";
 const std::string JSON_MODULE_END = "\"}";
 
-//以消息模式处理逻辑代码
+//以消息模式处理逻辑代码（来自于插件）
 class CDelayPluginMessage
 {
 public:
     CDelayPluginMessage() = default;
-    uint16 tag_thread_id_ = 0;
-    std::string message_tag_ = "";
+    uint16 tag_thread_id_ = 0; // //插件工作线程ID
+    std::string message_tag_ = ""; //消息从哪来
     std::shared_ptr<CMessage_Packet> send_packet_;
     CFrame_Message_Delay delay_timer_;
 };
 
-//以lambda模式处理代码
+//以lambda模式处理代码 （来自于插件）
 class CDelayPluginFunc
 {
 public:
@@ -80,7 +80,7 @@ public:
     void each_session_id(const session_func& session_fn) const;
 
 private:
-    CSessionInterface sessions_interface_;
+    CSessionInterface sessions_interface_; //IO会话列表
     
     CModuleInterface modules_interface_; //业务逻辑模块的指令处理类
     
@@ -183,7 +183,7 @@ private:
 
     CLoadModule load_module_; //模块（插件）加载封装类
 
-    uint16      thread_count_ = 0; //线程数
+    uint16  thread_count_ = 0; //线程数
 
     uint32 connect_timeout_ = 0;  //客服端连接超时
 

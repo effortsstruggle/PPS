@@ -74,11 +74,12 @@ private:
 
     void delete_session_list(uint32 session_id);
 
+private:
     using hashmapconnectlist = unordered_map< std::string , uint32 >;
                                                                     
-    hashmapconnectlist connect_list_;  //【客户端信息  / 服务器信息 （IP:Port TCP/UDP）， 连接ID 】 连接ID 是全局唯一的
+    hashmapconnectlist connect_list_;  //【IP：端口 连接类型 ， 连接ID 】 连接ID 是全局唯一的
 
-    std::vector< CIo_Connect_Info > io_2_io_list_;
+    std::vector< CIo_Connect_Info > io_2_io_list_; // 点对点连接
 
     std::vector< CIo_Connect_Info > session_to_session_list_;//【客户端信息 ， 服务器信息】
 

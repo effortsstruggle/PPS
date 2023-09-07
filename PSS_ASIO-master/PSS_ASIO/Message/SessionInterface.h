@@ -12,7 +12,7 @@ class CSessionIOInfo
 public:
     _ClientIPInfo local_info_;
     _ClientIPInfo romote_info_;
-    shared_ptr<ISession> session_;
+    shared_ptr<ISession> session_; //当前会话
 };
 
 class CSessionIO_Cancel
@@ -44,12 +44,13 @@ public:
     template<class session_function>
     void each_session_id(const session_function& session_fn) const
     {
-        for (const auto& session_info : sessions_list_)
+        for ( const auto& session_info : this->sessions_list_ )
         {
-            session_fn(session_info.first);
+            session_fn( session_info.first ) ;
         }
     };
 private:
-    using hashmapsessions = unordered_map<uint32, CSessionIOInfo>;
-    hashmapsessions sessions_list_; //[会话ID ， 会话IO信息]
+    using hashmapsessions = unordered_map< uint32, CSessionIOInfo >;
+
+    hashmapsessions sessions_list_; //[ 会话ID ， 会话IO信息 ]
 };
